@@ -50,6 +50,11 @@
   </style>
 </head>
 <body>
+  <div id="aiLoadingScreen" class="fixed inset-0 bg-navy-900/95 z-50 flex flex-col items-center justify-center hidden">
+    <div class="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-gold-500 mb-4"></div>
+    <p class="text-gold-500 text-lg font-bold animate-pulse">مولد الخطط الذكي يحلل تفضيلاتك...</p>
+    <p class="text-white text-sm mt-2">جاري حساب المسافات والميزانية</p>
+  </div>
   <div id="loading" class="loading-screen flex flex-col items-center justify-center px-6 text-center text-white">
     <div class="relative mb-7 flex h-28 w-28 items-center justify-center">
       <div class="bot-orbit absolute inset-0 rounded-full border-2 border-dashed border-gold-500/70"></div>
@@ -87,8 +92,10 @@
     </form>
   </dialog>
 
+  <script src="./utils/appState.js"></script>
   <script>
     const loading = document.getElementById('loading');
+    const aiLoadingScreen = document.getElementById('aiLoadingScreen');
     const app = document.getElementById('app');
     const editDialog = document.getElementById('edit-dialog');
     const editForm = document.getElementById('edit-form');
@@ -265,9 +272,11 @@
     document.getElementById('close-edit').addEventListener('click', () => editDialog.close());
     document.getElementById('cancel-edit').addEventListener('click', () => editDialog.close());
 
+    aiLoadingScreen.classList.remove('hidden');
     window.setTimeout(() => {
       try {
-        tripData = JSON.parse(localStorage.getItem('currentTrip'));
+        tripData = AppState.getTrip();
+        if (!tripData) tripData = JSON.parse(localStorage.getItem('currentTrip'));
       } catch (error) {
         tripData = null;
       }
@@ -285,10 +294,10 @@
       loading.classList.add('hidden');
       app.classList.remove('hidden');
       render();
+      document.getElementById('aiLoadingScreen').classList.add('hidden');
     }, 2500);
   </script>
   <script src="./utils/navigation.js"></script>
   <script src="./utils/header.js"></script>
-  <script src="./utils/appState.js"></script>
 </body>
 </html>
