@@ -272,6 +272,7 @@
     document.getElementById('close-edit').addEventListener('click', () => editDialog.close());
     document.getElementById('cancel-edit').addEventListener('click', () => editDialog.close());
 
+    loading.classList.add('hidden');
     aiLoadingScreen.classList.remove('hidden');
     window.setTimeout(() => {
       try {
