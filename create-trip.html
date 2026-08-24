@@ -13,6 +13,7 @@
   <link rel="stylesheet" href="./utils/header.css">
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="./utils/supabaseClient.js"></script>
   <script>
     tailwind.config = {
       theme: {
@@ -212,7 +213,7 @@
     endDate.max = maxDateValue;
     startDate.addEventListener('change', () => { endDate.min = startDate.value || startDate.min; });
 
-    form.addEventListener('submit', (event) => {
+    form.addEventListener('submit', async (event) => {
       event.preventDefault();
       formError.classList.add('hidden');
       if (endDate.value < startDate.value) {
@@ -222,16 +223,42 @@
       }
 
       const data = new FormData(form);
+      const tripData = {
+        destination: String(data.get('destination') || '').trim(),
+        start_date: data.get('startDate'),
+        end_date: data.get('endDate'),
+        travelers_count: parseInt(data.get('travelers'), 10) || 1,
+        budget: parseFloat(data.get('budget')) || 0,
+        currency: data.get('currency') || 'MAD',
+        travel_style: data.get('travelStyle'),
+        status: 'active',
+      };
       const trip = {
-        destination: data.get('destination').trim(),
-        dates: { start: data.get('startDate'), end: data.get('endDate') },
-        travelers: Number(data.get('travelers')),
-        budget: { amount: data.get('budget') ? Number(data.get('budget')) : null, currency: data.get('currency') },
-        travelStyle: data.get('travelStyle'),
+        destination: tripData.destination,
+        dates: { start: tripData.start_date, end: tripData.end_date },
+        travelers: tripData.travelers_count,
+        budget: { amount: tripData.budget, currency: tripData.currency },
+        travelStyle: tripData.travel_style,
         preferences: data.getAll('preferences'),
         createdAt: new Date().toISOString(),
       };
+      const submitButton = form.querySelector('button[type="submit"]');
+      submitButton.disabled = true;
+      submitButton.textContent = 'جارٍ حفظ الرحلة...';
       try {
+        const user = window.supabaseClient
+          ? (await window.supabaseClient.auth.getUser()).data.user
+          : null;
+        if (user) {
+          tripData.user_id = user.id;
+          const { error } = await window.supabaseClient.from('trips').insert([tripData]);
+          if (error) throw error;
+        } else {
+          const currentTrips = JSON.parse(localStorage.getItem('trips') || '[]');
+          currentTrips.push({ ...tripData, id: Date.now().toString() });
+          localStorage.setItem('trips', JSON.stringify(currentTrips));
+        }
+        // Cache the latest trip for itinerary.html and the offline demo experience.
         localStorage.setItem('currentTrip', JSON.stringify(trip));
         localStorage.setItem('sb_trip', JSON.stringify({
           ...trip,
@@ -243,7 +270,11 @@
           check: ['جواز السفر', 'تذاكر السفر', 'حجز الفندق', 'تأمين السفر', 'شاحن الهاتف'].map((t) => ({ t, done: false }))
         }));
       } catch (error) {
-        formError.textContent = 'تعذر حفظ الرحلة على هذا الجهاز. تحقق من مساحة التخزين وحاول مرة أخرى.';
+        submitButton.disabled = false;
+        submitButton.textContent = 'إنشاء الرحلة بالذكاء الاصطناعي';
+        formError.textContent = error.message?.includes('relation') || error.message?.includes('trips')
+          ? 'لم يتم إنشاء جدول الرحلات في Supabase بعد. أنشئ جدول trips ثم حاول مرة أخرى.'
+          : 'حدث خطأ أثناء حفظ الرحلة. تحقق من الاتصال وحاول مرة أخرى.';
         formError.classList.remove('hidden');
         return;
       }
@@ -254,7 +285,6 @@
   </script>
   <script src="./utils/navigation.js"></script>
   <script src="./utils/header.js"></script>
-  <script src="./utils/supabaseClient.js"></script>
   <script src="./utils/appState.js"></script>
 </body>
 </html>
