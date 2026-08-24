@@ -1,12 +1,9 @@
 // تهيئة عميل Supabase — استبدل القيم التالية من لوحة تحكم مشروعك.
-const SUPABASE_URL = 'https://YOUR_PROJECT_REF.supabase.co';
-const SUPABASE_ANON_KEY = 'YOUR_ANON_KEY_HERE';
-const supabaseConfigured = !SUPABASE_URL.includes('YOUR_PROJECT_REF') &&
-  !SUPABASE_ANON_KEY.includes('YOUR_ANON_KEY_HERE');
+const SUPABASE_URL = 'https://xvlgfiyusjyldxkplekf.supabase.co';
+const SUPABASE_ANON_KEY = 'sb_publishable_erPeWRINlkxFXsSCSi0OIA_sxjGGVoU';
+const supabaseConfigured = true;
 
-const supabase = supabaseConfigured && window.supabase?.createClient
-  ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
-  : null;
+const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 window.supabaseClient = supabase;
 window.supabaseConfigured = supabaseConfigured;
