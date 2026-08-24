@@ -113,18 +113,12 @@
         '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
       }[character]));
     }
-     // <!-- QA15-IMG: resolve the header image from the destination at render time -->
-     const CITY_IMAGES = {
-       'مراكش': 'https://image.qwenlm.ai/public_source/e519404d-4d50-460e-a07e-5e2fe0b81811/87cd0db02-30ad-437f-9eec-3aa3c0dcbdf49390.png',
-       'Marrakech': 'https://image.qwenlm.ai/public_source/e519404d-4d50-460e-a07e-5eec-3aa3c0dcbdf49390.png',
-       'المغرب': 'https://image.qwenlm.ai/public_source/e519404d-4d50-460e-a07e-5eec-3aa3c0dcbdf49390.png',
-       'شفشاون': 'https://image.qwenlm.ai/public_source/e519404d-4d50-460e-a07e-5e2fe0b81811/5a74e70c6-0b49-4321-9579-b1ec180e57da4916.png',
-       'Chefchaouen': 'https://image.qwenlm.ai/public_source/e519404d-4d50-460e-a07e-5e2fe0b81811/5a74e70c6-0b49-4321-9579-b1ec180e57da4916.png'
-     };
-     function cityImage(name) {
-       const value = String(name || '');
-       return Object.entries(CITY_IMAGES).find(([city]) => value.toLowerCase().includes(city.toLowerCase()))?.[1] || CITY_IMAGES['مراكش'];
-     }
+    function resolveTripImage(dest) {
+      const d = (dest || '').toLowerCase();
+      if (d.includes('مراكش') || d.includes('marrakech') || d.includes('المغرب') || d.includes('morocco')) return 'https://image.qwenlm.ai/public_source/e519404d-4d50-460e-a07e-5e2fe0b81811/87cd0db02-30ad-437f-9eec-3aa3c0dcbdf49390.png';
+      if (d.includes('شفشاون') || d.includes('chefchaouen')) return 'https://image.qwenlm.ai/public_source/e519404d-4d50-460e-a07e-5e2fe0b81811/5a74e70c6-0b49-4321-9579-b1ec180e57da4916.png';
+      return 'https://image.qwenlm.ai/public_source/e519404d-4d50-460e-a07e-5eec-3aa3c0dcbdf49390.png';
+    }
 
     function formatDate(dateString) {
       const date = new Date(`${dateString}T12:00:00`);
@@ -330,7 +324,7 @@
         <section class="px-4 pb-6 pt-6 sm:px-5">
            <div class="mb-5">
           <p class="mb-1 text-xs font-bold tracking-wide text-gold-600">MY SINDBAD · مولد الخطط الذكي</p>
-            <div class="mb-4 overflow-hidden rounded-2xl bg-gradient-to-br from-navy-900 to-gold-500 text-white"><img src="${cityImage(tripData.destination)}" alt="${escapeHtml(tripData.destination)}" class="h-36 w-full object-cover" onerror="this.style.display='none';this.parentElement.classList.add('image-fallback');this.parentElement.dataset.city='${escapeHtml(tripData.destination)}'"><div class="p-3 text-center text-sm font-extrabold image-fallback-label">${escapeHtml(tripData.destination)}</div></div>
+            <div class="mb-4 overflow-hidden rounded-2xl bg-gradient-to-br from-navy-900 to-gold-500 text-white"><img id="tripHeaderImg" src="" alt="${escapeHtml(tripData.destination)}" class="h-36 w-full object-cover" onerror="this.style.display='none'; this.parentElement.style.background='linear-gradient(135deg, #0A192F, #D4AF37)'"><div class="p-3 text-center text-sm font-extrabold image-fallback-label">${escapeHtml(tripData.destination)}</div></div>
             <h1 id="tripDestination" class="text-2xl font-extrabold leading-relaxed text-navy-900">برنامج رحلة ${escapeHtml(tripData.destination)}</h1>
             <p class="mt-1 text-sm leading-7 text-slate-500">خطة يومية مقترحة بأسلوب ${escapeHtml(tripData.travelStyle || 'متنوع')}، ويمكنك تعديلها كما تحب.</p>
           </div>
@@ -340,13 +334,31 @@
              <div class="px-2 text-center"><span class="block text-[.66rem] text-white/60">الميزانية</span><strong id="tripBudget" class="mt-1 block truncate text-sm text-gold-400">${totalBudget ? `${totalBudget} ${escapeHtml(tripData.budget.currency || '')}` : 'غير محددة'}</strong></div>
           </div>
            <div class="mb-3 flex items-center justify-between"><h2 class="text-lg font-extrabold text-navy-900">برنامج يوم بيوم</h2></div>
-           <div id="activitiesContainer" class="space-y-6">
-            ${itinerary.map((day) => `<section><div class="mb-3 flex items-center gap-2"><span class="flex h-8 w-8 items-center justify-center rounded-xl bg-gold-500 text-sm font-extrabold text-white">${day.day}</span><h3 class="text-sm font-extrabold text-navy-900">اليوم ${['الأول','الثاني','الثالث','الرابع','الخامس','السادس','السابع'][day.day - 1] || day.day}: <span class="font-semibold text-slate-500">${formatDate(day.date)}</span></h3></div><div class="space-y-3">${day.activities.map((activity, index) => renderActivity(activity, day.day - 1, index)).join('')}</div></section>`).join('')}
-          </div>
+          <div id="activitiesContainer" class="space-y-6"></div>
           <a href="./create-trip.html" class="mt-7 flex min-h-12 items-center justify-center rounded-xl border-2 border-navy-900 px-4 py-3 text-sm font-bold text-navy-900 transition hover:bg-navy-900 hover:text-white">تعديل بيانات الرحلة</a>
         </section>
         <nav data-site-nav data-active="trip"></nav>`;
-      app.querySelectorAll('[data-add]').forEach((button) => button.addEventListener('click', () => {
+      document.getElementById('tripHeaderImg').src = resolveTripImage(tripData.destination);
+      renderDayPlan(readLiveActivities());
+    }
+
+    function readLiveActivities() {
+      try {
+        return window.AppState?.getActivities?.() || JSON.parse(localStorage.getItem('myTripActivities') || '[]');
+      } catch (error) {
+        return [];
+      }
+    }
+
+    function renderDayPlan(activities) {
+      if (!tripData) return;
+      if (Array.isArray(activities) && activities.length) {
+        itinerary = itineraryFromActivities(activities, tripData);
+      }
+      const container = document.getElementById('activitiesContainer');
+      if (!container) return;
+      container.innerHTML = itinerary.map((day) => `<section><div class="mb-3 flex items-center gap-2"><span class="flex h-8 w-8 items-center justify-center rounded-xl bg-gold-500 text-sm font-extrabold text-white">${day.day}</span><h3 class="text-sm font-extrabold text-navy-900">اليوم ${['الأول','الثاني','الثالث','الرابع','الخامس','السادس','السابع'][day.day - 1] || day.day}: <span class="font-semibold text-slate-500">${formatDate(day.date)}</span></h3></div><div class="space-y-3">${day.activities.map((activity, index) => renderActivity(activity, day.day - 1, index)).join('')}</div></section>`).join('');
+      container.querySelectorAll('[data-add]').forEach((button) => button.addEventListener('click', () => {
         const [dayIndex, activityIndex] = button.dataset.add.split(':').map(Number);
         const activity = itinerary[dayIndex].activities[activityIndex];
         activity.added = true;
@@ -366,9 +378,9 @@
         if (!saved.some((item) => item.id === activity.id)) saved.push({ ...activity, day: itinerary[dayIndex].day, day_number: itinerary[dayIndex].day, date: itinerary[dayIndex].date });
         localStorage.setItem('myTripActivities', JSON.stringify(saved));
         saveItinerary();
-        render();
+        renderDayPlan(readLiveActivities());
       }));
-      app.querySelectorAll('[data-edit]').forEach((button) => button.addEventListener('click', () => {
+      container.querySelectorAll('[data-edit]').forEach((button) => button.addEventListener('click', () => {
         const [dayIndex, activityIndex] = button.dataset.edit.split(':').map(Number);
         openEditor(dayIndex, activityIndex);
       }));
@@ -407,7 +419,10 @@
          ? itineraryFromActivities(activities, tripData)
          : (savedItinerary.length ? savedItinerary : generateMockItinerary(tripData));
        saveItinerary();
-       if (!app.classList.contains('hidden')) render();
+       if (!app.classList.contains('hidden')) {
+         render();
+         renderDayPlan(readLiveActivities());
+       }
      }
 
      window.addEventListener('storage', () => rebuildItinerary());
