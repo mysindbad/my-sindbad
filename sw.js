@@ -1,54 +1,21 @@
-// <!-- QA14-SW -->
-const CACHE_NAME = 'my-sindbad-v14';
-const APP_SHELL = [
-  './',
-  './index.html',
-  './manifest.json',
-  './icons/icon.svg',
-  './icons/icon-192.png',
-  './icons/icon-512.png',
-  './icons/brand-logo.jpg'
-];
-
-self.addEventListener('install', (event) => {
-  event.waitUntil(caches.open(CACHE_NAME).then((cache) => cache.addAll(APP_SHELL)));
-  self.skipWaiting();
+// <!-- QA15-SW -->
+const CACHE_NAME = 'my-sindbad-v15';
+const APP_SHELL = ['./', './index.html', './map.html', './itinerary.html', './create-trip.html', './explore.html', './community.html', './manifest.json'];
+self.addEventListener('install', event => {
+  event.waitUntil(caches.open(CACHE_NAME).then(cache => cache.addAll(APP_SHELL)).then(() => self.skipWaiting()));
 });
-
-self.addEventListener('activate', (event) => {
-  event.waitUntil(
-    caches.keys().then((keys) => Promise.all(
-      keys.map((key) => caches.delete(key))
-    )).then(() => self.clients.claim()).then(() => self.skipWaiting())
-  );
+self.addEventListener('activate', event => {
+  event.waitUntil(caches.keys().then(keys => Promise.all(keys.filter(key => key !== CACHE_NAME).map(key => caches.delete(key)))).then(() => self.clients.claim()));
 });
-
-self.addEventListener('fetch', (event) => {
+self.addEventListener('fetch', event => {
   if (event.request.method !== 'GET') return;
-  const requestUrl = new URL(event.request.url);
-  if (requestUrl.origin === self.location.origin && requestUrl.pathname.startsWith('/api/')) {
-    event.respondWith(fetch(event.request));
+  if (event.request.mode === 'navigate' || event.request.destination === 'document') {
+    event.respondWith(fetch(event.request).then(response => {
+      const copy = response.clone(); caches.open(CACHE_NAME).then(cache => cache.put(event.request, copy)); return response;
+    }).catch(() => caches.match(event.request).then(cached => cached || caches.match('./index.html'))));
     return;
   }
-  const shouldRefresh = requestUrl.origin === self.location.origin
-    && ['document', 'script', 'style'].includes(event.request.destination);
-  if (shouldRefresh) {
-    event.respondWith(
-      fetch(event.request).then((response) => {
-        const copy = response.clone();
-        caches.open(CACHE_NAME).then((cache) => cache.put(event.request, copy));
-        return response;
-      }).catch(() => caches.match(event.request).then((cached) => cached || caches.match('./index.html')))
-    );
-    return;
-  }
-  event.respondWith(
-    caches.match(event.request).then((cached) => cached || fetch(event.request).then((response) => {
-      if (event.request.url.startsWith(self.location.origin)) {
-        const copy = response.clone();
-        caches.open(CACHE_NAME).then((cache) => cache.put(event.request, copy));
-      }
-      return response;
-    }).catch(() => caches.match('./index.html')))
-  );
+  event.respondWith(caches.match(event.request).then(cached => cached || fetch(event.request).then(response => {
+    const copy = response.clone(); caches.open(CACHE_NAME).then(cache => cache.put(event.request, copy)); return response;
+  })));
 });

@@ -113,15 +113,18 @@
         '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
       }[character]));
     }
-     // <!-- QA13-IMG -->
-      // <!-- QA14-IMG -->
-      const CITY_IMAGES = {
-      'مراكش': 'https://image.qwenlm.ai/public_source/e519404d-4d50-460e-a07e-5e2fe0b81811/87cd0db02-30ad-437f-9eec-3aa3c0dcbdf49390.png',
+     // <!-- QA15-IMG: resolve the header image from the destination at render time -->
+     const CITY_IMAGES = {
+       'مراكش': 'https://image.qwenlm.ai/public_source/e519404d-4d50-460e-a07e-5e2fe0b81811/87cd0db02-30ad-437f-9eec-3aa3c0dcbdf49390.png',
+       'Marrakech': 'https://image.qwenlm.ai/public_source/e519404d-4d50-460e-a07e-5eec-3aa3c0dcbdf49390.png',
+       'المغرب': 'https://image.qwenlm.ai/public_source/e519404d-4d50-460e-a07e-5eec-3aa3c0dcbdf49390.png',
        'شفشاون': 'https://image.qwenlm.ai/public_source/e519404d-4d50-460e-a07e-5e2fe0b81811/5a74e70c6-0b49-4321-9579-b1ec180e57da4916.png',
-      'إسطنبول': 'https://images.unsplash.com/photo-1524231757912-21f4fe3a7200?auto=format&fit=crop&w=900&q=84',
-      'باريس': 'https://images.unsplash.com/photo-1502602898657-3e91760cbb34?auto=format&fit=crop&w=900&q=84'
-    };
-    function cityImage(name) { return Object.entries(CITY_IMAGES).find(([city]) => String(name || '').includes(city))?.[1] || CITY_IMAGES['مراكش']; }
+       'Chefchaouen': 'https://image.qwenlm.ai/public_source/e519404d-4d50-460e-a07e-5e2fe0b81811/5a74e70c6-0b49-4321-9579-b1ec180e57da4916.png'
+     };
+     function cityImage(name) {
+       const value = String(name || '');
+       return Object.entries(CITY_IMAGES).find(([city]) => value.toLowerCase().includes(city.toLowerCase()))?.[1] || CITY_IMAGES['مراكش'];
+     }
 
     function formatDate(dateString) {
       const date = new Date(`${dateString}T12:00:00`);
@@ -269,10 +272,14 @@
       return currentTrip;
     }
 
-    function itineraryFromActivities(activities, trip) {
-      const grouped = new Map();
+     function itineraryFromActivities(activities, trip) {
+       const dayCount = getDayCount(trip);
+       const grouped = new Map(Array.from({ length: dayCount }, (_, index) => [index + 1, []]));
       activities.forEach((item, index) => {
-        const day = Number(item.day_number || item.day) || (index % getDayCount(trip)) + 1;
+         const requestedDay = Number(item.day_number || item.day);
+         const day = Number.isFinite(requestedDay) && requestedDay >= 1 && requestedDay <= dayCount
+           ? requestedDay
+           : (index % dayCount) + 1;
         if (!grouped.has(day)) grouped.set(day, []);
         grouped.get(day).push({
           time: item.time || '',
@@ -284,7 +291,7 @@
           id: item.id || `${day}-${index}`
         });
       });
-      return Array.from(grouped, ([day, dayActivities]) => ({
+       return Array.from(grouped, ([day, dayActivities]) => ({
         day,
         date: day === 1 ? trip.dates.start : addDays(trip.dates.start, day - 1),
         activities: dayActivities
@@ -367,6 +374,45 @@
       }));
     }
 
+     // <!-- QA15-SYNC: merge every saved activity source and keep the day assignment -->
+     function readStoredItinerary() {
+       try {
+         const value = JSON.parse(localStorage.getItem('currentItinerary') || 'null');
+         return Array.isArray(value) ? value : [];
+       } catch (error) { return []; }
+     }
+
+     function collectSavedActivities(savedItinerary) {
+       const sources = [
+         ...(tripData.remoteActivities || []),
+         ...(window.AppState?.getActivities?.() || [])
+       ];
+       try {
+         const stored = JSON.parse(localStorage.getItem('myTripActivities') || '[]');
+         if (Array.isArray(stored)) sources.push(...stored);
+       } catch (error) {}
+       savedItinerary.forEach((day) => (day.activities || []).forEach((activity) => {
+         if (activity.added) sources.push({ ...activity, day_number: day.day });
+       }));
+       return sources.filter((item, index, all) => item && all.findIndex((candidate) => (
+         item.id && candidate.id && candidate.id === item.id
+       )) === index);
+     }
+
+     function rebuildItinerary() {
+       if (!tripData) return;
+       const savedItinerary = readStoredItinerary();
+       const activities = collectSavedActivities(savedItinerary);
+       itinerary = activities.length
+         ? itineraryFromActivities(activities, tripData)
+         : (savedItinerary.length ? savedItinerary : generateMockItinerary(tripData));
+       saveItinerary();
+       if (!app.classList.contains('hidden')) render();
+     }
+
+     window.addEventListener('storage', () => rebuildItinerary());
+     window.addEventListener('pageshow', () => rebuildItinerary());
+
     function openEditor(dayIndex, activityIndex) {
       editing = { day: dayIndex, activity: activityIndex };
       const activity = itinerary[dayIndex].activities[activityIndex];
@@ -401,21 +447,7 @@
         window.location.href = './create-trip.html';
         return;
       }
-      try {
-         const savedItinerary = JSON.parse(localStorage.getItem('currentItinerary'));
-          let localActivities = [];
-         try {
-            const appActivities = window.AppState?.getActivities() || [];
-            const storedActivities = JSON.parse(localStorage.getItem('myTripActivities') || '[]');
-            const generated = Array.isArray(savedItinerary) ? savedItinerary.flatMap((day) => (day.activities || []).filter((activity) => activity.added).map((activity) => ({ ...activity, day_number: day.day }))) : [];
-             localActivities = [...appActivities, ...(Array.isArray(storedActivities) ? storedActivities : []), ...generated].filter((item, index, all) => item && all.findIndex((candidate) => (item.id && candidate.id && candidate.id === item.id) || candidate === item) === index);
-         } catch (error) { localActivities = []; }
-          itinerary = localActivities.length ? itineraryFromActivities([...(tripData.remoteActivities || []), ...localActivities], tripData)
-            : (Array.isArray(savedItinerary) && savedItinerary.length ? savedItinerary : generateMockItinerary(tripData));
-      } catch (error) {
-        itinerary = generateMockItinerary(tripData);
-      }
-      saveItinerary();
+       rebuildItinerary();
       loading.classList.add('hidden');
       app.classList.remove('hidden');
       render();
