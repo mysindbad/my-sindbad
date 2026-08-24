@@ -1,5 +1,5 @@
 // <!-- QA15-SW -->
-const CACHE_NAME = 'my-sindbad-v15';
+const CACHE_NAME = 'my-sindbad-v16';
 const APP_SHELL = ['./', './index.html', './map.html', './itinerary.html', './create-trip.html', './explore.html', './community.html', './manifest.json'];
 self.addEventListener('install', event => {
   event.waitUntil(caches.open(CACHE_NAME).then(cache => cache.addAll(APP_SHELL)).then(() => self.skipWaiting()));
