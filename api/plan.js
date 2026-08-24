@@ -11,7 +11,7 @@ function addDays(dateString, amount) {
   return date.toISOString().split('T')[0];
 }
 
-function fallbackPlan({ destination, startDate, endDate, travelStyle, budget, currency }) {
+function fallbackPlan({ destination, startDate, endDate, travelStyle, currency }) {
   const dayCount = getDayCount(startDate, endDate);
   const marrakech = [
     ['10:00', 'ساحة جامع الفنا', 'جولة في الساحة والمدينة القديمة', 0, 'ساعتان', 31.6258, -7.9892],
@@ -35,13 +35,15 @@ function fallbackPlan({ destination, startDate, endDate, travelStyle, budget, cu
       activities: [0, 1, 2].map((offset) => {
         const item = source[(index * 3 + offset) % source.length];
         return {
-        time: item[0],
-        title: item[1],
-        desc: `${item[2]}${travelStyle ? ` · مناسب لنمط ${travelStyle}` : ''}`,
-        coords: item[5] == null ? null : { lat: item[5], lng: item[6] },
-        cost: item[3],
-        currency,
-        duration: item[4]
+          time: item[0],
+          title: item[1],
+          desc: `${item[2]}${travelStyle ? ` · مناسب لنمط ${travelStyle}` : ''}`,
+          coords: item[5] == null ? null : { lat: item[5], lng: item[6] },
+          cost: item[3],
+          costEstimated: true,
+          costLabel: 'تقديري',
+          currency,
+          duration: item[4]
         };
       })
     }))
@@ -58,6 +60,79 @@ function isValidPlan(value, dayCount) {
 function parseGeminiPlan(text) {
   const cleaned = String(text || '').replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/i, '').trim();
   return JSON.parse(cleaned);
+}
+
+function activityText(activity) {
+  return `${activity?.title || ''} ${activity?.desc || ''}`.trim();
+}
+
+function classifyActivity(activity) {
+  const text = activityText(activity);
+  if (/فندق|رياض|إقامة|hotel|riad|check.?in|نزل/i.test(text)) return 'hotel';
+  if (/نقل|تاكسي|حافلة|قطار|مطار|transport|taxi|bus|train|airport/i.test(text)) return 'transport';
+  if (/تسوق|سوق|بازار|مول|هدايا|shopping|market|souq|mall/i.test(text)) return 'shopping';
+  if (/مطعم|مقهى|قهوة|غداء|عشاء|فطور|مأكولات|restaurant|cafe|coffee|lunch|dinner|breakfast|food/i.test(text)) return 'restaurant';
+  if (/حديقة|منتزه|بستان|garden|park/i.test(text)) return 'garden';
+  return 'attraction';
+}
+
+const CATEGORY_ESTIMATES = {
+  restaurant: { cost: 150, duration: '90 min' },
+  attraction: { cost: 50, duration: '120 min' },
+  garden: { cost: 30, duration: '90 min' },
+  hotel: { cost: 800, duration: 'check-in' },
+  shopping: { cost: 200, duration: '120 min' },
+  transport: { cost: 100, duration: '30 min' }
+};
+
+async function geocodeActivity(activity, destination) {
+  const query = `${activityText(activity)} ${destination}`.trim();
+  if (!query) return null;
+  try {
+    const response = await fetch(`https://nominatim.openstreetmap.org/search?format=jsonv2&limit=1&accept-language=ar,en&q=${encodeURIComponent(query)}`, {
+      headers: {
+        Accept: 'application/json',
+        'User-Agent': 'MySindbad/20 (travel planner; contact via repository)'
+      }
+    });
+    if (!response.ok) throw new Error(`Nominatim HTTP ${response.status}`);
+    const rows = await response.json();
+    const first = rows?.[0];
+    const lat = Number(first?.lat);
+    const lng = Number(first?.lon);
+    return Number.isFinite(lat) && Number.isFinite(lng) ? { lat, lng } : null;
+  } catch (error) {
+    console.warn('Nominatim geocode failed:', query, error.message);
+    return null;
+  }
+}
+
+async function enrichActivity(activity, destination, currency) {
+  const category = classifyActivity(activity);
+  const estimate = CATEGORY_ESTIMATES[category];
+  const coords = await geocodeActivity(activity, destination);
+  return {
+    ...activity,
+    coords,
+    cost: estimate.cost,
+    costEstimated: true,
+    costLabel: 'تقديري',
+    currency: activity.currency || currency,
+    duration: estimate.duration
+  };
+}
+
+// QA20-ENRICH: server-side tool loop; each activity is geocoded before the plan is returned.
+async function enrichPlan(plan, destination, currency) {
+  const days = [];
+  for (const day of plan.days) {
+    const activities = [];
+    for (const activity of day.activities || []) {
+      activities.push(await enrichActivity(activity, destination, currency));
+    }
+    days.push({ ...day, activities });
+  }
+  return { ...plan, days };
 }
 
 export default async function handler(req, res) {
@@ -102,8 +177,9 @@ export default async function handler(req, res) {
     const text = payload.candidates?.[0]?.content?.parts?.map((part) => part.text || '').join('') || '';
     const plan = parseGeminiPlan(text);
     if (!isValidPlan(plan, dayCount)) throw new Error('Invalid AI plan');
-    return res.status(200).json(plan);
+    return res.status(200).json(await enrichPlan(plan, destination, planInput.currency));
   } catch (error) {
+    console.warn('AI plan unavailable; returning local fallback:', error.message);
     return res.status(200).json(fallbackPlan(planInput));
   }
 }

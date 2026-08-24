@@ -299,8 +299,13 @@
                   time: activity.time || '',
                   place: activity.title || 'نشاط',
                   activity: activity.desc || '',
-                  distance: '',
+                  distance: activity.distance || '',
                   duration: activity.duration || '',
+                  coords: activity.coords || null,
+                  cost: Number.isFinite(Number(activity.cost)) ? Number(activity.cost) : null,
+                  costEstimated: activity.costEstimated !== false,
+                  costLabel: activity.costLabel || 'تقديري',
+                  currency: activity.currency || trip.budget.currency,
                   added: false
                 }))
               }))));
