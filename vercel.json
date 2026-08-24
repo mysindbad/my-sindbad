@@ -9,6 +9,7 @@
     }
   ],
   "rewrites": [
+    { "source": "/api/map-token", "destination": "/api/map-token.js" },
     { "source": "/api/(.*)", "destination": "/api/$1" }
   ]
 }
