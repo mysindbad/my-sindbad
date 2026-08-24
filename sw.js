@@ -1,5 +1,5 @@
-// <!-- QA21-SW -->
-const CACHE_NAME = 'my-sindbad-v21';
+// <!-- QA22-SW -->
+const CACHE_NAME = 'my-sindbad-v22';
 const APP_SHELL = ['./', './index.html', './map.html', './itinerary.html', './create-trip.html', './explore.html', './community.html', './manifest.json'];
 
 self.addEventListener('install', (event) => {
