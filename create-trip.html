@@ -270,6 +270,7 @@
         }
         // Cache the latest trip for itinerary.html and the offline demo experience.
         localStorage.setItem('currentTrip', JSON.stringify(trip));
+        window.AppState?.saveTrip?.(trip);
          const savedTrips = JSON.parse(localStorage.getItem('savedTrips') || '[]');
          if (!savedTrips.some((saved) => JSON.stringify(saved) === JSON.stringify(trip))) savedTrips.unshift(trip);
          localStorage.setItem('savedTrips', JSON.stringify(savedTrips));
@@ -303,6 +304,7 @@
                   duration: activity.duration || '',
                   coords: activity.coords || null,
                   cost: Number.isFinite(Number(activity.cost)) ? Number(activity.cost) : null,
+                  category: activity.category || 'activities',
                   costEstimated: activity.costEstimated !== false,
                   costLabel: activity.costLabel || 'تقديري',
                   currency: activity.currency || trip.budget.currency,

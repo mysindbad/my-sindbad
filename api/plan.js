@@ -40,6 +40,7 @@ function fallbackPlan({ destination, startDate, endDate, travelStyle, currency }
           desc: `${item[2]}${travelStyle ? ` · مناسب لنمط ${travelStyle}` : ''}`,
           coords: item[5] == null ? null : { lat: item[5], lng: item[6] },
           cost: item[3],
+          category: outputCategory({ title: item[1], desc: item[2] }),
           costEstimated: true,
           costLabel: 'تقديري',
           currency,
@@ -85,6 +86,14 @@ const CATEGORY_ESTIMATES = {
   transport: { cost: 100, duration: '30 min' }
 };
 
+function outputCategory(activity) {
+  const category = classifyActivity(activity);
+  if (category === 'hotel') return 'accommodation';
+  if (category === 'restaurant') return 'food';
+  if (category === 'transport') return 'transport';
+  return 'activities';
+}
+
 async function geocodeActivity(activity, destination) {
   const query = `${activityText(activity)} ${destination}`.trim();
   if (!query) return null;
@@ -114,6 +123,7 @@ async function enrichActivity(activity, destination, currency) {
   return {
     ...activity,
     coords,
+    category: outputCategory(activity),
     cost: estimate.cost,
     costEstimated: true,
     costLabel: 'تقديري',
