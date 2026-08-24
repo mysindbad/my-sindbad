@@ -32,7 +32,9 @@ function fallbackPlan({ destination, startDate, endDate, travelStyle, budget, cu
     days: Array.from({ length: dayCount }, (_, index) => ({
       day: index + 1,
       date: addDays(startDate, index),
-      activities: source.slice(0, 3).map((item, activityIndex) => ({
+      activities: [0, 1, 2].map((offset) => {
+        const item = source[(index * 3 + offset) % source.length];
+        return {
         time: item[0],
         title: item[1],
         desc: `${item[2]}${travelStyle ? ` · مناسب لنمط ${travelStyle}` : ''}`,
@@ -40,7 +42,8 @@ function fallbackPlan({ destination, startDate, endDate, travelStyle, budget, cu
         cost: item[3],
         currency,
         duration: item[4]
-      }))
+        };
+      })
     }))
   };
 }
