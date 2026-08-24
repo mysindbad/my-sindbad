@@ -260,6 +260,9 @@
         }
         // Cache the latest trip for itinerary.html and the offline demo experience.
         localStorage.setItem('currentTrip', JSON.stringify(trip));
+         const savedTrips = JSON.parse(localStorage.getItem('savedTrips') || '[]');
+         if (!savedTrips.some((saved) => JSON.stringify(saved) === JSON.stringify(trip))) savedTrips.unshift(trip);
+         localStorage.setItem('savedTrips', JSON.stringify(savedTrips));
         localStorage.setItem('sb_trip', JSON.stringify({
           ...trip,
           city: trip.destination,

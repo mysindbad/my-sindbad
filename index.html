@@ -429,7 +429,9 @@ label .inp { margin-top: 0.35rem; }
   inset: 35% 0 0;
   background: linear-gradient(180deg, transparent, rgba(6,14,26,.88));
 }
-.destination-card img { width: 100%; height: 100%; position: absolute; inset: 0; object-fit: cover; opacity: .86; }
+ .destination-card img { width: 100%; height: 100%; position: absolute; inset: 0; object-fit: cover; opacity: .86; }
+ .destination-card.image-fallback { background: linear-gradient(135deg, #0A192F, #D4AF37); }
+ .destination-card.image-fallback::before { content: attr(data-city); position: absolute; inset: 0; z-index: 1; display: grid; place-items: center; color: #fff; font-weight: 800; }
 .destination-card .dc-copy { position: absolute; inset: auto .85rem .75rem; z-index: 1; }
 .destination-card b { display: block; font-size: .98rem; line-height: 1.2; }
 .destination-card span { display: block; font-size: .68rem; color: #e4eaf2; margin-top: .25rem; }
@@ -866,9 +868,10 @@ const CITIES={
  cairo:{n:'القاهرة',c:'مصر',lat:30.04,lon:31.24,hotels:[{n:'فندق النيل الكبير',p:95,r:4.6},{n:'فندق وسط البلد',p:60,r:4.3},{n:'دار مصر القديمة',p:40,r:4.4}],rest:[{n:'مطعم أم كلثوم',t:'شرقي'},{n:'كشري التحرير',t:'شعبي'},{n:'قهوة الفيشاوي',t:'تاريخي'}],spots:[{n:'أهرامات الجيزة',d:'أعجوبة الدنيا القديمة'},{n:'المتحف المصري',d:'آثار فرعونية'},{n:'خان الخليلي',d:'سوق تاريخي'}]},
  paris:{n:'باريس',c:'فرنسا',lat:48.85,lon:2.35,hotels:[{n:'فندق اللوفر',p:190,r:4.7},{n:'hotel مونمارتر',p:110,r:4.4},{n:'إيبس باستيل',p:85,r:4.2}],rest:[{n:'مطعم لوتيس',t:'فرنسي راق'},{n:'كافيه دو باري',t:'مقهى'},{n:'مطعم الشام',t:'شرقي'}],spots:[{n:'برج إيفل',d:'رمز باريس'},{n:'متحف اللوفر',d:'أكبر متحف فني'},{n:'قوس النصر',d:'معلم تاريخي'}]}
 };
-const CITY_IMAGES={
+ const CITY_IMAGES={
  istanbul:'https://images.unsplash.com/photo-1524231757912-21f4fe3a7200?auto=format&fit=crop&w=700&q=82',
- marrakech:'https://images.unsplash.com/photo-1548013146-72479768bada?auto=format&fit=crop&w=700&q=82',
+  marrakech:'https://image.qwenlm.ai/public_source/e519404d-4d50-460e-a07e-5e2fe0b81811/87cd0db02-30ad-437f-9eec-3aa3c0dcbdf49390.png',
+  chefchaouen:'https://image.qwenlm.ai/public_source/e519404d-4d50-460e-a07e-5e2fe0b81811/67cd0db02-30ad-437f-9eec-3aa3c0dcbdf49916.png',
  dubai:'https://images.unsplash.com/photo-1512453979798-5ea266f8880c?auto=format&fit=crop&w=700&q=82',
  cairo:'https://images.unsplash.com/photo-1568322445389-f64ac2515020?auto=format&fit=crop&w=700&q=82',
  paris:'https://images.unsplash.com/photo-1502602898657-3e91760cbb34?auto=format&fit=crop&w=700&q=82'
@@ -958,7 +961,7 @@ function pgHome(P){const t=lg('sb_trip',null);
    
    <div class="destination-grid">
     ${Object.keys(CITIES).map(c=>`<button class="destination-card" onclick="city='${c}';go('explore')" aria-label="استكشف ${CITIES[c].n}">
-      <img src="${CITY_IMAGES[c]}" alt="" loading="lazy">
+       <img src="${CITY_IMAGES[c]}" alt="" loading="lazy" onerror="this.style.display='none';this.parentElement.dataset.city='${esc(CITIES[c].n)}';this.parentElement.classList.add('image-fallback')">
       <span class="dc-arrow">←</span>
       <span class="dc-copy"><b>${CITIES[c].n}</b><span>${CITIES[c].c}</span></span>
     </button>`).join('')}
@@ -1121,6 +1124,7 @@ function ask(q){const txt=q||$('bIn').value.trim();if(!txt)return;
    }
    return Promise.reject(new Error('api_error'));
  };
+ const imageForCity=(name)=>Object.entries(CITIES).find(([key,value])=>String(name||'').includes(value.n)||String(name||'').toLowerCase().includes(key))?.[0] ? CITY_IMAGES[Object.entries(CITIES).find(([key,value])=>String(name||'').includes(value.n)||String(name||'').toLowerCase().includes(key))[0]] : CITY_IMAGES.marrakech;
  const destinationLabel = () => destination ? `${esc(destination.name)}${destination.country ? ` — ${esc(destination.country)}` : ''}` : 'اختر وجهتك من البحث';
  const requireDestination = (P) => {
    if (destination) return true;
@@ -1169,7 +1173,7 @@ function ask(q){const txt=q||$('bIn').value.trim();if(!txt)return;
       <button class="cat" onclick="go('trip')"><span class="ci">${ic('cal',18)}</span>رحلتي</button>
     </div>
     <div class="sec">رحلتي الحالية</div>
-     ${t ? `<div class="trip-summary"><div><h2>${esc(t.destinationName || t.city || 'وجهتك')}</h2><p>${esc(t.from)} ← ${esc(t.to)}</p></div><button class="btn sm ghost" onclick="go('trip')">عرض الخطة</button></div>` : `<div class="empty-state"><div class="es-icon">${ic('plane',22)}</div><h3>لم تنشئ رحلة بعد</h3><a class="btn navy sm" href="./create-trip.html">إنشاء رحلة</a></div>`}
+      ${t ? `<div class="trip-summary" style="background-image:linear-gradient(180deg,rgba(4,17,28,.08),rgba(4,17,28,.82)),url('${imageForCity(t.destinationName || t.city)}')"><img src="${imageForCity(t.destinationName || t.city)}" alt="${esc(t.destinationName || t.city || 'وجهتك')}" style="display:none" onerror="this.parentElement.style.backgroundImage='linear-gradient(135deg,#0A192F,#D4AF37)';this.parentElement.dataset.city='${esc(t.destinationName || t.city || 'وجهتك')}'"><div><h2>${esc(t.destinationName || t.city || 'وجهتك')}</h2><p>${esc(t.from)} ← ${esc(t.to)}</p></div><button class="btn sm ghost" onclick="go('trip')">عرض الخطة</button></div>` : `<div class="empty-state"><div class="es-icon">${ic('plane',22)}</div><h3>لم تنشئ رحلة بعد</h3><a class="btn navy sm" href="./create-trip.html">إنشاء رحلة</a></div>`}
      <div class="card" style="margin-top:1rem"><b style="color:var(--navy-900)">خدمات مباشرة</b></div>`;
  }
  function doSearch() {
@@ -1228,7 +1232,7 @@ function ask(q){const txt=q||$('bIn').value.trim();if(!txt)return;
    render();
   window.setTimeout(() => document.getElementById('splashScreen')?.remove(), 650);
  }
- function addItem() { const t=lg('sb_trip',null); const title=$('iTitle')?.value.trim(); if(!t||!title)return; t.days[+$('iDay').value].push({title,time:$('iTime').value,type:$('iType').value}); ls('sb_trip',t); render(); }
+  function addItem() { const t=lg('sb_trip',null); const title=$('iTitle')?.value.trim(); if(!t||!title)return; const day=+$('iDay').value; t.days[day].push({title,time:$('iTime').value,type:$('iType').value,day_number:day+1}); ls('sb_trip',t); render(); }
  function delItem(d,ix) { const t=lg('sb_trip',null); if(!t)return; t.days[d].splice(ix,1); ls('sb_trip',t); render(); }
  function togCheck(ix) { const t=lg('sb_trip',null); if(!t)return; t.check[ix].done=!t.check[ix].done; ls('sb_trip',t); render(); }
  function addCheck() { const value=$('newCh')?.value.trim(), t=lg('sb_trip',null); if(!value||!t)return; t.check.push({t:value,done:false}); ls('sb_trip',t); render(); }

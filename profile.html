@@ -97,12 +97,15 @@
     const toast = document.getElementById('toast');
     let toastTimer;
     function showToast(message = 'تم حفظ الإعدادات بنجاح') { toast.textContent = message; toast.classList.add('show'); clearTimeout(toastTimer); toastTimer = setTimeout(() => toast.classList.remove('show'), 2200); }
+    let remoteTrips = [];
     function normaliseTrips() {
       const saved = readLocal('savedTrips', []);
       const trips = Array.isArray(saved) ? saved : [];
       const current = readLocal('currentTrip', null);
       if (current && typeof current === 'object' && !trips.some((trip) => JSON.stringify(trip) === JSON.stringify(current))) trips.unshift(current);
-      return trips.filter((trip) => trip && typeof trip === 'object');
+      const appTrip = window.AppState?.getTrip?.() || readLocal('mysindbad_app_data_v1', {}).currentTrip;
+      if (appTrip && typeof appTrip === 'object' && !trips.some((trip) => JSON.stringify(trip) === JSON.stringify(appTrip))) trips.unshift(appTrip);
+      return remoteTrips.concat(trips).filter((trip) => trip && typeof trip === 'object').filter((trip, index, all) => all.findIndex((item) => (item.id && trip.id && item.id === trip.id) || JSON.stringify(item) === JSON.stringify(trip)) === index);
     }
     function tripName(trip) { return trip.destination || trip.destinationName || trip.city || trip.title || 'رحلة محفوظة'; }
     function tripDate(trip) { const start = trip.startDate || trip.start || trip.date || trip.dates?.start; return start ? `تاريخ البدء: ${start}` : 'بيانات الرحلة جاهزة للمراجعة'; }
@@ -110,12 +113,12 @@
       const trips = normaliseTrips();
       const activities = readLocal('myTripActivities', []);
       const savedActivities = Array.isArray(activities) ? activities.filter((activity) => activity && typeof activity === 'object') : [];
-      document.getElementById('saved-count').textContent = trips.length + savedActivities.length;
+      document.getElementById('saved-count').textContent = trips.length;
       const container = document.getElementById('saved-trips');
-      if (!trips.length && !savedActivities.length) { container.innerHTML = '<div class="empty">لا توجد رحلات محفوظة بعد.<br>ابدأ بإنشاء رحلة جديدة لتظهر هنا.</div>'; return; }
+      if (!trips.length) { container.innerHTML = '<div class="empty">لا توجد رحلات محفوظة بعد.<br>ابدأ بإنشاء رحلة جديدة لتظهر هنا.</div>'; return; }
       const tripCards = trips.map((trip) => `<article class="trip"><div><h3>${escapeHtml(tripName(trip))}</h3><p>${escapeHtml(tripDate(trip))}</p></div><a class="trip-link" href="./itinerary.html">عرض التفاصيل</a></article>`);
       const activityCards = savedActivities.map((activity) => `<article class="trip"><div><h3>${escapeHtml(activity.title || activity.place || 'نشاط محفوظ')}</h3><p>لديك نشاط محفوظ في رحلتك</p></div><a class="trip-link" href="./itinerary.html">عرض التفاصيل</a></article>`);
-      container.innerHTML = tripCards.concat(activityCards).join('');
+      container.innerHTML = tripCards.join('');
     }
     function escapeHtml(value) { return String(value ?? '').replace(/[&<>"']/g, (char) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[char])); }
     const language = document.getElementById('language');
@@ -137,8 +140,13 @@
         if (user) {
           document.getElementById('profile-title').textContent = user.user_metadata?.full_name || user.email || 'مسافر سندباد';
           document.getElementById('profile-email').textContent = user.email || '';
+          if (window.supabaseClient) {
+            const result = await window.supabaseClient.from('trips').select('*').eq('user_id', user.id).order('created_at', { ascending: false });
+            if (!result.error && Array.isArray(result.data)) remoteTrips = result.data;
+          }
         }
       } catch (error) { console.warn('Auth profile unavailable:', error.message); }
+      renderTrips();
     }
     document.getElementById('logout').addEventListener('click', async () => {
       try { ['currentTrip', 'currentItinerary', 'myTripActivities', 'sb_trip', 'sb_destination'].forEach((key) => localStorage.removeItem(key)); } catch (error) {}

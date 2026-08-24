@@ -63,7 +63,8 @@ const AppState = {
           activity_description: activity.description || 'نشاط مضاف',
           distance: activity.distance || '',
           duration: activity.duration || '',
-          estimated_cost: Number(activity.cost || activity.price || 0)
+           estimated_cost: Number(activity.cost || activity.price || 0),
+           day_number: Number(activity.day_number || activity.day) || 1
         }]);
         if (error) throw error;
       } catch (error) {
