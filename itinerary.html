@@ -343,11 +343,16 @@
     }
 
     function readLiveActivities() {
+      const sources = [];
       try {
-        return window.AppState?.getActivities?.() || JSON.parse(localStorage.getItem('myTripActivities') || '[]');
+        const stateActivities = window.AppState?.getActivities?.() || [];
+        const localActivities = JSON.parse(localStorage.getItem('myTripActivities') || '[]');
+        sources.push(...stateActivities, ...(Array.isArray(localActivities) ? localActivities : []));
       } catch (error) {
-        return [];
       }
+      return sources.filter((item, index, all) => item && all.findIndex((candidate) => (
+        item.id && candidate.id && candidate.id === item.id
+      )) === index);
     }
 
     function renderDayPlan(activities) {
@@ -427,6 +432,7 @@
 
      window.addEventListener('storage', () => rebuildItinerary());
      window.addEventListener('pageshow', () => rebuildItinerary());
+    window.addEventListener('appstate:activity-added', () => renderDayPlan(readLiveActivities()));
 
     function openEditor(dayIndex, activityIndex) {
       editing = { day: dayIndex, activity: activityIndex };

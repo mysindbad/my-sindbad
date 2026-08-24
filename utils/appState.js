@@ -83,6 +83,7 @@ const AppState = {
         localStorage.setItem('myTripActivities', JSON.stringify(localActivities));
       }
     } catch (error) {}
+    window.dispatchEvent(new Event('appstate:activity-added'));
     return true;
   },
 

@@ -959,7 +959,7 @@ function pgHome(P){const t=lg('sb_trip',null);
     </button>`).join('')}
    </div>`;}
 // <!-- QA14-SEARCH -->
-function doSearch(){const q=$('q')?.value.trim();if(!q)return;ls('sb_destination_query',q);window.location.href=`./explore.html?destination=${encodeURIComponent(q)}`;}
+function doSearch(){const q=$('q')?.value.trim();if(!q)return;sessionStorage.setItem('sb_destination_query',q);ls('sb_destination_query',q);window.location.href=`./explore.html?dest=${encodeURIComponent(q)}`;}
 
 function pgTrip(P){let t=lg('sb_trip',null);
  if(!t){P.innerHTML=`<div class="sec">تخطيط رحلة جديدة</div>
@@ -1172,12 +1172,10 @@ function ask(q){const txt=q||$('bIn').value.trim();if(!txt)return;
  }
  function doSearch() {
    const q = $('q')?.value.trim();
-   const box = $('searchResults');
-   if (!q || !box) return;
-   box.innerHTML = `<div class="card" style="color:var(--text-muted);text-align:center">جارِ البحث في الخرائط...</div>`;
-   apiGet(`/api/search?q=${encodeURIComponent(q)}`).then((items) => {
-     box.innerHTML = items.length ? `<div class="sec">نتائج البحث</div><div class="card">${items.map((item) => `<button class="search-result" onclick='chooseDestination(${JSON.stringify(item).replace(/'/g, '&#39;')})'><span class="ci">${ic('pin',16)}</span><span><b>${esc(item.name)}</b><small>${esc(item.displayName)}</small></span><span>←</span></button>`).join('')}</div>` : `<div class="empty-state"><h3>لم نجد هذه الوجهة</h3></div>`;
-   }).catch(() => { box.innerHTML = `<div class="empty-state"><h3>تعذر البحث الآن</h3><p>تحقق من اتصال الخادم وحاول مرة أخرى.</p></div>`; });
+   if (!q) return;
+   sessionStorage.setItem('sb_destination_query', q);
+   ls('sb_destination_query', q);
+   window.location.href = `./explore.html?dest=${encodeURIComponent(q)}`;
  }
  function pgExplore(P) {
    if (!requireDestination(P)) return;
