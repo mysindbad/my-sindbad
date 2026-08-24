@@ -202,15 +202,26 @@
       try {
         const user = await window.Auth?.getCurrentUser();
         if (user && window.supabaseClient) {
-          const { data, error } = await window.supabaseClient
+          let { data, error } = await window.supabaseClient
             .from('trips')
-            .select('*')
+            .select('*, activities(*)')
             .eq('user_id', user.id)
             .order('created_at', { ascending: false })
             .limit(1)
             .maybeSingle();
+          if (error) {
+            ({ data, error } = await window.supabaseClient
+              .from('trips')
+              .select('*')
+              .eq('user_id', user.id)
+              .order('created_at', { ascending: false })
+              .limit(1)
+              .maybeSingle());
+          }
           if (data && !error) currentTrip = normaliseTrip(data);
-          if (currentTrip?.id) {
+          if (currentTrip?.activities?.length) {
+            currentTrip.remoteActivities = currentTrip.activities;
+          } else if (currentTrip?.id) {
             const activitiesResult = await window.supabaseClient
               .from('activities')
               .select('*')
@@ -358,8 +369,14 @@
       }
       try {
          const savedItinerary = JSON.parse(localStorage.getItem('currentItinerary'));
+         let localActivities = [];
+         try {
+           localActivities = window.AppState?.getActivities() || JSON.parse(localStorage.getItem('myTripActivities') || '[]');
+         } catch (error) { localActivities = []; }
          itinerary = tripData.remoteActivities?.length
            ? itineraryFromActivities(tripData.remoteActivities, tripData)
+           : localActivities.length
+             ? itineraryFromActivities(localActivities, tripData)
            : (Array.isArray(savedItinerary) && savedItinerary.length ? savedItinerary : generateMockItinerary(tripData));
       } catch (error) {
         itinerary = generateMockItinerary(tripData);
