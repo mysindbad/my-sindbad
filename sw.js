@@ -1,4 +1,5 @@
-const CACHE_NAME = 'my-sindbad-v13';
+// <!-- QA14-SW -->
+const CACHE_NAME = 'my-sindbad-v14';
 const APP_SHELL = [
   './',
   './index.html',

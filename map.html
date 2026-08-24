@@ -31,7 +31,8 @@
     .leaflet-control-zoom a{color:var(--navy)!important;border-color:#d4af3780!important}.marker{width:22px;height:22px;border:3px solid #fff;border-radius:50% 50% 50% 0;background:var(--gold);box-shadow:0 3px 9px #0006;transform:rotate(-45deg)}.marker:after{content:'';display:block;width:6px;height:6px;margin:5px auto;border-radius:50%;background:var(--navy)}
     .nav{position:fixed;bottom:0;left:50%;z-index:1000;display:flex;width:100%;max-width:480px;transform:translateX(-50%);padding:8px 8px calc(8px + env(safe-area-inset-bottom));background:#0a192ff7;border-top:1px solid #fff2;box-shadow:0 -4px 18px #0003;backdrop-filter:blur(14px)}.nav a{display:flex;min-height:52px;flex:1;flex-direction:column;align-items:center;justify-content:center;gap:3px;border-radius:12px;color:#fffa;text-decoration:none;font-size:.6rem}.nav a.active{background:#d4af3729;color:var(--gold);font-weight:800}
     @media(min-width:700px){body{padding:22px 0}.shell{min-height:calc(100vh - 44px);border-radius:28px;overflow:hidden}.nav{position:absolute;border-radius:0 0 28px 28px}}
-  </style>
+   .saved-places{display:grid;gap:8px;margin-top:16px}.saved-place{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:10px;border:1px solid var(--line);border-radius:12px;background:#fff}.saved-place strong{font-size:.72rem;color:var(--navy)}.saved-place small{display:block;color:#64748b;font-size:.62rem}.saved-place div:last-child{display:flex;gap:5px}.saved-place button{min-height:34px;padding:0 8px;border:1px solid var(--line);border-radius:8px;background:#fffaf0;color:var(--navy);font-size:.62rem;font-weight:700;cursor:pointer}
+   </style>
 </head>
 <body>
 <main class="shell">
@@ -41,7 +42,9 @@
     <div class="map-wrap"><div id="map" aria-label="خريطة تفاعلية"></div><form class="search" id="search"><input id="query" type="search" placeholder="ابحث عن مكان أو مدينة..." aria-label="البحث عن مكان"><button aria-label="بحث">⌕</button></form><button class="locate" id="locate" type="button" aria-label="موقعي الحالي">⌖</button></div>
     <div class="modes"><button class="active" data-mode="driving" type="button">قيادة 🚗</button><button data-mode="walking" type="button">مشي 🚶</button></div>
     <p class="status" id="status" role="status">ابحث عن مكان أو اضغط على الخريطة لاختيار وجهة.</p>
-    <article class="place" id="place"><h2 id="name">المكان المختار</h2><div class="meta"><div><small>المسافة</small><b id="distance">—</b></div><div><small>الوقت المتوقع</small><b id="duration">—</b></div></div><button class="add" id="add" type="button">أضف إلى رحلتي ➕</button></article>
+     <article class="place" id="place"><h2 id="name">المكان المختار</h2><div class="meta"><div><small>المسافة</small><b id="distance">—</b></div><div><small>الوقت المتوقع</small><b id="duration">—</b></div></div><button class="add" id="add" type="button">أضف إلى رحلتي ➕</button></article>
+     <!-- QA14-NAV -->
+     <section><h2 style="margin:18px 0 8px;color:var(--navy);font-size:.9rem">أماكن رحلتي</h2><div id="saved-places" class="saved-places"></div></section>
   </section>
   <nav data-site-nav data-active="map"></nav>
 </main>
@@ -62,7 +65,17 @@
   let reverseController = null;
   const icon = window.L ? L.divIcon({ className: '', html: '<div class="marker"></div>', iconSize: [22, 22], iconAnchor: [11, 22] }) : null;
 
-  function status(message) { $('status').textContent = message; }
+   function status(message) { $('status').textContent = message; }
+   function escapeHtml(value) { return String(value ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+   function showSaved(place) { choose(place); }
+   function renderSavedPlaces() {
+     const items = window.AppState?.getActivities?.() || [];
+     const visible = items.filter(item => Number.isFinite(Number(item.lat)) && Number.isFinite(Number(item.lon)));
+     $('saved-places').innerHTML = visible.length ? visible.map(item => {
+       const place = { name:item.name || item.place || 'مكان محفوظ', lat:Number(item.lat), lon:Number(item.lon) };
+       return `<article class="saved-place"><div><strong>${escapeHtml(place.name)}</strong><small>${escapeHtml(item.type || '')}</small></div><div><button onclick='showSaved(${JSON.stringify(place)})'>عرض</button><button onclick='showSaved(${JSON.stringify(place)});routeTo()'>اتجاهات</button></div></article>`;
+     }).join('') : '<p style="color:#64748b;font-size:.7rem">أضف أماكن إلى رحلتك لتظهر هنا.</p>';
+   }
   function distance(a, b) {
     const radians = Math.PI / 180;
     const radius = 6371000;
@@ -113,7 +126,7 @@
         $('distance').textContent = dist(summary.totalDistance);
         $('duration').textContent = time(summary.totalTime);
         status(`تم تحديد المسار إلى ${selected.name}.`);
-      });
+   });
       route.on('routingerror', () => fallback(start, end));
     } catch (error) { fallback(start, end); }
   }
@@ -206,7 +219,14 @@
      button.textContent = '✓ تمت الإضافة إلى رحلتك';
     status('تم حفظ المكان في رحلتك بنجاح.');
   });
-</script>
+   // <!-- QA14-NAV -->
+   renderSavedPlaces();
+   const mapParams = new URLSearchParams(location.search);
+   const queryLat = Number(mapParams.get('lat')), queryLon = Number(mapParams.get('lng'));
+   if (Number.isFinite(queryLat) && Number.isFinite(queryLon)) {
+     showSaved({ name: mapParams.get('name') || 'المكان المطلوب', lat: queryLat, lon: queryLon });
+   }
+ </script>
 <script src="./utils/navigation.js"></script>
 <script src="./utils/header.js"></script>
 </body>

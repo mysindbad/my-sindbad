@@ -266,17 +266,6 @@ label .inp { margin-top: 0.35rem; }
 }
 .auth-card .tabs button.on { background: var(--surface); color: var(--navy-900); font-weight: 700; box-shadow: var(--shadow-sm); }
 .auth-card .err { color: var(--danger); font-size: 0.75rem; min-height: 1.2rem; margin: 0.25rem 0; }
-.demo-warning {
-  margin: 0 0 1rem;
-  padding: .7rem .8rem;
-  border: 1px solid #fecaca;
-  border-radius: var(--radius-sm);
-  background: #fef2f2;
-  color: #b91c1c;
-  font-size: .72rem;
-  font-weight: 700;
-  line-height: 1.6;
-}
 .auth-card .free {
   margin-top: 0.9rem;
   background: #f0fdf4;
@@ -603,7 +592,6 @@ iframe.map { width: 100%; height: 240px; border: 1px solid var(--border); border
 }
 .brand-logo { box-shadow: 0 2px 8px rgba(11, 27, 51, 0.14); }
 .foot { text-align: center; color: var(--text-light); font-size: 0.68rem; padding: 1.2rem 0 0.5rem; }
-.demo-note { margin: 1rem 0 .25rem; color: #64748b; font-size: .68rem; line-height: 1.7; text-align: center; }
 .quick-action-card { transition: all .3s ease; }
 .quick-action-card:hover { transform: translateY(-5px); box-shadow: 0 10px 25px rgba(212,175,55,.3); }
 .hero-section { animation: fadeInUp .8s ease-out; }
@@ -791,13 +779,18 @@ body{background:#060e1a}.shell{max-width:480px;background:#fbf9f5;padding-bottom
   </div>
 </div>
 <script>
-  window.setTimeout(() => {
-    const splash = document.getElementById('splashScreen');
-    if (!splash) return;
-    splash.style.opacity = '0';
-    splash.style.transition = 'opacity 0.5s ease';
-    window.setTimeout(() => splash.remove(), 500);
-  }, 1500);
+  // <!-- QA14-SPLASH -->
+  if (sessionStorage.getItem('splashShown')) document.getElementById('splashScreen')?.remove();
+  else {
+    sessionStorage.setItem('splashShown', '1');
+    window.setTimeout(() => {
+      const splash = document.getElementById('splashScreen');
+      if (!splash) return;
+      splash.style.opacity = '0';
+      splash.style.transition = 'opacity 0.5s ease';
+      window.setTimeout(() => splash.remove(), 500);
+    }, 1500);
+  }
 </script>
 <div class="shell" id="shell"></div>
 <script src="./utils/timeUtils.js"></script>
@@ -868,10 +861,11 @@ const CITIES={
  cairo:{n:'القاهرة',c:'مصر',lat:30.04,lon:31.24,hotels:[{n:'فندق النيل الكبير',p:95,r:4.6},{n:'فندق وسط البلد',p:60,r:4.3},{n:'دار مصر القديمة',p:40,r:4.4}],rest:[{n:'مطعم أم كلثوم',t:'شرقي'},{n:'كشري التحرير',t:'شعبي'},{n:'قهوة الفيشاوي',t:'تاريخي'}],spots:[{n:'أهرامات الجيزة',d:'أعجوبة الدنيا القديمة'},{n:'المتحف المصري',d:'آثار فرعونية'},{n:'خان الخليلي',d:'سوق تاريخي'}]},
  paris:{n:'باريس',c:'فرنسا',lat:48.85,lon:2.35,hotels:[{n:'فندق اللوفر',p:190,r:4.7},{n:'hotel مونمارتر',p:110,r:4.4},{n:'إيبس باستيل',p:85,r:4.2}],rest:[{n:'مطعم لوتيس',t:'فرنسي راق'},{n:'كافيه دو باري',t:'مقهى'},{n:'مطعم الشام',t:'شرقي'}],spots:[{n:'برج إيفل',d:'رمز باريس'},{n:'متحف اللوفر',d:'أكبر متحف فني'},{n:'قوس النصر',d:'معلم تاريخي'}]}
 };
+ // <!-- QA14-IMG -->
  const CITY_IMAGES={
  istanbul:'https://images.unsplash.com/photo-1524231757912-21f4fe3a7200?auto=format&fit=crop&w=700&q=82',
   marrakech:'https://image.qwenlm.ai/public_source/e519404d-4d50-460e-a07e-5e2fe0b81811/87cd0db02-30ad-437f-9eec-3aa3c0dcbdf49390.png',
-  chefchaouen:'https://image.qwenlm.ai/public_source/e519404d-4d50-460e-a07e-5e2fe0b81811/67cd0db02-30ad-437f-9eec-3aa3c0dcbdf49916.png',
+   chefchaouen:'https://image.qwenlm.ai/public_source/e519404d-4d50-460e-a07e-5e2fe0b81811/5a74e70c6-0b49-4321-9579-b1ec180e57da4916.png',
  dubai:'https://images.unsplash.com/photo-1512453979798-5ea266f8880c?auto=format&fit=crop&w=700&q=82',
  cairo:'https://images.unsplash.com/photo-1568322445389-f64ac2515020?auto=format&fit=crop&w=700&q=82',
  paris:'https://images.unsplash.com/photo-1502602898657-3e91760cbb34?auto=format&fit=crop&w=700&q=82'
@@ -896,7 +890,6 @@ function authHTML(){return `
     <button class="${authTab==='login'?'on':''}" onclick="authTab='login';render()">تسجيل الدخول</button>
     <button class="${authTab==='reg'?'on':''}" onclick="authTab='reg';render()">حساب جديد</button>
    </div>
-   <div class="demo-warning">⚠️ وضع العرض التجريبي: لا تدخل بيانات حقيقية، يتم الحفظ محلياً فقط</div>
    ${authTab==='reg'?'<label>الاسم الكامل<input class="inp" id="rName" placeholder="الاسم الكريم"></label>':''}
    <label>البريد الإلكتروني<input class="inp" id="aEmail" type="email" placeholder="name@example.com"></label>
    <label>كلمة المرور<input class="inp" id="aPass" type="password" placeholder="••••••••"></label>
@@ -922,7 +915,6 @@ function doOut(){session=null;ls('sb_session',null);render();}
  function appHTML(){return `
   <div data-site-header></div>
  <div class="content" id="pg"></div>
- <div class="foot demo-note">ملاحظة: هذه النسخة التجريبية تستخدم بيانات محاكاة للعرض. سيتم ربط الذكاء الاصطناعي الفعلي في المرحلة القادمة</div>
       <nav data-site-nav data-active="${page}"></nav>`;}
 function go(p){page=p;render();}
 function bind(){const P=$('pg');if(!P)return;({home:pgHome,trip:pgTrip,explore:pgExplore,map:pgMap,community:pgCommunity,bot:pgBot})[page](P);}
@@ -966,7 +958,8 @@ function pgHome(P){const t=lg('sb_trip',null);
       <span class="dc-copy"><b>${CITIES[c].n}</b><span>${CITIES[c].c}</span></span>
     </button>`).join('')}
    </div>`;}
-function doSearch(){const q=$('q').value.trim();const k=Object.keys(CITIES).find(c=>CITIES[c].n.includes(q)||CITIES[c].c.includes(q));if(k)city=k;go('explore');}
+// <!-- QA14-SEARCH -->
+function doSearch(){const q=$('q')?.value.trim();if(!q)return;ls('sb_destination_query',q);window.location.href=`./explore.html?destination=${encodeURIComponent(q)}`;}
 
 function pgTrip(P){let t=lg('sb_trip',null);
  if(!t){P.innerHTML=`<div class="sec">تخطيط رحلة جديدة</div>
@@ -1174,7 +1167,8 @@ function ask(q){const txt=q||$('bIn').value.trim();if(!txt)return;
     </div>
     <div class="sec">رحلتي الحالية</div>
       ${t ? `<div class="trip-summary" style="background-image:linear-gradient(180deg,rgba(4,17,28,.08),rgba(4,17,28,.82)),url('${imageForCity(t.destinationName || t.city)}')"><img src="${imageForCity(t.destinationName || t.city)}" alt="${esc(t.destinationName || t.city || 'وجهتك')}" style="display:none" onerror="this.parentElement.style.backgroundImage='linear-gradient(135deg,#0A192F,#D4AF37)';this.parentElement.dataset.city='${esc(t.destinationName || t.city || 'وجهتك')}'"><div><h2>${esc(t.destinationName || t.city || 'وجهتك')}</h2><p>${esc(t.from)} ← ${esc(t.to)}</p></div><button class="btn sm ghost" onclick="go('trip')">عرض الخطة</button></div>` : `<div class="empty-state"><div class="es-icon">${ic('plane',22)}</div><h3>لم تنشئ رحلة بعد</h3><a class="btn navy sm" href="./create-trip.html">إنشاء رحلة</a></div>`}
-     <div class="card" style="margin-top:1rem"><b style="color:var(--navy-900)">خدمات مباشرة</b></div>`;
+      <!-- QA14-SERVICES -->
+      <div class="card" style="margin-top:1rem"><b style="color:var(--navy-900)">خدمات مباشرة</b><div class="tools" style="margin-top:.7rem"><a class="btn ghost" href="./explore.html">الطقس</a><a class="btn ghost" href="./map.html">خريطتي</a><a class="btn ghost" href="./community.html">المجتمع</a></div></div>`;
  }
  function doSearch() {
    const q = $('q')?.value.trim();

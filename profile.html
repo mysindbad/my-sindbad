@@ -70,7 +70,7 @@
     <section class="content">
       <section class="profile-card" aria-labelledby="profile-title">
         <div class="avatar" aria-hidden="true">👤</div>
-        <div><h1 id="profile-title">مسافر سندباد</h1><p id="profile-email">traveler@mysindbad.example</p></div>
+         <div><h1 id="profile-title">زائر My Sindbad</h1><p id="profile-email"></p></div>
       </section>
       <h2 class="section-title">نظرة سريعة</h2>
       <section class="stats" aria-label="إحصائيات الحساب">
@@ -133,17 +133,18 @@
     notifications.addEventListener('click', () => { const enabled = !notifications.classList.contains('on'); notifications.classList.toggle('on', enabled); notifications.setAttribute('aria-checked', String(enabled)); writeLocal('notificationsEnabled', enabled); showToast(); });
     document.getElementById('favorite-count').textContent = Array.isArray(readLocal('favorites', [])) ? readLocal('favorites', []).length : 0;
     document.getElementById('points-count').textContent = Number(readLocal('points', readLocal('sb_points', 0))) || 0;
+    // <!-- QA14-DEMO -->
     async function loadAuthProfile() {
-      if (!window.Auth) return;
+       if (!window.Auth) { document.getElementById('logout').classList.add('hidden'); renderTrips(); return; }
       try {
         const user = await Auth.getCurrentUser();
-        if (user) {
+         if (user) {
           document.getElementById('profile-title').textContent = user.user_metadata?.full_name || user.email || 'مسافر سندباد';
           document.getElementById('profile-email').textContent = user.email || '';
           if (window.supabaseClient) {
             const result = await window.supabaseClient.from('trips').select('*').eq('user_id', user.id).order('created_at', { ascending: false });
             if (!result.error && Array.isArray(result.data)) remoteTrips = result.data;
-          }
+         } else document.getElementById('logout').classList.add('hidden');
         }
       } catch (error) { console.warn('Auth profile unavailable:', error.message); }
       renderTrips();
