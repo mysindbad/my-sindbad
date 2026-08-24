@@ -18,6 +18,8 @@
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="./utils/supabaseClient.js"></script>
+<script src="./utils/auth.js"></script>
 <script>
   tailwind.config = {
     theme: {
@@ -901,12 +903,16 @@ function authHTML(){return `
   </div>
   <div class="feat"><span>تخطيط رحلات متكامل</span><span>خرائط وإرشادات</span><span>تجارب المسافرين</span></div>
  </div>`;}
-function doLogin(){const u=lg('sb_users',[]).find(x=>x.email===$('aEmail').value.trim()&&x.pass===$('aPass').value);
- if(u){session={name:u.name,email:u.email};ls('sb_session',session);render();}else $('aErr').textContent='البريد أو كلمة المرور غير صحيحة.';}
-function doReg(){const name=$('rName').value.trim(),email=$('aEmail').value.trim(),pass=$('aPass').value;
+ async function doLogin(){const email=$('aEmail').value.trim(),pass=$('aPass').value;
+  if(!email||!pass){$('aErr').textContent='أدخل البريد الإلكتروني وكلمة المرور.';return;}
+  try{if(window.supabaseConfigured){const user=await Auth.signIn(email,pass);session={name:user.user_metadata?.full_name||user.email,email:user.email};ls('sb_session',session);render();return;}
+   const u=lg('sb_users',[]).find(x=>x.email===email&&x.pass===pass);if(u){session={name:u.name,email:u.email};ls('sb_session',session);render();}else $('aErr').textContent='البريد أو كلمة المرور غير صحيحة.';
+  }catch(error){$('aErr').textContent='تعذر تسجيل الدخول: '+(error.message||'تحقق من بياناتك.');}}
+ async function doReg(){const name=$('rName').value.trim(),email=$('aEmail').value.trim(),pass=$('aPass').value;
  if(!name||!email||pass.length<4){$('aErr').textContent='المرجو ملء جميع الخانات (كلمة المرور 4 أحرف فأكثر).';return;}
- const u=lg('sb_users',[]);if(u.find(x=>x.email===email)){$('aErr').textContent='هذا البريد مسجل من قبل.';return;}
- u.push({name,email,pass});ls('sb_users',u);session={name,email};ls('sb_session',session);render();}
+  try{if(window.supabaseConfigured){const user=await Auth.signUp(email,pass,name);if(!user){$('aErr').textContent='تحقق من بريدك الإلكتروني لتفعيل الحساب.';return;}session={name:user.user_metadata?.full_name||name,email:user.email};ls('sb_session',session);render();return;}
+   const u=lg('sb_users',[]);if(u.find(x=>x.email===email)){$('aErr').textContent='هذا البريد مسجل من قبل.';return;}u.push({name,email,pass});ls('sb_users',u);session={name,email};ls('sb_session',session);render();
+  }catch(error){$('aErr').textContent='تعذر إنشاء الحساب: '+(error.message||'تحقق من البيانات.');}}
 function doOut(){session=null;ls('sb_session',null);render();}
 
 /* ===== الهيكل ===== */
@@ -1247,7 +1253,6 @@ if ('serviceWorker' in navigator) {
 </script>
 <script src="./utils/navigation.js"></script>
 <script src="./utils/header.js"></script>
-<script src="./utils/supabaseClient.js"></script>
 <script src="./utils/appState.js"></script>
 </body>
 </html>
