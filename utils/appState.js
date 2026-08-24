@@ -33,16 +33,56 @@ const AppState = {
 
   getTrip: () => AppState.getAll().currentTrip,
 
-  addActivity: (activity) => {
+  addActivity: async (activity) => {
     const state = AppState.getAll();
-    if (!state.activities) state.activities = [];
-    // منع التكرار
-    if (!state.activities.find(a => a.name === activity.name && a.date === activity.date)) {
-      state.activities.push(activity);
-      AppState.saveAll(state);
-      return true;
+    let currentTrip = state.currentTrip;
+    if (!currentTrip) {
+      try {
+        currentTrip = JSON.parse(localStorage.getItem('currentTrip') || localStorage.getItem('sb_trip') || 'null');
+      } catch (error) { currentTrip = null; }
     }
-    return false; // مكرر
+    if (!currentTrip) { alert('يرجى إنشاء رحلة أولاً!'); return false; }
+
+    let remoteTripId = currentTrip.id;
+    if (window.supabaseClient && !remoteTripId) {
+      try {
+        const user = (await window.supabaseClient.auth.getUser()).data.user;
+        if (user) {
+          const result = await window.supabaseClient.from('trips').select('id')
+            .eq('user_id', user.id).order('created_at', { ascending: false }).limit(1).maybeSingle();
+          if (!result.error) remoteTripId = result.data?.id;
+        }
+      } catch (error) { console.warn('Could not resolve remote trip:', error.message); }
+    }
+
+    if (window.supabaseClient && remoteTripId) {
+      try {
+        const { error } = await window.supabaseClient.from('activities').insert([{
+          trip_id: remoteTripId,
+          place_name: activity.name || activity.place,
+          activity_description: activity.description || 'نشاط مضاف',
+          distance: activity.distance || '',
+          duration: activity.duration || '',
+          estimated_cost: Number(activity.cost || activity.price || 0)
+        }]);
+        if (error) throw error;
+      } catch (error) {
+        console.warn('Supabase activity save failed, falling back to local:', error.message);
+      }
+    }
+
+    if (!state.activities) state.activities = [];
+    if (state.activities.some(a => a.id && activity.id && a.id === activity.id)) return false;
+    state.activities.push(activity);
+    AppState.saveAll(state);
+    try {
+      const localActivities = JSON.parse(localStorage.getItem('myTripActivities') || '[]');
+      if (!localActivities.some(a => a.id && activity.id && a.id === activity.id)) {
+        localActivities.push(activity);
+        localStorage.setItem('myTripActivities', JSON.stringify(localActivities));
+      }
+    } catch (error) {}
+    return true;
   },
 
   getActivities: () => AppState.getAll().activities || [],

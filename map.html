@@ -10,7 +10,11 @@
   <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="./utils/navigation.css">
   <link rel="stylesheet" href="./utils/header.css">
-  <script src="https://cdn.tailwindcss.com"></script>
+   <script src="https://cdn.tailwindcss.com"></script>
+   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+   <script src="./utils/supabaseClient.js"></script>
+   <script src="./utils/auth.js"></script>
+   <script src="./utils/appState.js"></script>
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
   <link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.css">
   <style>
@@ -181,27 +185,25 @@
     map.on('locationerror', () => status('لم نتمكن من الوصول إلى موقعك. يمكنك البحث يدوياً.'));
      map.on('click', (event) => { const point = { name: 'جارٍ تحديد اسم المكان...', lat: event.latlng.lat, lon: event.latlng.lng }; choose(point); nameMapPoint(point.lat, point.lon); });
   }
-  $('add').addEventListener('click', () => {
+  $('add').addEventListener('click', async () => {
     if (!selected) { status('اختر مكاناً أولاً لإضافته إلى رحلتك.'); return; }
-    let activities = [];
-    let trip = null;
-    try { const value = JSON.parse(localStorage.getItem('myTripActivities') || '[]'); activities = Array.isArray(value) ? value : []; } catch (error) { activities = []; }
-    const item = { id: `map-${selected.lat}-${selected.lon}`, title: selected.name, place: selected.name, type: 'وجهة من الخريطة', lat: selected.lat, lon: selected.lon, distance: $('distance').textContent, duration: $('duration').textContent, addedAt: new Date().toISOString() };
-    if (!activities.some((entry) => entry && entry.id === item.id)) activities.push(item);
-    try {
-      localStorage.setItem('myTripActivities', JSON.stringify(activities));
-      trip = JSON.parse(localStorage.getItem('currentTrip') || localStorage.getItem('sb_trip') || 'null');
-    } catch (error) { trip = null; }
-    if (trip && typeof trip === 'object') {
-      trip.days = Array.isArray(trip.days) && trip.days.length ? trip.days : [[]];
-      trip.days[0].push({ title: selected.name, time: '10:00', type: 'وجهة من الخريطة', lat: selected.lat, lon: selected.lon });
-      try {
-        localStorage.setItem('currentTrip', JSON.stringify(trip));
-        localStorage.setItem('sb_trip', JSON.stringify(trip));
-      } catch (error) {}
-    }
-    $('add').textContent = '✓ تمت الإضافة إلى رحلتك';
-    $('add').disabled = true;
+     const button = $('add');
+     button.disabled = true;
+     const success = await window.AppState.addActivity({
+       id: `map-${selected.lat}-${selected.lon}`,
+       name: selected.name,
+       place: selected.name,
+       description: 'وجهة من الخريطة',
+       type: 'وجهة من الخريطة',
+       lat: selected.lat,
+       lon: selected.lon,
+       distance: $('distance').textContent,
+       duration: $('duration').textContent,
+       time: '10:00',
+       addedAt: new Date().toISOString()
+     });
+     if (!success) { button.disabled = false; return; }
+     button.textContent = '✓ تمت الإضافة إلى رحلتك';
     status('تم حفظ المكان في رحلتك بنجاح.');
   });
 </script>
