@@ -130,8 +130,13 @@ async function buildReplacementOptions(trip, day, activityIndex, aiOptions = [])
     .map((option) => ({ ...option, cost: Number(option.cost), category: option.category || category }))
     .filter((option) => option.title && Number.isFinite(option.cost) && option.cost < currentCost);
   const merged = [...searched, ...existing, ...aiFiltered];
+  const withCoordinates = await Promise.all(merged.map(async (option) => {
+    if (option.coords) return option;
+    const coords = await geocodeDestination(`${option.title} ${trip?.destination || ''}`);
+    return { ...option, coords };
+  }));
   const seen = new Set();
-  return merged.filter((option) => {
+  return withCoordinates.filter((option) => {
     const key = option.title.toLowerCase();
     if (seen.has(key)) return false;
     seen.add(key);
