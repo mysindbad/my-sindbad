@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>عرض الرحلة المشتركة - سندباد</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-50 text-slate-900 min-h-screen p-4 flex flex-col items-center justify-center">
+  <div id="content" class="max-w-md w-full bg-white rounded-2xl shadow-xl p-6 border border-slate-100 text-center">
+    <div id="loading">جاري تحميل الرحلة...</div>
+    <div id="error" class="hidden">
+      <div class="text-4xl mb-3">⚠️</div>
+      <h2 class="text-xl font-bold text-slate-800 mb-2">هذا الرابط غير صالح</h2>
+      <p class="text-slate-600 text-sm mb-4">تعذر فك تشفير بيانات الرحلة أو الرابط منتهي الصلاحية.</p>
+      <a href="./index.html" class="inline-block bg-amber-500 hover:bg-amber-600 text-white font-bold py-2 px-6 rounded-xl transition">خطط لرحلتك الجديدة</a>
+    </div>
+    <div id="trip-details" class="hidden text-right">
+      <h1 id="trip-dest" class="text-2xl font-black text-amber-600 mb-1"></h1>
+      <p id="trip-meta" class="text-slate-500 text-sm mb-4"></p>
+      <div id="trip-activities" class="space-y-3 mb-6"></div>
+      <a href="./index.html" class="block w-full text-center bg-slate-900 text-amber-400 font-bold py-3 rounded-xl">نسّق رحلة مماثلة</a>
+    </div>
+  </div>
+  <script>
+    try {
+      const hash = window.location.hash.slice(1);
+      if (!hash) throw new Error('No hash');
+      const decoded = decodeURIComponent(atob(hash));
+      const trip = JSON.parse(decoded);
+      document.getElementById('loading').classList.add('hidden');
+      document.getElementById('trip-details').classList.remove('hidden');
+      document.getElementById('trip-dest').textContent = trip.destination || 'رحلة مخصصة';
+      document.getElementById('trip-meta').textContent = `${trip.days || 1} أيام • ${trip.budget || 0} MAD`;
+      const container = document.getElementById('trip-activities');
+      const acts = trip.activities || [];
+      container.innerHTML = acts.map(a => `<div class="p-3 bg-amber-50 rounded-xl border border-amber-100"><div class="font-bold">${a.title || 'نشاط'}</div><div class="text-xs text-slate-500">${a.cost || 0} MAD</div></div>`).join('');
+    } catch {
+      document.getElementById('loading').classList.add('hidden');
+      document.getElementById('error').classList.remove('hidden');
+    }
+  </script>
+</body>
+</html>
