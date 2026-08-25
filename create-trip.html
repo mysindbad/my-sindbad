@@ -14,6 +14,7 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="./utils/supabaseClient.js"></script>
+  <script src="./utils/cityImages.js"></script>
   <script>
     tailwind.config = {
       theme: {
@@ -202,6 +203,9 @@
     const endDate = document.getElementById('end-date');
     const successMessage = document.getElementById('success-message');
     const formError = document.getElementById('form-error');
+    const destinationInput = document.getElementById('destination');
+    const destinationQuery = new URLSearchParams(window.location.search).get('dest');
+    if (destinationQuery) destinationInput.value = destinationQuery;
 
     const today = new Date().toISOString().split('T')[0];
     const maxDate = new Date();
@@ -235,8 +239,11 @@
       }
 
       const data = new FormData(form);
+      const normalizedDestination = window.MySindbadCity?.normalizeCityName(data.get('destination')) || { display: String(data.get('destination') || '').trim() };
+      const destinationDisplay = normalizedDestination.display || String(data.get('destination') || '').trim();
       const tripData = {
-        destination: String(data.get('destination') || '').trim(),
+        destination: destinationDisplay,
+        destinationDisplay,
         start_date: data.get('startDate'),
         end_date: data.get('endDate'),
         travelers_count: parseInt(data.get('travelers'), 10) || 1,
@@ -247,6 +254,7 @@
       };
       const trip = {
         destination: tripData.destination,
+        destinationDisplay: tripData.destinationDisplay,
         dates: { start: tripData.start_date, end: tripData.end_date },
         travelers: tripData.travelers_count,
         budget: { amount: tripData.budget, currency: tripData.currency },

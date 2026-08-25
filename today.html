@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>وضع اليوم - سندباد</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <script src="./utils/cityImages.js"></script>
   <link rel="stylesheet" href="./utils/navigation.css" />
 </head>
 <body class="bg-slate-50 text-slate-900 pb-20">
@@ -13,6 +14,7 @@
     <header class="bg-gradient-to-r from-amber-500 to-amber-600 rounded-2xl p-4 text-white shadow-lg flex justify-between items-center">
       <div>
         <h1 class="text-xl font-black">وضع اليوم 📍</h1>
+        <p id="today-city" class="text-sm font-bold text-white">وجهتك</p>
         <p id="today-date" class="text-xs text-amber-100">جاري التحميل...</p>
       </div>
       <div id="weather-box" class="text-left text-xs bg-white/20 p-2 rounded-xl backdrop-blur-sm">
@@ -49,14 +51,19 @@
     import { evaluateAlerts } from './utils/proactive.js';
     import { evaluateHealth } from './utils/health.js';
 
+    const trip = JSON.parse(localStorage.getItem('currentTrip') || 'null') || JSON.parse(localStorage.getItem('sb_trip') || 'null') || {};
+    const normalized = window.MySindbadCity?.normalizeCityName(trip.destinationDisplay || trip.destination || trip.destinationName || trip.city || 'مراكش') || { display: trip.destination || 'مراكش' };
+    const destinationDisplay = normalized.display || 'مراكش';
+    document.getElementById('today-city').textContent = destinationDisplay;
     document.getElementById('today-date').textContent = new Date().toLocaleDateString('ar-MA', { weekday: 'long', month: 'short', day: 'numeric' });
-    
-    // Fetch Open-Meteo Weather
+    const cityCoords = trip.cityCoords || { lat: 31.6295, lng: -7.9811 };
+    const weatherText = (code) => code === 0 ? 'صحو ومشمس' : code < 3 ? 'غائم جزئياً' : code < 70 ? 'أمطار أو غائم' : 'زخات مطرية';
     try {
-      const res = await fetch('https://api.open-meteo.com/v1/forecast?latitude=31.6295&longitude=-7.9811&current_weather=true');
+      const res = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${encodeURIComponent(cityCoords.lat)}&longitude=${encodeURIComponent(cityCoords.lng)}&current=temperature_2m,weather_code&timezone=auto`);
       const data = await res.json();
-      if (data.current_weather) {
-        document.getElementById('weather-temp').textContent = `${data.current_weather.temperature}°C`;
+      if (data.current) {
+        document.getElementById('weather-temp').textContent = `${Math.round(data.current.temperature_2m)}°C`;
+        document.getElementById('weather-desc').textContent = weatherText(Number(data.current.weather_code));
       }
     } catch {}
 

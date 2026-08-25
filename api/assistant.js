@@ -66,6 +66,55 @@ async function geocodeDestination(destination) {
   }
 }
 
+function isWeatherMessage(message) {
+  return /طقس|جو|مطر|شتا|شتاء|برد|سخون|حرارة|رطوبة|rain|weather/i.test(message);
+}
+
+function isTravelMessage(message) {
+  return /سفر|رحل|وجه|نشاط|طقس|جو|مطر|شتا|برد|حرارة|خريطة|فندق|مطعم|مقهى|مطار|قطار|ميزاني|شنطة|تجهيز|بدل|استبدل|أرخص|يوم|اليوم|غدا|غداً|travel|trip|weather|hotel|restaurant|map|airport/i.test(message);
+}
+
+function tripDestination(trip) {
+  return trip?.destinationDisplay || trip?.destination || trip?.destinationName || trip?.city || 'وجهتك';
+}
+
+async function weatherResponse(trip) {
+  const destination = tripDestination(trip);
+  let coords = trip?.cityCoords || (Number.isFinite(Number(trip?.lat)) && Number.isFinite(Number(trip?.lng)) ? { lat: Number(trip.lat), lng: Number(trip.lng) } : null);
+  if (!coords) coords = await geocodeDestination(destination);
+  if (!coords) return { type: 'TEXT', message: `ما قدرتش نحدد موقع ${destination} باش نعطيك أرقام طقس حقيقية دابا.` };
+  try {
+    const start = trip?.dates?.start || trip?.start_date;
+    const end = trip?.dates?.end || trip?.end_date || start;
+    const url = `https://api.open-meteo.com/v1/forecast?latitude=${encodeURIComponent(coords.lat)}&longitude=${encodeURIComponent(coords.lng)}&current=temperature_2m,relative_humidity_2m,precipitation,weather_code,wind_speed_10m&daily=temperature_2m_max,temperature_2m_min,precipitation_probability_max,weather_code&timezone=auto`;
+    const response = await fetch(url, { headers: { Accept: 'application/json' } });
+    if (!response.ok) throw new Error(`Open-Meteo HTTP ${response.status}`);
+    const data = await response.json();
+    const current = data.current;
+    const daily = data.daily;
+    const index = start && Array.isArray(daily?.time) ? Math.max(0, daily.time.indexOf(start)) : 0;
+    const temperature = Number(current?.temperature_2m);
+    const humidity = Number(current?.relative_humidity_2m);
+    const precipitation = Number(current?.precipitation);
+    const probability = Number(daily?.precipitation_probability_max?.[index]);
+    const max = Number(daily?.temperature_2m_max?.[index]);
+    const min = Number(daily?.temperature_2m_min?.[index]);
+    const rainy = (Number.isFinite(probability) && probability >= 50) || (Number.isFinite(precipitation) && precipitation > 0);
+    const numbers = [temperature, humidity, precipitation, probability, max, min].filter(Number.isFinite).length;
+    if (numbers < 2) throw new Error('Incomplete weather data');
+    const range = Number.isFinite(min) && Number.isFinite(max) ? `، والمتوقع نهار الرحلة بين ${Math.round(min)} و${Math.round(max)}°م` : '';
+    const rainText = Number.isFinite(probability) ? `احتمال التساقطات ${Math.round(probability)}%` : `التساقطات الحالية ${precipitation.toFixed(1)} مم`;
+    return {
+      type: 'TEXT',
+      message: `الطقس الحقيقي فـ${destination}: دابا ${Math.round(temperature)}°م، الرطوبة ${Math.round(humidity)}%، الرياح ${Math.round(Number(current?.wind_speed_10m) || 0)} كم/س، والتساقطات ${precipitation.toFixed(1)} مم. ${rainText}${range}. ${rainy ? 'الأفضل تبدل النشاط الخارجي بنشاط داخلي.' : 'الجو مناسب للنشاط الخارجي.'}`,
+      action: rainy ? { type: 'CONFIRM_REPLACE_OUTDOOR', label: 'بدّل النشاط الخارجي بنشاط داخلي' } : null
+    };
+  } catch (error) {
+    console.warn('Assistant weather request failed:', error.message);
+    return { type: 'TEXT', message: `ما قدرتش نوصل لبيانات الطقس الحقيقية فـ${destination} دابا؛ عاود المحاولة بعد شوية.` };
+  }
+}
+
 function overpassFilter(category) {
   if (category === 'food') return 'nwr["amenity"~"restaurant|cafe|fast_food"]';
   if (category === 'accommodation') return 'nwr["tourism"~"hotel|hostel|guest_house"]';
@@ -181,6 +230,8 @@ export default async function handler(req, res) {
   const message = String(body.message || '').trim();
   const trip = body.trip && typeof body.trip === 'object' ? body.trip : {};
   if (!message) return jsonResponse(res, 400, { type: 'TEXT', message: 'اكتب طلبك وسنعاونك في الرحلة.' });
+  if (!isTravelMessage(message)) return jsonResponse(res, 200, { type: 'TEXT', message: 'أنا مختص بمساعدتك في رحلتك فقط.' });
+  if (isWeatherMessage(message)) return jsonResponse(res, 200, await weatherResponse(trip));
 
   try {
     const aiResponse = await askGemini(message, trip);

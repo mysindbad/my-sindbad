@@ -20,6 +20,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="./utils/supabaseClient.js"></script>
 <script src="./utils/auth.js"></script>
+<script src="./utils/cityImages.js"></script>
 <script>
   tailwind.config = {
     theme: {
@@ -365,6 +366,9 @@ label .inp { margin-top: 0.35rem; }
 .home-search .inp { border: none; padding: 0.45rem 0; font-size: 0.86rem; flex: 1; min-height: auto; }
 .home-search .inp:focus { box-shadow: none; }
 .home-search .btn { min-height: 36px; padding: 0.45rem 0.9rem; }
+.hero-carousel-dots { display:flex; justify-content:center; gap:.4rem; margin-top:.8rem; }
+.hero-dot { width:8px; height:8px; padding:0; border:1px solid rgba(255,255,255,.75); border-radius:50%; background:transparent; cursor:pointer; }
+.hero-dot.active { background:#D4AF37; border-color:#D4AF37; transform:scale(1.2); }
 
 /* تصنيفات واختصارات سريعة */
 .cats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.55rem; margin-bottom: 1.1rem; }
@@ -863,9 +867,9 @@ const CITIES={
 };
  // <!-- QA14-IMG -->
  const CITY_IMAGES={
- istanbul:'https://images.unsplash.com/photo-1524231757912-21f4fe3a7200?auto=format&fit=crop&w=700&q=82',
+ istanbul:'./images/istanbul.jpg',
   marrakech:'./images/marrakech.jpg',
-   chefchaouen:'https://image.qwenlm.ai/public_source/e519404d-4d50-460e-a07e-5e2fe0b81811/5a74e70c6-0b49-4321-9579-b1ec180e57da4916.png',
+   chefchaouen:'./images/chefchaouen.jpg',
  dubai:'https://images.unsplash.com/photo-1512453979798-5ea266f8880c?auto=format&fit=crop&w=700&q=82',
  cairo:'https://images.unsplash.com/photo-1568322445389-f64ac2515020?auto=format&fit=crop&w=700&q=82',
  paris:'https://images.unsplash.com/photo-1502602898657-3e91760cbb34?auto=format&fit=crop&w=700&q=82'
@@ -1117,7 +1121,9 @@ function ask(q){const txt=q||$('bIn').value.trim();if(!txt)return;
    }
    return Promise.reject(new Error('api_error'));
  };
- const getCityImage=(cityName)=>{const key=Object.entries(CITIES).find(([slug,value])=>String(cityName||'').includes(value.n)||String(cityName||'').toLowerCase().includes(slug))?.[0];return key&&CITY_IMAGES[key]?CITY_IMAGES[key]:`https://source.unsplash.com/800x600/?${encodeURIComponent(cityName||'morocco')},morocco`}; const imageForCity=getCityImage;
+ const getCityImage=(cityName)=>window.MySindbadCity?.normalizeCityImage(cityName)||window.MySindbadCity?.placeholderForCategory('attraction'); const imageForCity=getCityImage; const tripDestinationText=(trip)=>window.MySindbadCity?.normalizeCityName(trip?.destinationDisplay||trip?.destinationName||trip?.city||trip?.destination||'وجهتك')?.display||trip?.destinationDisplay||trip?.destinationName||trip?.city||trip?.destination||'وجهتك';
+ let heroCarouselTimer;
+ function startHeroCarousel(){const hero=document.querySelector('.home-hero'),dots=document.getElementById('hero-carousel-dots');if(!hero||!dots)return;const cities=[['مراكش','marrakech'],['شفشاون','chefchaouen'],['إسطنبول','istanbul']];let active=0;const paint=()=>{const [name]=cities[active];hero.style.backgroundImage=`linear-gradient(180deg,rgba(4,17,28,.18),rgba(4,17,28,.84)),url('${getCityImage(name)}')`;dots.innerHTML=cities.map((item,index)=>`<button type="button" aria-label="صورة ${item[0]}" aria-pressed="${index===active}" class="hero-dot${index===active?' active':''}" data-hero-index="${index}"></button>`).join('');dots.querySelectorAll('[data-hero-index]').forEach((button)=>button.addEventListener('click',()=>{active=Number(button.dataset.heroIndex);paint()}))};paint();clearInterval(heroCarouselTimer);heroCarouselTimer=setInterval(()=>{active=(active+1)%cities.length;paint()},5000)}
  const destinationLabel = () => destination ? `${esc(destination.name)}${destination.country ? ` — ${esc(destination.country)}` : ''}` : 'اختر وجهتك من البحث';
  const requireDestination = (P) => {
    if (destination) return true;
@@ -1157,6 +1163,7 @@ function ask(q){const txt=q||$('bIn').value.trim();if(!txt)return;
        <input class="inp" id="q" placeholder="اكتب اسم مدينة أو دولة..." autocomplete="off" onkeydown="if(event.key==='Enter')doSearch()">
        <button class="btn navy sm" onclick="doSearch()">${ic('nav',14)} بحث</button>
       </div>
+      <div id="hero-carousel-dots" class="hero-carousel-dots" aria-label="صور الوجهات"></div>
     </div>
     <div id="searchResults"></div>
     <div class="cats">
@@ -1166,16 +1173,17 @@ function ask(q){const txt=q||$('bIn').value.trim();if(!txt)return;
       <button class="cat" onclick="go('trip')"><span class="ci">${ic('cal',18)}</span>رحلتي</button>
     </div>
     <div class="sec">رحلتي الحالية</div>
-      ${t ? `<div class="trip-summary" style="background-image:linear-gradient(180deg,rgba(4,17,28,.08),rgba(4,17,28,.82)),url('${imageForCity(t.destinationName || t.city)}')"><img src="${imageForCity(t.destinationName || t.city)}" alt="${esc(t.destinationName || t.city || 'وجهتك')}" style="display:none" onerror="this.parentElement.style.backgroundImage='linear-gradient(135deg,#0A192F,#D4AF37)';this.parentElement.dataset.city='${esc(t.destinationName || t.city || 'وجهتك')}'"><div><h2>${esc(t.destinationName || t.city || 'وجهتك')}</h2><p>${esc(t.from)} ← ${esc(t.to)}</p></div><button class="btn sm ghost" onclick="go('trip')">عرض الخطة</button></div>` : `<div class="empty-state"><div class="es-icon">${ic('plane',22)}</div><h3>لم تنشئ رحلة بعد</h3><a class="btn navy sm" href="./create-trip.html">إنشاء رحلة</a></div>`}
+      ${t ? `<div class="trip-summary" style="background-image:linear-gradient(180deg,rgba(4,17,28,.08),rgba(4,17,28,.82)),url('${imageForCity(tripDestinationText(t))}')"><img src="${imageForCity(tripDestinationText(t))}" alt="${esc(tripDestinationText(t) || 'وجهتك')}" style="display:none" onerror="this.parentElement.style.backgroundImage='linear-gradient(135deg,#0A192F,#D4AF37)';this.parentElement.dataset.city='${esc(tripDestinationText(t) || 'وجهتك')}'"><div><h2>${esc(tripDestinationText(t) || 'وجهتك')}</h2><p>${esc(t.from)} ← ${esc(t.to)}</p></div><button class="btn sm ghost" onclick="go('trip')">عرض الخطة</button></div>` : `<div class="empty-state"><div class="es-icon">${ic('plane',22)}</div><h3>لم تنشئ رحلة بعد</h3><a class="btn navy sm" href="./create-trip.html">إنشاء رحلة</a></div>`}
       <!-- QA14-SERVICES -->
       <div class="card" style="margin-top:1rem"><b style="color:var(--navy-900)">خدمات مباشرة</b><div class="tools" style="margin-top:.7rem"><a class="btn ghost" href="./explore.html">الطقس</a><a class="btn ghost" href="./map.html">خريطتي</a><a class="btn ghost" href="./community.html">المجتمع</a></div></div>`;
+    startHeroCarousel();
  }
  function doSearch() {
    const q = $('q')?.value.trim();
    if (!q) return;
    sessionStorage.setItem('sb_destination_query', q);
    ls('sb_destination_query', q);
-   window.location.href = `./explore.html?dest=${encodeURIComponent(q)}`;
+   window.location.href = `./create-trip.html?dest=${encodeURIComponent(q)}`;
  }
  function pgExplore(P) {
    if (!requireDestination(P)) return;
@@ -1185,9 +1193,9 @@ function ask(q){const txt=q||$('bIn').value.trim();if(!txt)return;
       <button class="chip ${tab==='rest'?'on':''}" onclick="tab='rest';loadPlaces()">المطاعم والمقاهي</button>
       <button class="chip ${tab==='spots'?'on':''}" onclick="tab='spots';loadPlaces()">الأماكن السياحية</button>
     </div><div id="placesBox"></div>`;
-   loadPlaces();
+    loadPlaces();
  }
- function loadPlaces() {
+ function addLivePlaces() {
    const box = $('placesBox');
    if (!box || !destination) return;
    const kind = tab === 'rest' ? 'food' : tab === 'hotels' ? 'hotels' : 'tourism';
@@ -1214,7 +1222,7 @@ function ask(q){const txt=q||$('bIn').value.trim();if(!txt)return;
    const days = Math.min(14, Math.max(1, Math.round((new Date(t.to)-new Date(t.from))/864e5)+1));
    t.days = Array.isArray(t.days) ? t.days : [];
    while (t.days.length < days) t.days.push([]);
-   P.innerHTML = `<div class="trip-summary"><div><h2>${esc(t.destinationName || t.city)}</h2><p>${esc(t.from)} ← ${esc(t.to)} • ${days} أيام</p></div><button class="btn sm ghost" onclick="if(confirm('حذف الرحلة؟')){ls('sb_trip',null);render()}">${ic('trash',14)}</button></div><div class="sec">خطة الأيام</div>${Array.from({length:days},(_,d)=>`<div class="day-h">اليوم ${d+1}</div><div class="timeline">${t.days[d].map((it,ix)=>`<div class="tl"><button class="del" onclick="delItem(${d},${ix})">${ic('trash',13)}</button><b>${esc(it.title)}</b><small>${esc(it.time)} • ${esc(it.type)}</small></div>`).join('') || '<small style="color:var(--text-muted);display:block;padding:.4rem 0">لا توجد أنشطة بعد</small>'}</div>`).join('')}<div class="card"><div class="sec" style="margin-top:0">إضافة نشاط</div><div class="grid2"><label>اليوم<select class="inp" id="iDay">${Array.from({length:days},(_,d)=>`<option value="${d}">اليوم ${d+1}</option>`).join('')}</select></label><label>الوقت<input class="inp" type="time" id="iTime" value="10:00"></label></div><label>النشاط<input class="inp" id="iTitle" placeholder="مثال: زيارة المعالم التاريخية"></label><label>النوع<select class="inp" id="iType"><option>معلم سياحي</option><option>تنقل</option><option>مطعم</option><option>فندق</option><option>تسوق</option></select></label><button class="btn navy w" onclick="addItem()">إضافة النشاط</button></div><div class="sec">قائمة التجهيزات</div><div class="card">${t.check.map((c,ix)=>`<div class="check"><input type="checkbox" ${c.done?'checked':''} onchange="togCheck(${ix})"><span class="${c.done?'done':''}">${esc(c.t)}</span></div>`).join('')}<div style="display:flex;gap:.45rem;margin-top:.85rem"><input class="inp" id="newCh" placeholder="إضافة حاجة جديدة..."><button class="btn sm navy" onclick="addCheck()">إضافة</button></div></div>`;
+   P.innerHTML = `<div class="trip-summary"><div><h2>${esc(tripDestinationText(t))}</h2><p>${esc(t.from)} ← ${esc(t.to)} • ${days} أيام</p></div><button class="btn sm ghost" onclick="if(confirm('حذف الرحلة؟')){ls('sb_trip',null);render()}">${ic('trash',14)}</button></div><div class="sec">خطة الأيام</div>${Array.from({length:days},(_,d)=>`<div class="day-h">اليوم ${d+1}</div><div class="timeline">${t.days[d].map((it,ix)=>`<div class="tl"><button class="del" onclick="delItem(${d},${ix})">${ic('trash',13)}</button><b>${esc(it.title)}</b><small>${esc(it.time)} • ${esc(it.type)}</small></div>`).join('') || '<small style="color:var(--text-muted);display:block;padding:.4rem 0">لا توجد أنشطة بعد</small>'}</div>`).join('')}<div class="card"><div class="sec" style="margin-top:0">إضافة نشاط</div><div class="grid2"><label>اليوم<select class="inp" id="iDay">${Array.from({length:days},(_,d)=>`<option value="${d}">اليوم ${d+1}</option>`).join('')}</select></label><label>الوقت<input class="inp" type="time" id="iTime" value="10:00"></label></div><label>النشاط<input class="inp" id="iTitle" placeholder="مثال: زيارة المعالم التاريخية"></label><label>النوع<select class="inp" id="iType"><option>معلم سياحي</option><option>تنقل</option><option>مطعم</option><option>فندق</option><option>تسوق</option></select></label><button class="btn navy w" onclick="addItem()">إضافة النشاط</button></div><div class="sec">قائمة التجهيزات</div><div class="card">${t.check.map((c,ix)=>`<div class="check"><input type="checkbox" ${c.done?'checked':''} onchange="togCheck(${ix})"><span class="${c.done?'done':''}">${esc(c.t)}</span></div>`).join('')}<div style="display:flex;gap:.45rem;margin-top:.85rem"><input class="inp" id="newCh" placeholder="إضافة حاجة جديدة..."><button class="btn sm navy" onclick="addCheck()">إضافة</button></div></div>`;
  }
  function mkTrip() {
    const from = $('tFrom')?.value;
