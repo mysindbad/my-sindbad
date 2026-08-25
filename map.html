@@ -77,7 +77,7 @@
   }
   function zoomFor(source){return source==='activity'||source==='geocode'?16:source==='city'?13:5}
   function timeValue(value){const match=String(value||'').match(/(\d{1,2})(?::(\d{2}))?/);return match?Number(match[1])*60+Number(match[2]||0):9999}
-  function sortedActivities(day){return [...(day?.activities||[])].sort((a,b)=>timeValue(a.time)-timeValue(b.time))}
+  function sortedActivities(day){return [...(day?.activities||[])]}
   function readTripDays(){
     let days=[];
     try{const stored=JSON.parse(localStorage.getItem('currentItinerary')||'null');if(Array.isArray(stored))days=stored}catch(e){}
