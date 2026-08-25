@@ -51,6 +51,7 @@ function markAndApply(root = typeof document !== 'undefined' ? document : null) 
   if (!root || applying) return;
   applying = true;
   root.querySelectorAll?.('[data-i18n],h1,h2,h3,p,label,button,a,small,span').forEach((el) => {
+    if (el.hasAttribute('data-i18n-ignore')) return;
     if (!el.hasAttribute('data-i18n') && el.children.length) return;
     const key = el.getAttribute('data-i18n');
     const raw = el.dataset.i18nOriginal || (key && translations.ar[key]) || el.textContent.trim();
@@ -59,7 +60,7 @@ function markAndApply(root = typeof document !== 'undefined' ? document : null) 
     const value = inferred ? getTranslation(current, inferred) : translateValue(el.dataset.i18nOriginal || raw);
     if (value && el.textContent !== value) el.textContent = value;
   });
-  root.querySelectorAll?.('[data-i18n-placeholder]').forEach((el) => { el.placeholder = getTranslation(current, el.dataset.i18nPlaceholder); });
+  root.querySelectorAll?.('[data-i18n-placeholder]:not([data-i18n-ignore])').forEach((el) => { el.placeholder = getTranslation(current, el.dataset.i18nPlaceholder); });
   applying = false;
 }
 
