@@ -35,9 +35,9 @@
     <div class="space-y-3">
       <h2 class="text-sm font-bold text-slate-500">النشاط الحالي</h2>
       <div id="current-card" class="bg-white p-5 rounded-2xl border-2 border-amber-400 shadow-md">
-        <div id="current-title" class="text-lg font-black text-slate-800">لا يوجد نشاط حالي</div>
+        <div id="current-title" class="text-lg font-black text-slate-800">لا أنشطة لهذا اليوم</div>
         <p id="current-time" class="text-xs text-slate-400 mb-4">--:--</p>
-        <button id="btn-arrived" class="w-full bg-amber-500 hover:bg-amber-600 text-white font-bold py-3 rounded-xl shadow transition">وصلت ✓</button>
+        <button id="btn-arrived" class="hidden w-full bg-amber-500 hover:bg-amber-600 text-white font-bold py-3 rounded-xl shadow transition">وصلت ✓</button>
       </div>
     </div>
 
@@ -60,16 +60,26 @@
       }
     } catch {}
 
-    let count = 0;
-    document.getElementById('btn-arrived').addEventListener('click', () => {
-      count = Math.min(100, count + 33);
-      document.getElementById('progress-bar').style.width = count + '%';
-      document.getElementById('progress-percent').textContent = count + '%';
-      if (count >= 99) {
-        document.getElementById('current-title').textContent = '🎉 أكملت أنشطة اليوم بنجاح!';
-        document.getElementById('btn-arrived').classList.add('hidden');
-      }
-    });
+    const savedActs = JSON.parse(localStorage.getItem('myTripActivities') || '[]');
+    if (!savedActs.length) {
+      document.getElementById('progress-bar').style.width = '0%';
+      document.getElementById('progress-percent').textContent = '0%';
+      document.getElementById('current-title').textContent = 'لا أنشطة لهذا اليوم';
+      document.getElementById('btn-arrived').classList.add('hidden');
+    } else {
+      document.getElementById('btn-arrived').classList.remove('hidden');
+      document.getElementById('current-title').textContent = savedActs[0].title || savedActs[0].place || 'النشاط الأول';
+      let count = 0;
+      document.getElementById('btn-arrived').addEventListener('click', () => {
+        count = Math.min(100, count + 33);
+        document.getElementById('progress-bar').style.width = count + '%';
+        document.getElementById('progress-percent').textContent = count + '%';
+        if (count >= 99) {
+          document.getElementById('current-title').textContent = '🎉 أكملت أنشطة اليوم بنجاح!';
+          document.getElementById('btn-arrived').classList.add('hidden');
+        }
+      });
+    }
   </script>
 </body>
 </html>
