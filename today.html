@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>وضع اليوم - سندباد</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="./utils/navigation.css" />
+</head>
+<body class="bg-slate-50 text-slate-900 pb-20">
+  <div class="max-w-md mx-auto p-4 space-y-4">
+    <!-- Header Weather -->
+    <header class="bg-gradient-to-r from-amber-500 to-amber-600 rounded-2xl p-4 text-white shadow-lg flex justify-between items-center">
+      <div>
+        <h1 class="text-xl font-black">وضع اليوم 📍</h1>
+        <p id="today-date" class="text-xs text-amber-100">جاري التحميل...</p>
+      </div>
+      <div id="weather-box" class="text-left text-xs bg-white/20 p-2 rounded-xl backdrop-blur-sm">
+        <span id="weather-temp">--°C</span> • <span id="weather-desc">مشمس</span>
+      </div>
+    </header>
+
+    <!-- Progress Bar -->
+    <div class="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm space-y-2">
+      <div class="flex justify-between text-xs font-bold text-slate-600">
+        <span>تقدم اليوم</span>
+        <span id="progress-percent">0%</span>
+      </div>
+      <div class="w-full bg-slate-100 rounded-full h-3 overflow-hidden">
+        <div id="progress-bar" class="bg-amber-500 h-full w-0 transition-all duration-500"></div>
+      </div>
+    </div>
+
+    <!-- Active & Next Cards -->
+    <div class="space-y-3">
+      <h2 class="text-sm font-bold text-slate-500">النشاط الحالي</h2>
+      <div id="current-card" class="bg-white p-5 rounded-2xl border-2 border-amber-400 shadow-md">
+        <div id="current-title" class="text-lg font-black text-slate-800">لا يوجد نشاط حالي</div>
+        <p id="current-time" class="text-xs text-slate-400 mb-4">--:--</p>
+        <button id="btn-arrived" class="w-full bg-amber-500 hover:bg-amber-600 text-white font-bold py-3 rounded-xl shadow transition">وصلت ✓</button>
+      </div>
+    </div>
+
+    <!-- Banner Alerts Container -->
+    <div id="alerts-container"></div>
+  </div>
+
+  <script type="module">
+    import { evaluateAlerts } from './utils/proactive.js';
+    import { evaluateHealth } from './utils/health.js';
+
+    document.getElementById('today-date').textContent = new Date().toLocaleDateString('ar-MA', { weekday: 'long', month: 'short', day: 'numeric' });
+    
+    // Fetch Open-Meteo Weather
+    try {
+      const res = await fetch('https://api.open-meteo.com/v1/forecast?latitude=31.6295&longitude=-7.9811&current_weather=true');
+      const data = await res.json();
+      if (data.current_weather) {
+        document.getElementById('weather-temp').textContent = `${data.current_weather.temperature}°C`;
+      }
+    } catch {}
+
+    let count = 0;
+    document.getElementById('btn-arrived').addEventListener('click', () => {
+      count = Math.min(100, count + 33);
+      document.getElementById('progress-bar').style.width = count + '%';
+      document.getElementById('progress-percent').textContent = count + '%';
+      if (count >= 99) {
+        document.getElementById('current-title').textContent = '🎉 أكملت أنشطة اليوم بنجاح!';
+        document.getElementById('btn-arrived').classList.add('hidden');
+      }
+    });
+  </script>
+</body>
+</html>
