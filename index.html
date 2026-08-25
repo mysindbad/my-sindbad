@@ -864,7 +864,7 @@ const CITIES={
  // <!-- QA14-IMG -->
  const CITY_IMAGES={
  istanbul:'https://images.unsplash.com/photo-1524231757912-21f4fe3a7200?auto=format&fit=crop&w=700&q=82',
-  marrakech:'https://image.qwenlm.ai/public_source/e519404d-4d50-460e-a07e-5e2fe0b81811/87cd0db02-30ad-437f-9eec-3aa3c0dcbdf49390.png',
+  marrakech:'./images/marrakech.jpg',
    chefchaouen:'https://image.qwenlm.ai/public_source/e519404d-4d50-460e-a07e-5e2fe0b81811/5a74e70c6-0b49-4321-9579-b1ec180e57da4916.png',
  dubai:'https://images.unsplash.com/photo-1512453979798-5ea266f8880c?auto=format&fit=crop&w=700&q=82',
  cairo:'https://images.unsplash.com/photo-1568322445389-f64ac2515020?auto=format&fit=crop&w=700&q=82',
@@ -1117,7 +1117,7 @@ function ask(q){const txt=q||$('bIn').value.trim();if(!txt)return;
    }
    return Promise.reject(new Error('api_error'));
  };
- const imageForCity=(name)=>Object.entries(CITIES).find(([key,value])=>String(name||'').includes(value.n)||String(name||'').toLowerCase().includes(key))?.[0] ? CITY_IMAGES[Object.entries(CITIES).find(([key,value])=>String(name||'').includes(value.n)||String(name||'').toLowerCase().includes(key))[0]] : CITY_IMAGES.marrakech;
+ const getCityImage=(cityName)=>{const key=Object.entries(CITIES).find(([slug,value])=>String(cityName||'').includes(value.n)||String(cityName||'').toLowerCase().includes(slug))?.[0];return key&&CITY_IMAGES[key]?CITY_IMAGES[key]:`https://source.unsplash.com/800x600/?${encodeURIComponent(cityName||'morocco')},morocco`}; const imageForCity=getCityImage;
  const destinationLabel = () => destination ? `${esc(destination.name)}${destination.country ? ` — ${esc(destination.country)}` : ''}` : 'اختر وجهتك من البحث';
  const requireDestination = (P) => {
    if (destination) return true;

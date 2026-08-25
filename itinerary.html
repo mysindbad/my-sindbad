@@ -114,11 +114,11 @@
         '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
       }[character]));
     }
-    function resolveTripImage(dest) {
-      const d = (dest || '').toLowerCase();
-      if (d.includes('مراكش') || d.includes('marrakech') || d.includes('المغرب') || d.includes('morocco')) return 'https://image.qwenlm.ai/public_source/e519404d-4d50-460e-a07e-5e2fe0b81811/87cd0db02-30ad-437f-9eec-3aa3c0dcbdf49390.png';
+    function getCityImage(cityName) {
+      const d = String(cityName || '').toLowerCase();
+      if (d.includes('مراكش') || d.includes('marrakech')) return './images/marrakech.jpg';
       if (d.includes('شفشاون') || d.includes('chefchaouen')) return 'https://image.qwenlm.ai/public_source/e519404d-4d50-460e-a07e-5e2fe0b81811/5a74e70c6-0b49-4321-9579-b1ec180e57da4916.png';
-      return 'https://image.qwenlm.ai/public_source/e519404d-4d50-460e-a07e-5eec-3aa3c0dcbdf49390.png';
+      return `https://source.unsplash.com/800x600/?${encodeURIComponent(cityName || 'morocco')},morocco`;
     }
 
     function formatDate(dateString) {
@@ -504,7 +504,7 @@
           <form id="assistant-form" class="assistant-form"><input id="assistant-input" type="text" autocomplete="off" placeholder="قول ليا شنو بغيتي نبدلو..." aria-label="رسالة المساعد" required><button type="submit" aria-label="إرسال">➤</button></form>
         </section>
         <div id="assistant-toast" class="assistant-toast" role="status"></div>`;
-      document.getElementById('tripHeaderImg').src = resolveTripImage(tripData.destination);
+      document.getElementById('tripHeaderImg').src = getCityImage(tripData.destination);
       renderDayPlan(readLiveActivities());
       wireAssistant();
     }
