@@ -31,5 +31,5 @@
 
   if (document.body) start();
   else document.addEventListener('DOMContentLoaded', start, { once: true });
-  if (!window.MySindbadI18n) import('./i18n.js').catch(() => {});
+  if (!window.MySindbadI18n) import('./i18n.js?m3=83d880d').catch(() => {});
 })();
