@@ -768,6 +768,7 @@ body{background:#060e1a}.shell{max-width:480px;background:#fbf9f5;padding-bottom
          .hdr .user-name { display: none; }
        }
       </style>
+  <script src="./utils/i18n.js"></script>
 </head>
 <body>
 <div id="splashScreen" class="fixed inset-0 bg-navy-900 z-[100] flex items-center justify-center" aria-label="جاري تحميل My Sindbad">
@@ -929,24 +930,24 @@ function pgHome(P){const t=lg('sb_trip',null);
  P.innerHTML=`
   <div class="home-hero">
         <span class="greeting text-white" id="greeting-text">MY SINDBAD · أهلًا ${esc(session.name)}</span>
-   <h2>إلى أين تأخذك الرحلة؟</h2>
+   <h2 data-i18n="home_heading">إلى أين تأخذك الرحلة؟</h2>
    <div class="home-search">
-    <input class="inp" id="q" placeholder="ابحث عن مدينة أو وجهة..." onkeydown="if(event.key==='Enter')doSearch()">
+    <input class="inp" id="q" placeholder="ابحث عن مدينة أو وجهة..." data-i18n-placeholder="home_search_placeholder" onkeydown="if(event.key==='Enter')doSearch()">
     <button class="btn navy sm" onclick="doSearch()">${ic('nav',14)} بحث</button>
    </div>
   </div>
      <div class="service-rail" aria-label="خدمات التطبيق">
-       <button class="service-slide" onclick="tab='hotels';go('explore')"><span class="service-icon">${ic('hotel',18)}</span><strong>الفنادق</strong><small>إقامات مناسبة لرحلتك</small><span class="service-arrow">←</span></button>
-       <button class="service-slide" onclick="tab='rest';go('explore')"><span class="service-icon">${ic('food',18)}</span><strong>المطاعم</strong><small>تجارب ومذاقات محلية</small><span class="service-arrow">←</span></button>
-       <button class="service-slide" onclick="tab='spots';go('explore')"><span class="service-icon">${ic('pin',18)}</span><strong>الأماكن</strong><small>معالم تستحق الزيارة</small><span class="service-arrow">←</span></button>
-       <button class="service-slide" onclick="go('trip')"><span class="service-icon">${ic('cal',18)}</span><strong>رحلتي</strong><small>خطة سفر منظمة</small><span class="service-arrow">←</span></button>
-       <button class="service-slide" onclick="go('bot')"><span class="service-icon">${ic('chat',18)}</span><strong>مساعد السفر</strong><small>رفيقك في كل خطوة</small><span class="service-arrow">←</span></button>
+       <button class="service-slide" onclick="tab='hotels';go('explore')"><span class="service-icon">${ic('hotel',18)}</span><strong data-i18n="service_hotels">الفنادق</strong><small data-i18n="service_hotels_desc">إقامات مناسبة لرحلتك</small><span class="service-arrow">←</span></button>
+       <button class="service-slide" onclick="tab='rest';go('explore')"><span class="service-icon">${ic('food',18)}</span><strong data-i18n="service_restaurants">المطاعم</strong><small data-i18n="service_restaurants_desc">تجارب ومذاقات محلية</small><span class="service-arrow">←</span></button>
+       <button class="service-slide" onclick="tab='spots';go('explore')"><span class="service-icon">${ic('pin',18)}</span><strong data-i18n="service_places">الأماكن</strong><small data-i18n="service_places_desc">معالم تستحق الزيارة</small><span class="service-arrow">←</span></button>
+       <button class="service-slide" onclick="go('trip')"><span class="service-icon">${ic('cal',18)}</span><strong data-i18n="service_trip">رحلتي</strong><small data-i18n="service_trip_desc">خطة سفر منظمة</small><span class="service-arrow">←</span></button>
+       <button class="service-slide" onclick="go('bot')"><span class="service-icon">${ic('chat',18)}</span><strong data-i18n="service_assistant">مساعد السفر</strong><small data-i18n="service_assistant_desc">رفيقك في كل خطوة</small><span class="service-arrow">←</span></button>
   </div>
-  <div class="sec">رحلتي القادمة</div>
+  <div class="sec" data-i18n="home_upcoming">رحلتي القادمة</div>
   ${t?`
   <div class="trip-summary">
    <div><h2>رحلتك إلى ${CITIES[t.city]?CITIES[t.city].n:esc(t.city)}</h2><p>${esc(t.from)} ← ${esc(t.to)}</p></div>
-   <button class="btn sm ghost" onclick="go('trip')">عرض الخطة</button>
+   <button class="btn sm ghost" onclick="go('trip')" data-i18n="view_plan">عرض الخطة</button>
   </div>`:`
   <div class="empty-state">
    <div class="es-icon">${ic('plane',22)}</div>

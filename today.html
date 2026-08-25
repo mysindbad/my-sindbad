@@ -7,13 +7,14 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="./utils/cityImages.js"></script>
   <link rel="stylesheet" href="./utils/navigation.css" />
+  <script src="./utils/i18n.js"></script>
 </head>
 <body class="bg-slate-50 text-slate-900 pb-20">
   <div class="max-w-md mx-auto p-4 space-y-4">
     <!-- Header Weather -->
     <header class="bg-gradient-to-r from-amber-500 to-amber-600 rounded-2xl p-4 text-white shadow-lg flex justify-between items-center">
       <div>
-        <h1 class="text-xl font-black">وضع اليوم 📍</h1>
+        <h1 class="text-xl font-black" data-i18n="today_heading">وضع اليوم 📍</h1>
         <p id="today-city" class="text-sm font-bold text-white">وجهتك</p>
         <p id="today-date" class="text-xs text-amber-100">جاري التحميل...</p>
       </div>
@@ -35,7 +36,7 @@
 
     <!-- Active & Next Cards -->
     <div class="space-y-3">
-      <h2 class="text-sm font-bold text-slate-500">النشاط الحالي</h2>
+      <h2 class="text-sm font-bold text-slate-500" data-i18n="today_activity">النشاط الحالي</h2>
       <div id="current-card" class="bg-white p-5 rounded-2xl border-2 border-amber-400 shadow-md">
         <div id="current-title" class="text-lg font-black text-slate-800">لا أنشطة لهذا اليوم</div>
         <p id="current-time" class="text-xs text-slate-400 mb-4">--:--</p>

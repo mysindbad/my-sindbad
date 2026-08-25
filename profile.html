@@ -63,6 +63,7 @@
     .nav a.active { color: var(--gold); background: #d4af3729; font-weight: 800; }
     @media (min-width: 700px) { .shell { margin: 22px auto; min-height: calc(100vh - 44px); border-radius: 28px; overflow: hidden; } .nav { position: absolute; border-radius: 0 0 28px 28px; } }
   </style>
+  <script src="./utils/i18n.js"></script>
 </head>
 <body>
   <main class="shell">
@@ -72,19 +73,19 @@
         <div class="avatar" aria-hidden="true">👤</div>
          <div><h1 id="profile-title">زائر My Sindbad</h1><p id="profile-email"></p></div>
       </section>
-      <h2 class="section-title">نظرة سريعة</h2>
+      <h2 class="section-title" data-i18n="quick_view">نظرة سريعة</h2>
       <section class="stats" aria-label="إحصائيات الحساب">
         <div class="stat"><strong id="saved-count">0</strong><span>الرحلات المحفوظة</span></div>
         <div class="stat"><strong id="favorite-count">0</strong><span>المفضلة</span></div>
         <div class="stat"><strong id="points-count">0</strong><span>النقاط</span></div>
       </section>
-      <h2 class="section-title">الإعدادات</h2>
+      <h2 class="section-title" data-i18n="settings">الإعدادات</h2>
       <section class="settings" aria-label="إعدادات الحساب">
-        <label class="setting"><span class="setting-info"><span class="setting-icon" aria-hidden="true">文</span>اللغة</span><select id="language" aria-label="اختيار اللغة"><option value="ar">العربية</option><option value="en">English</option><option value="fr">Français</option><option value="es">Español</option><option value="de">Deutsch</option><option value="tr">Türkçe</option></select></label>
+        <label class="setting"><span class="setting-info"><span class="setting-icon" aria-hidden="true">文</span>اللغة</span><select id="language" data-language-select aria-label="اختيار اللغة"><option value="ar">العربية</option><option value="en">English</option><option value="fr">Français</option><option value="es">Español</option><option value="de">Deutsch</option><option value="tr">Türkçe</option></select></label>
         <label class="setting"><span class="setting-info"><span class="setting-icon" aria-hidden="true">¤</span>العملة</span><select id="currency" aria-label="اختيار العملة"><option value="MAD">MAD</option><option value="USD">USD</option><option value="EUR">EUR</option><option value="SAR">SAR</option></select></label>
         <div class="setting"><span class="setting-info"><span class="setting-icon" aria-hidden="true">♧</span>الإشعارات</span><button id="notifications" class="toggle" type="button" role="switch" aria-checked="false" aria-label="تفعيل الإشعارات"></button></div>
       </section>
-      <h2 class="section-title">الرحلات المحفوظة</h2>
+      <h2 class="section-title" data-i18n="saved_trips">الرحلات المحفوظة</h2>
       <section id="saved-trips" class="trips" aria-live="polite"></section>
       <button id="logout" class="logout" type="button">تسجيل الخروج</button>
     </section>

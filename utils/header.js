@@ -10,7 +10,7 @@
     </span>
     <span class="site-header__wordmark">
       <strong>My Sindbad</strong>
-      <small>رفيق السفر</small>
+      <small data-i18n="header_tagline">رفيق السفر</small>
     </span>`;
 
   function headerMarkup() {
@@ -18,7 +18,8 @@
       <header class="site-header" id="mainHeader">
         <div class="site-header__inner">
           <a class="site-header__brand" href="./index.html" aria-label="My Sindbad - الرئيسية">${logo}</a>
-          <a class="site-header__home" href="./index.html">الرئيسية</a>
+          <a class="site-header__home" href="./index.html" data-i18n="nav_home">الرئيسية</a>
+          <select data-language-select aria-label="اللغة" style="margin-inline-start:8px;border:1px solid #d4af37;border-radius:8px;background:transparent;color:inherit;padding:4px;font:inherit"><option value="ar">العربية</option><option value="en">English</option></select>
         </div>
       </header>`;
   }
