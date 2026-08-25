@@ -1,6 +1,25 @@
-// <!-- QA22-SW -->
-const CACHE_NAME = 'my-sindbad-v22';
-const APP_SHELL = ['./', './index.html', './map.html', './itinerary.html', './create-trip.html', './explore.html', './community.html', './manifest.json'];
+// <!-- QA34-SW -->
+const CACHE_NAME = 'my-sindbad-v34';
+const APP_SHELL = [
+  './',
+  './index.html',
+  './map.html',
+  './itinerary.html',
+  './create-trip.html',
+  './explore.html',
+  './community.html',
+  './profile.html',
+  './today.html',
+  './view.html',
+  './privacy.html',
+  './manifest.json',
+  './utils/i18n.js',
+  './utils/sync.js',
+  './utils/tripops.js',
+  './utils/health.js',
+  './utils/proactive.js',
+  './utils/share.js'
+];
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
