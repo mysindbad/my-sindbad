@@ -23,7 +23,8 @@
 <script src="./utils/auth.js"></script>
 <script src="./utils/cityImages.js"></script>
 <script>
-  tailwind.config = {
+  window.tailwind = window.tailwind || {};
+  window.tailwind.config = {
     theme: {
       extend: {
         colors: {
