@@ -64,27 +64,59 @@ if (typeof globalThis !== 'undefined' && !globalThis.CITY_IMAGES) {
 // Prevent a stale shell or a boot-time JavaScript error from leaving the PWA spinning forever.
 (function installBootWatchdog(root) {
   if (typeof document === 'undefined' || typeof root.setTimeout !== 'function') return;
+
+  // reveal() hides/removes the splash and ensures the app has a chance to render.
   const reveal = () => {
-    const shell = document.getElementById('shell');
-    const splash = document.getElementById('splashScreen');
-    if (shell && !shell.children.length) {
-      shell.innerHTML = '<div style="min-height:100vh;display:grid;place-items:center;padding:24px;background:#0A192F;color:#fff;text-align:center;font-family:Arial,sans-serif"><div><h1 style="color:#D4AF37;margin:0 0 12px">My Sindbad</h1><p style="line-height:1.8">تعذر تشغيل الواجهة. أعد تحميل الصفحة للمحاولة من جديد.</p><button type="button" onclick="location.reload()" style="padding:12px 22px;border:0;border-radius:8px;background:#D4AF37;color:#0A192F;font-weight:700;cursor:pointer">إعادة المحاولة</button></div></div>';
-    }
-    if (splash) {
-      splash.style.display = 'none';
-      splash.setAttribute('aria-hidden', 'true');
-      if (typeof splash.remove === 'function') splash.remove();
-      else if (splash.parentNode) splash.parentNode.removeChild(splash);
+    try {
+      const shell = document.getElementById('shell');
+      const splash = document.getElementById('splashScreen');
+
+      // If shell exists but is empty, provide a minimal placeholder so users aren't left with a blank screen.
+      if (shell && !shell.children.length) {
+        shell.innerHTML = '<div style="min-height:100vh;display:grid;place-items:center;padding:24px;background:#0A192F;color:#fff;text-align:center;font-family:Arial,sans-serif"><div><h1 style="color:#D4AF37;margin-bottom:8px">My Sindbad</h1><p style="opacity:.9">جاري إتمام التحميل — إن لم ينتهي، حاول تحديث الصفحة.</p></div></div>';
+      }
+
+      // Always try to hide/remove the splash element if present.
+      if (splash) {
+        try { splash.style.display = 'none'; } catch (e) {}
+        try { splash.setAttribute('aria-hidden', 'true'); } catch (e) {}
+        if (typeof splash.remove === 'function') {
+          try { splash.remove(); } catch (e) {}
+        } else if (splash.parentNode) {
+          try { splash.parentNode.removeChild(splash); } catch (e) {}
+        }
+      }
+
+      // Give the application a short moment then call render() if it's available (the main script defines render()).
+      root.setTimeout(() => {
+        try {
+          if (typeof root.render === 'function') root.render();
+        } catch (e) {
+          // swallow errors here — reveal should not throw.
+          console.warn('Boot watchdog render call failed', e);
+        }
+      }, 40);
+    } catch (err) {
+      // Don't allow the watchdog to crash the page.
+      console.warn('Boot watchdog failed', err);
     }
   };
+
+  // If a runtime error or unhandled rejection occurs we should reveal a fallback UI promptly.
   if (typeof root.addEventListener === 'function') {
     root.addEventListener('error', reveal, { once: true });
     root.addEventListener('unhandledrejection', reveal, { once: true });
   }
+
+  // Run shortly after DOMContentLoaded, and again as a longer timeout.
   if (typeof document !== 'undefined' && document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', function () { root.setTimeout(reveal, 80); }, { once: true });
   } else {
     root.setTimeout(reveal, 80);
   }
+
+  // Additional, later fallbacks to ensure splash is removed even if other scripts are slow or hung.
   root.setTimeout(reveal, 1500);
+  root.setTimeout(reveal, 3500);
+  root.setTimeout(reveal, 7000);
 })(typeof globalThis !== 'undefined' ? globalThis : window);
