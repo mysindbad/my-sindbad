@@ -34,7 +34,7 @@ const dynamicRules = [
   [/^اليوم\s+(\d+)$/, (day, lang) => lang === 'en' ? `Day ${day}` : `اليوم ${day}`],
   [/^(\d+)% مستخدم$/, (value, lang) => lang === 'en' ? `${value}% used` : `${value}% مستخدم`]
 ];
-const extraTranslations = { 'موعد النشاط': 'Activity time', 'الخريطة': 'Map', 'تعديل': 'Edit', 'مشاركة الرحلة': 'Share trip', 'وضع اليوم': 'Today mode', 'تعديل البيانات': 'Edit details', 'برنامج يوم بيوم': 'Day-by-day plan', 'غير محددة': 'Not specified', 'تقديري': 'Estimated', 'أضف إلى رحلتي ➕': 'Add to my trip ➕', 'إلغاء': 'Cancel', 'حفظ التعديل': 'Save changes', 'إغلاق': 'Close', 'العملة المدعومة حالياً: MAD.': 'Currently supported currency: MAD.', 'تسجيل الخروج': 'Log out' };
+const extraTranslations = { 'العربية': 'Arabic', 'English': 'English', '⚠️ الميزانية قريبة من النفاد': '⚠️ Budget nearly depleted', 'تحسين بالذكاء الاصطناعي': 'Optimize with AI', 'تمت الإضافة إلى رحلتك بنجاح!': 'Added to your trip successfully!', 'موعد النشاط': 'Activity time', 'الخريطة': 'Map', 'تعديل': 'Edit', 'مشاركة الرحلة': 'Share trip', 'وضع اليوم': 'Today mode', 'تعديل البيانات': 'Edit details', 'برنامج يوم بيوم': 'Day-by-day plan', 'غير محددة': 'Not specified', 'تقديري': 'Estimated', 'أضف إلى رحلتي ➕': 'Add to my trip ➕', 'إلغاء': 'Cancel', 'حفظ التعديل': 'Save changes', 'إغلاق': 'Close', 'العملة المدعومة حالياً: MAD.': 'Currently supported currency: MAD.', 'تسجيل الخروج': 'Log out' };
 const exact = Object.fromEntries(Object.entries(translations.ar).map(([key, value]) => [value, key]));
 let current = 'ar';
 let applying = false;
