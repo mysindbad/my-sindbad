@@ -35,6 +35,7 @@
       host.className = 'site-header-host';
       host.innerHTML = headerMarkup();
       host.dataset.mounted = 'true';
+      setTimeout(() => window.MySindbadI18n?.refresh?.(), 0);
     });
     setScrolledState();
   }
