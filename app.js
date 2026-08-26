@@ -324,8 +324,39 @@ function ask(q){const txt=q||$('bIn').value.trim();if(!txt)return;
    return Promise.reject(new Error('api_error'));
  };
  const getCityImage=(cityName)=>window.MySindbadCity?.normalizeCityImage(cityName)||window.MySindbadCity?.placeholderForCategory('attraction'); const imageForCity=getCityImage; const tripDestinationText=(trip)=>window.MySindbadCity?.normalizeCityName(trip?.destinationDisplay||trip?.destinationName||trip?.city||trip?.destination||'وجهتك')?.display||trip?.destinationDisplay||trip?.destinationName||trip?.city||trip?.destination||'وجهتك';
- let heroCarouselTimer;
- function startHeroCarousel(){const hero=document.querySelector('.home-hero'),dots=document.getElementById('hero-carousel-dots');if(!hero||!dots)return;const cities=[['مراكش','marrakech'],['شفشاون','chefchaouen'],['إسطنبول','istanbul']];let active=0;const paint=()=>{const [name]=cities[active];hero.style.backgroundImage=`linear-gradient(180deg,rgba(4,17,28,.18),rgba(4,17,28,.84)),url('${getCityImage(name)}')`;dots.innerHTML=cities.map((item,index)=>`<button type="button" aria-label="صورة ${item[0]}" aria-pressed="${index===active}" class="hero-dot${index===active?' active':''}" data-hero-index="${index}"></button>`).join('');dots.querySelectorAll('[data-hero-index]').forEach((button)=>button.addEventListener('click',()=>{active=Number(button.dataset.heroIndex);paint()}))};paint();clearInterval(heroCarouselTimer);heroCarouselTimer=setInterval(()=>{active=(active+1)%cities.length;paint()},5000)}
+ let heroCarouselTimer = null;
+ function stopHeroCarousel() {
+  if (heroCarouselTimer) {
+   clearInterval(heroCarouselTimer);
+   heroCarouselTimer = null;
+  }
+ }
+ function startHeroCarousel() {
+  const hero = document.querySelector('.home-hero');
+  const dots = document.getElementById('hero-carousel-dots');
+  if (!hero || !dots) {
+   stopHeroCarousel();
+   return;
+  }
+  const cities = [['مراكش','marrakech'],['شفشاون','chefchaouen'],['إسطنبول','istanbul']];
+  let active = 0;
+  const paint = () => {
+   const [name] = cities[active];
+   hero.style.backgroundImage = `linear-gradient(180deg,rgba(4,17,28,.18),rgba(4,17,28,.84)),url('${getCityImage(name)}')`;
+   dots.innerHTML = cities.map((item,index) => `<button type="button" aria-label="صورة ${item[0]}" aria-pressed="${index===active}" class="hero-dot${index===active?' active':''}" data-hero-index="${index}"></button>`).join('');
+   dots.querySelectorAll('[data-hero-index]').forEach((button) => button.addEventListener('click', () => {
+    active = Number(button.dataset.heroIndex);
+    paint();
+   }));
+  };
+  stopHeroCarousel();
+  paint();
+  heroCarouselTimer = setInterval(() => {
+   active = (active + 1) % cities.length;
+   paint();
+  }, 5000);
+ }
+ window.addEventListener('pagehide', stopHeroCarousel);
  const destinationLabel = () => destination ? `${esc(destination.name)}${destination.country ? ` — ${esc(destination.country)}` : ''}` : 'اختر وجهتك من البحث';
  const requireDestination = (P) => {
    if (destination) return true;
@@ -423,9 +454,14 @@ function ask(q){const txt=q||$('bIn').value.trim();if(!txt)return;
       P.innerHTML = `<div class="sec">تخطيط رحلة جديدة</div><div class="empty-state"><div class="es-icon">${ic('plane',22)}</div><h3>${destination ? `رحلة إلى ${destinationLabel()}` : 'لا توجد وجهة مختارة'}</h3>${destination ? `<div class="card"><label>تاريخ الذهاب<input class="inp" type="date" id="tFrom"></label><label>تاريخ العودة<input class="inp" type="date" id="tTo"></label><button class="btn navy w" onclick="mkTrip()">إنشاء خطة الرحلة</button></div>` : `<button class="btn navy sm" onclick="go('home')">البحث عن وجهة</button>`}</div>`;
      return;
    }
-   const days = Math.min(14, Math.max(1, Math.round((new Date(t.to)-new Date(t.from))/864e5)+1));
+   const fromMs = Date.parse(t.from);
+   const toMs = Date.parse(t.to);
+   const rawDays = Number.isFinite(fromMs) && Number.isFinite(toMs) ? Math.round((toMs - fromMs) / 864e5) + 1 : 1;
+   const days = Math.min(14, Math.max(1, rawDays));
    t.days = Array.isArray(t.days) ? t.days : [];
    while (t.days.length < days) t.days.push([]);
+   t.days = t.days.slice(0, days).map((day) => Array.isArray(day) ? day : []);
+   t.check = Array.isArray(t.check) ? t.check : [];
    P.innerHTML = `<div class="trip-summary"><div><h2>${esc(tripDestinationText(t))}</h2><p>${esc(t.from)} ← ${esc(t.to)} • ${days} أيام</p></div><button class="btn sm ghost" onclick="if(confirm('حذف الرحلة؟')){ls('sb_trip',null);render()}">${ic('trash',14)}</button></div><div class="sec">خطة الأيام</div>${Array.from({length:days},(_,d)=>`<div class="day-h">اليوم ${d+1}</div><div class="timeline">${t.days[d].map((it,ix)=>`<div class="tl"><button class="del" onclick="delItem(${d},${ix})">${ic('trash',13)}</button><b>${esc(it.title)}</b><small>${esc(it.time)} • ${esc(it.type)}</small></div>`).join('') || '<small style="color:var(--text-muted);display:block;padding:.4rem 0">لا توجد أنشطة بعد</small>'}</div>`).join('')}<div class="card"><div class="sec" style="margin-top:0">إضافة نشاط</div><div class="grid2"><label>اليوم<select class="inp" id="iDay">${Array.from({length:days},(_,d)=>`<option value="${d}">اليوم ${d+1}</option>`).join('')}</select></label><label>الوقت<input class="inp" type="time" id="iTime" value="10:00"></label></div><label>النشاط<input class="inp" id="iTitle" placeholder="مثال: زيارة المعالم التاريخية"></label><label>النوع<select class="inp" id="iType"><option>معلم سياحي</option><option>تنقل</option><option>مطعم</option><option>فندق</option><option>تسوق</option></select></label><button class="btn navy w" onclick="addItem()">إضافة النشاط</button></div><div class="sec">قائمة التجهيزات</div><div class="card">${t.check.map((c,ix)=>`<div class="check"><input type="checkbox" ${c.done?'checked':''} onchange="togCheck(${ix})"><span class="${c.done?'done':''}">${esc(c.t)}</span></div>`).join('')}<div style="display:flex;gap:.45rem;margin-top:.85rem"><input class="inp" id="newCh" placeholder="إضافة حاجة جديدة..."><button class="btn sm navy" onclick="addCheck()">إضافة</button></div></div>`;
  }
  function mkTrip() {
@@ -434,8 +470,7 @@ function ask(q){const txt=q||$('bIn').value.trim();if(!txt)return;
    if (!destination || !from || !to || new Date(to) < new Date(from)) { alert('اختر وجهة وتواريخ صحيحة.'); return; }
    ls('sb_trip', { city: destination.name, destinationName: destination.name, from, to, days: [], check: ['جواز السفر','تذاكر السفر','حجز الفندق','تأمين السفر','شاحن الهاتف'].map((t) => ({t, done:false})) });
    render();
- window.setTimeout(() => document.getElementById('splashScreen')?.remove(), 650);
- }
+  }
   function addItem() { const t=lg('sb_trip',null); const title=$('iTitle')?.value.trim(); if(!t||!title)return; const day=+$('iDay').value; t.days[day].push({title,time:$('iTime').value,type:$('iType').value,day_number:day+1}); ls('sb_trip',t); render(); }
  function delItem(d,ix) { const t=lg('sb_trip',null); if(!t)return; t.days[d].splice(ix,1); ls('sb_trip',t); render(); }
  function togCheck(ix) { const t=lg('sb_trip',null); if(!t)return; t.check[ix].done=!t.check[ix].done; ls('sb_trip',t); render(); }
@@ -448,6 +483,11 @@ function ask(q){const txt=q||$('bIn').value.trim();if(!txt)return;
  }
  function doCv() { const box=$('cvR'); if(!box||!liveRates)return; const amount=Number($('cvA').value)||0, from=$('cvF').value, to=$('cvT').value; const rates={MAD:1,...liveRates.rates}; if(from==='MAD'&&rates[to])box.textContent=`${(amount*rates[to]).toFixed(2)} ${to}`; else if(rates[from]&&rates[to])box.textContent=`${(amount/rates[from]*rates[to]).toFixed(2)} ${to}`; }
  function pgBot(P) { P.innerHTML=`<div class="sec">مساعد السفر</div><div class="card"><div class="es-icon">${ic('chat',22)}</div><h3>مساعدك أثناء الرحلة</h3><p style="font-size:.8rem;line-height:1.7;color:var(--text-muted)">هذه الصفحة تجمع أدوات السفر الأساسية في مكان واحد. اختر إحدى الأدوات للوصول بسرعة إلى معلومات وجهتك وخطة رحلتك.</p><div class="tools"><button class="btn ghost" onclick="go('explore')">استكشاف الأماكن</button><button class="btn ghost" onclick="go('map')">الطقس والصرف</button><button class="btn ghost" onclick="go('trip')">إدارة الرحلة</button><button class="btn ghost" onclick="go('home')">البحث عن وجهة</button></div></div>`; }
- render();
- window.__hideMySindbadSplash?.();
- document.addEventListener('DOMContentLoaded', applyDynamicTheme);
+  try {
+    render();
+    window.__hideMySindbadSplash?.();
+  } catch (error) {
+    console.error('[My Sindbad] startup failed', error);
+    window.__mySindbadStartupFailed?.(error);
+  }
+  document.addEventListener('DOMContentLoaded', applyDynamicTheme);
