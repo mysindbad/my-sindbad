@@ -926,7 +926,7 @@ function bind(){const P=$('pg');if(!P)return;({home:pgHome,trip:pgTrip,explore:p
 const cityChips=()=>`<div class="row" style="margin-bottom:.85rem">${Object.keys(CITIES).map(c=>`<button class="chip ${c===city?'on':''}" onclick="city='${c}';render()">${CITIES[c].n}</button>`).join('')}</div>`;
 
 /* ===== الصفحات ===== */
-function pgHome(P){const t=lg('sb_trip',null);
+function pgHome(P){const t=lg('sb_trip',null)||lg('currentTrip',null);
  P.innerHTML=`
   <div class="home-hero">
         <span class="greeting text-white" id="greeting-text">MY SINDBAD · أهلًا ${esc(session.name)}</span>
@@ -936,6 +936,8 @@ function pgHome(P){const t=lg('sb_trip',null);
     <button class="btn navy sm" onclick="doSearch()">${ic('nav',14)} بحث</button>
    </div>
   </div>
+  ${t?`<a href="./today.html" class="today-entry" style="display:block;margin:0 0 .85rem;padding:1rem;border-radius:1rem;background:linear-gradient(135deg,#D4AF37,#b8941f);color:#0A192F;text-decoration:none"><b>وضع اليوم — شنو ندير الآن؟</b><small style="display:block;margin-top:.25rem">افتح نشاطك الحالي والطقس والتقدم اليومي.</small></a>`:''}
+  <div class="how-it-works" style="margin:0 0 .85rem;padding:.9rem 1rem;border:1px solid #D4AF37;border-radius:1rem;background:#fffaf0"><b>كيف يعمل؟</b><div style="display:flex;justify-content:space-between;gap:.4rem;margin-top:.5rem;font-size:.75rem;color:#64748b"><span>١ خطط</span><span>٢ استكشف</span><span>٣ سافر برفقة</span></div></div>
      <div class="service-rail" aria-label="خدمات التطبيق">
        <button class="service-slide" onclick="tab='hotels';go('explore')"><span class="service-icon">${ic('hotel',18)}</span><strong data-i18n="service_hotels">الفنادق</strong><small data-i18n="service_hotels_desc">إقامات مناسبة لرحلتك</small><span class="service-arrow">←</span></button>
        <button class="service-slide" onclick="tab='rest';go('explore')"><span class="service-icon">${ic('food',18)}</span><strong data-i18n="service_restaurants">المطاعم</strong><small data-i18n="service_restaurants_desc">تجارب ومذاقات محلية</small><span class="service-arrow">←</span></button>
