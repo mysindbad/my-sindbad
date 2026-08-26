@@ -1,5 +1,5 @@
 // <!-- M7-PERFORMANCE-SW -->
-const CACHE_NAME = 'my-sindbad-v38';
+const CACHE_NAME = 'my-sindbad-v39';
 const APP_SHELL = [
   './',
   './index.html',
