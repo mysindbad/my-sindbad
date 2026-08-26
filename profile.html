@@ -97,6 +97,8 @@
 <nav data-active="profile" data-site-nav=""></nav>
 </main>
 <div aria-live="polite" class="toast" id="toast" role="status">تم حفظ الإعدادات بنجاح</div>
+
+<script src="./utils/appState.js"></script>
 <script>
     const readLocal = (key, fallback) => { try { const value = localStorage.getItem(key); if (value === null) return fallback; try { return JSON.parse(value); } catch { return value; } } catch (error) { return fallback; } };
     const writeLocal = (key, value) => { try { localStorage.setItem(key, JSON.stringify(value)); return true; } catch (error) { return false; } };
@@ -108,9 +110,9 @@
     function normaliseTrips() {
       const saved = readLocal('savedTrips', []);
       const trips = Array.isArray(saved) ? saved : [];
-      const current = readLocal('currentTrip', null);
+      const current = window.AppState?.getTrip?.() || null;
       if (current && typeof current === 'object' && !trips.some((trip) => JSON.stringify(trip) === JSON.stringify(current))) trips.unshift(current);
-      const appTrip = window.AppState?.getTrip?.() || readLocal('mysindbad_app_data_v1', {}).currentTrip;
+      const appTrip = window.AppState?.getTrip?.() || null;
       if (appTrip && typeof appTrip === 'object' && !trips.some((trip) => JSON.stringify(trip) === JSON.stringify(appTrip))) trips.unshift(appTrip);
       return remoteTrips.concat(trips).filter((trip) => trip && typeof trip === 'object').filter((trip, index, all) => all.findIndex((item) => (item.id && trip.id && item.id === trip.id) || JSON.stringify(item) === JSON.stringify(trip)) === index);
     }
@@ -118,7 +120,7 @@
     function tripDate(trip) { const start = trip.startDate || trip.start || trip.date || trip.dates?.start; const lang = window.MySindbadI18n?.getLang?.() || readLocal('userLang', 'ar'); return start ? (lang === 'fr' ? `Début : ${start}` : lang === 'en' ? `Start date: ${start}` : `تاريخ البدء: ${start}`) : t('saved_trip_empty', 'بيانات الرحلة جاهزة للمراجعة'); }
     function renderTrips() {
       const trips = normaliseTrips();
-      const activities = readLocal('myTripActivities', []);
+      const activities = window.AppState?.getActivities?.() || [];
       const savedActivities = Array.isArray(activities) ? activities.filter((activity) => activity && typeof activity === 'object') : [];
       document.getElementById('saved-count').textContent = trips.length;
       const container = document.getElementById('saved-trips');
@@ -138,8 +140,8 @@
     language.addEventListener('change', () => { writeLocal('userLang', language.value); window.MySindbadI18n?.applyLang?.(language.value); showToast(); });
     notifications.addEventListener('click', () => { const enabled = !notifications.classList.contains('on'); notifications.classList.toggle('on', enabled); notifications.setAttribute('aria-checked', String(enabled)); writeLocal('notificationsEnabled', enabled); showToast(enabled ? t('notifications_enabled', 'سيظهر تذكير checklist عند وجود رحلة.') : t('notifications_disabled', 'تم إيقاف تذكير checklist.')); });
     theme.addEventListener('change', () => { window.MySindbadTheme?.set?.(theme.value); if (!window.MySindbadTheme?.set) writeLocal('themePreference', theme.value); showToast(t('theme_saved', 'تم حفظ المظهر.')); });
-    if (notificationsEnabled && readLocal('currentTrip', null)) setTimeout(() => showToast(t('checklist_reminder', 'تذكير checklist: راجع قائمة التجهيزات في رحلتك.')), 700);
-    document.getElementById('favorite-count').textContent = Array.isArray(readLocal('favorites', [])) ? readLocal('favorites', []).length : 0;
+    if (notificationsEnabled && window.AppState?.getTrip?.()) setTimeout(() => showToast(t('checklist_reminder', 'تذكير checklist: راجع قائمة التجهيزات في رحلتك.')), 700);
+    document.getElementById('favorite-count').textContent = window.AppState?.getFavorites?.().length || 0;
     document.getElementById('points-count').textContent = Number(readLocal('points', readLocal('sb_points', 0))) || 0;
     // <!-- QA14-DEMO -->
     async function loadAuthProfile() {
@@ -158,14 +160,12 @@
       renderTrips();
     }
     document.getElementById('logout').addEventListener('click', async () => {
-      try { ['currentTrip', 'currentItinerary', 'myTripActivities', 'sb_trip', 'sb_destination'].forEach((key) => localStorage.removeItem(key)); } catch (error) {}
-      if (window.supabaseClient) await Auth.signOut(); else { localStorage.removeItem('sb_session'); window.location.href = './index.html'; }
+      if (window.supabaseClient) await Auth.signOut(); else { window.AppState?.clear?.(); }
     });
     renderTrips();
     loadAuthProfile();
   </script>
 <script src="./utils/navigation.js"></script>
 <script src="./utils/header.js"></script>
-<script src="./utils/appState.js"></script>
 </body>
 </html>

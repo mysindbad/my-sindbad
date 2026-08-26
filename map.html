@@ -15,7 +15,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="./utils/supabaseClient.js" type="module"></script>
 <script src="./utils/auth.js"></script>
-<script src="./utils/appState.js"></script>
+
 <script src="./utils/cityImages.js"></script>
 <script src="./utils/geocode.js"></script>
 <link href="https://api.mapbox.com/mapbox-gl-js/v3.5.1/mapbox-gl.css" rel="stylesheet"/>
@@ -63,6 +63,8 @@
 <nav data-active="map" data-site-nav=""></nav>
 </main>
 <script src="https://api.mapbox.com/mapbox-gl-js/v3.5.1/mapbox-gl.js"></script>
+
+<script src="./utils/appState.js"></script>
 <script>
   // <!-- QA16-MAPTOKEN -->
   const $=id=>document.getElementById(id), MOROCCO=[-6,31.8]; let token='';
@@ -77,7 +79,7 @@
   function markerElement(current=false){const e=document.createElement('div');e.className=`marker${current?' current':''}`;return e}
   function setModeButtonsDisabled(disabled){document.querySelectorAll('[data-mode]').forEach((button)=>{button.disabled=disabled;button.title=disabled?'اختر مكاناً صالحاً أولاً':''})}
   function validCoords(activity){const c=activity?.coords || activity;const lat=Number(c?.lat);const lng=Number(c?.lng ?? c?.lon);return Number.isFinite(lat)&&Number.isFinite(lng)&&!(lat===0&&lng===0)?{lat,lng}:null}
-  function tripData(){try{return window.AppState?.getTrip?.()||JSON.parse(localStorage.getItem('currentTrip')||'null')||JSON.parse(localStorage.getItem('sb_trip')||'null')||null}catch(e){return null}}
+  function tripData(){return window.AppState?.getTrip?.() || null}
   function tripDestination(){const trip=tripData();return window.MySindbadCity?.normalizeCityName(trip?.destinationDisplay||trip?.destination||trip?.destinationName||trip?.city||'')?.display||trip?.destinationDisplay||trip?.destination||trip?.destinationName||trip?.city||''}
   function activityTitle(activity){return activity?.title||activity?.place||activity?.name||'نشاط'}
   function cityCoordsFor(trip){return validCoords(trip?.cityCoords)||validCoords({lat:trip?.lat,lng:trip?.lng})||validCoords({lat:trip?.lat,lon:trip?.lon})}
@@ -92,8 +94,8 @@
   function timeValue(value){const match=String(value||'').match(/(\d{1,2})(?::(\d{2}))?/);return match?Number(match[1])*60+Number(match[2]||0):9999}
   function sortedActivities(day){return [...(day?.activities||[])]}
   function readTripDays(){
-    let days=[];
-    try{const stored=JSON.parse(localStorage.getItem('currentItinerary')||'null');if(Array.isArray(stored))days=stored}catch(e){}
+    let days=window.AppState?.getItinerary?.() || [];
+    if(!Array.isArray(days))days=[];
     if(!days.length){
       const activities=window.AppState?.getActivities?.()||[];
       if(activities.length){const grouped={};activities.forEach((item,index)=>{const day=Number(item.day_number||item.day)||1;(grouped[day] ||= []).push(item)});days=Object.keys(grouped).sort((a,b)=>a-b).map(day=>({day:Number(day),activities:grouped[day]}))}
@@ -133,13 +135,13 @@
   }
   function persistActivityCoords(activity){
     try {
-      const stored=JSON.parse(localStorage.getItem('currentItinerary')||'null');
+      const stored=window.AppState?.getItinerary?.() || [];
       if(Array.isArray(stored)) stored.forEach(day=>(day.activities||[]).forEach(item=>{if(item.id===activity.id||item.place===activity.place){item.coords=activity.coords;item.__coordSource=activity.__coordSource;}}));
-      if(Array.isArray(stored)) localStorage.setItem('currentItinerary',JSON.stringify(stored));
+      if(Array.isArray(stored)) window.AppState?.saveItinerary?.(stored);
     } catch (error) {}
   }
   async function focusTripActivity(index){const day=tripDays.find(item=>item.day===selectedDay)||tripDays[0];const activity=day?.activities?.[index];if(!activity)return;const hadCoords=Boolean(validCoords(activity));const resolved=await resolveActivityCoords(activity);if(!hadCoords&&(!resolved||resolved.source==='city'||resolved.source==='morocco')){showToast(mapText('map_no_coords','Could not locate this activity'));return}expandMap();if(!hadCoords&&resolved){activity.coords={lat:resolved.lat,lng:resolved.lng};activity.__coordSource=resolved.source;persistActivityCoords(activity);renderTripDay(index)}const c=validCoords(activity);if(c){selectedPlace={name:activityTitle(activity),lat:c.lat,lon:c.lng};routeTo()}const marker=tripMarkers[index];if(marker&&c){marker.togglePopup();map.flyTo({center:[c.lng,c.lat],zoom:16})}status(`${mapText('map_selected','Place selected')}: ${activityTitle(activity)}`)}
-  async function backfillTripCoords(){const trip=tripData();if(!trip||!window.MySindbadGeocode)return;const days=readTripDays();let changed=false;for(const day of days){for(const activity of (day.activities||[])){if(validCoords(activity))continue;const resolved=await resolveActivityCoords(activity);if(!resolved||resolved.source==='city'||resolved.source==='morocco')continue;activity.coords={lat:resolved.lat,lng:resolved.lng};activity.__coordSource=resolved.source;changed=true;}}if(changed){try{localStorage.setItem('currentItinerary',JSON.stringify(days))}catch{} }return changed}
+  async function backfillTripCoords(){const trip=tripData();if(!trip||!window.MySindbadGeocode)return;const days=readTripDays();let changed=false;for(const day of days){for(const activity of (day.activities||[])){if(validCoords(activity))continue;const resolved=await resolveActivityCoords(activity);if(!resolved||resolved.source==='city'||resolved.source==='morocco')continue;activity.coords={lat:resolved.lat,lng:resolved.lng};activity.__coordSource=resolved.source;changed=true;}}if(changed)window.AppState?.saveItinerary?.(days);return changed}
   function routeTo(){if(!selectedPlace||!Number.isFinite(Number(selectedPlace.lat))||!Number.isFinite(Number(selectedPlace.lon))||!map){status(mapText('map_select_place','Choose a valid place first.'));return}const center=cityCoordsFor(tripData());const farFromDestination=user&&center&&window.MySindbadGeocode?.distanceKm(user,center)>300;const start=farFromDestination?center:(user||center||{lng:map.getCenter().lng,lat:map.getCenter().lat});const originLabel=farFromDestination||!user?mapText('map_route_from_city','from the city center'):mapText('map_route_from_you','from your location');$('distance').textContent=mapText('map_route_loading','Calculating route...');$('duration').textContent='—';const profile=mode==='walking'?'walking':'driving';try{const u=`https://api.mapbox.com/directions/v5/mapbox/${profile}/${start.lng},${start.lat};${selectedPlace.lon},${selectedPlace.lat}?alternatives=false&geometries=geojson&overview=full&access_token=${encodeURIComponent(token||'')}`;fetchMapWithTimeout(u).then(async response=>{if(!response.ok)throw Error('directions');const data=await response.json(),summary=data.routes?.[0];if(!summary)throw Error('no_route');drawRoute(summary);const label=`${dist(summary.distance)} · ${time(summary.duration)} ${originLabel}`;$('distance').textContent=label;$('duration').textContent=time(summary.duration);status(`${mapText('directions','Directions')} ${selectedPlace.name} · ${label}`)}).catch(()=>{clearRoute();status(mapText('map_route_failed','Unable to calculate the route right now.'));$('distance').textContent='—';$('duration').textContent='—'})}catch(e){status(mapText('map_route_failed','Unable to calculate the route right now.'))}}
   function choose(place){if(!map||!Number.isFinite(Number(place.lat))||!Number.isFinite(Number(place.lon))||(Number(place.lat)===0&&Number(place.lon)===0)){status('لا يمكن اختيار موقع غير صالح.');return}expandMap();selectedPlace={...place,lat:Number(place.lat),lon:Number(place.lon)};$('name').textContent=place.name;setModeButtonsDisabled(false);$('place').classList.add('show');if(selectedMarker)selectedMarker.remove();selectedMarker=new mapboxgl.Marker({element:markerElement(true)}).setLngLat([place.lon,place.lat]).setPopup(new mapboxgl.Popup().setText(place.name)).addTo(map);map.flyTo({center:[place.lon,place.lat],zoom:place.zoom||16});selectedMarker.togglePopup();routeTo()}
   async function geocode(query){if(searchController)searchController.abort();searchController=new AbortController();status('جارٍ البحث في الخريطة...');try{const r=await fetchMapWithTimeout(`https://nominatim.openstreetmap.org/search?format=jsonv2&limit=6&accept-language=ar,en&q=${encodeURIComponent(query)}`,{signal:searchController.signal,headers:{Accept:'application/json'}});if(!r.ok)throw Error('search');const rows=await r.json();if(!rows.length){status('لم نجد هذا المكان.');return}const p=rows[0];choose({name:p.display_name?.split(',')[0]||query,lat:Number(p.lat),lon:Number(p.lon),zoom:/city|town|village|municipality|administrative|county|state|country/i.test(p.type)?13:16})}catch(e){if(e.name!=='AbortError')status('تعذر البحث الآن. تحقق من الاتصال وحاول مرة أخرى.')}}

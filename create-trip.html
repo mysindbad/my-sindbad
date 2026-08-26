@@ -192,6 +192,10 @@
 </section>
 <nav data-active="trip" data-site-nav=""></nav>
 </main>
+
+
+
+<script src="./utils/appState.js"></script>
 <script>
     const form = document.getElementById('trip-form');
     const startDate = document.getElementById('start-date');
@@ -286,20 +290,20 @@
         }
         // Cache the latest trip for itinerary.html and the offline demo experience.
         trip.cityCoords = await cityCoordsFor(trip.destination);
-        localStorage.setItem('currentTrip', JSON.stringify(trip));
-        window.AppState?.saveTrip?.(trip);
-         const savedTrips = JSON.parse(localStorage.getItem('savedTrips') || '[]');
-         if (!savedTrips.some((saved) => JSON.stringify(saved) === JSON.stringify(trip))) savedTrips.unshift(trip);
-         localStorage.setItem('savedTrips', JSON.stringify(savedTrips));
-        localStorage.setItem('sb_trip', JSON.stringify({
+        const unifiedTrip = {
           ...trip,
           city: trip.destination,
           destinationName: trip.destination,
           from: trip.dates.start,
           to: trip.dates.end,
           days: [[]],
-          check: ['جواز السفر', 'تذاكر السفر', 'حجز الفندق', 'تأمين السفر', 'شاحن الهاتف'].map((t) => ({ t, done: false }))
-        }));
+          check: ['جواز السفر', 'تذاكر السفر', 'حجز الفندق', 'تأمين السفر', 'شاحن الهاتف'].map((t) => ({ t, done: false })),
+          cityCoords: trip.cityCoords
+        };
+        window.AppState?.saveTrip?.(unifiedTrip);
+        const savedTrips = JSON.parse(localStorage.getItem('savedTrips') || '[]');
+        if (!savedTrips.some((saved) => JSON.stringify(saved) === JSON.stringify(unifiedTrip))) savedTrips.unshift(unifiedTrip);
+        localStorage.setItem('savedTrips', JSON.stringify(savedTrips));
         try {
           const response = await fetchWithTimeout('/api/plan', {
             method: 'POST',
@@ -309,7 +313,7 @@
           if (response.ok) {
             const generatedPlan = await response.json();
             if (Array.isArray(generatedPlan.days) && generatedPlan.days.length) {
-              localStorage.setItem('currentItinerary', JSON.stringify(generatedPlan.days.map((day) => ({
+                window.AppState?.saveItinerary?.(generatedPlan.days.map((day) => ({
                 day: day.day,
                 date: day.date || trip.dates.start,
                 activities: (day.activities || []).map((activity, index) => ({
@@ -327,8 +331,9 @@
                   currency: activity.currency || trip.budget.currency,
                   added: false
                 }))
-              }))));
-            }
+                              })));
+              }
+
           }
         } catch (error) {
           // The itinerary page silently uses its local generator when the API is unavailable.
@@ -349,6 +354,6 @@
   </script>
 <script src="./utils/navigation.js"></script>
 <script src="./utils/header.js"></script>
-<script src="./utils/appState.js"></script>
+
 </body>
 </html>

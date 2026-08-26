@@ -234,8 +234,11 @@
       }));
     }
 
+
+
+
     function saveItinerary() {
-      localStorage.setItem('currentItinerary', JSON.stringify(itinerary));
+      window.AppState?.saveItinerary?.(itinerary);
     }
 
     function hasValidCoords(activity) { return window.MySindbadGeocode?.validCoords(activity); }
@@ -313,8 +316,7 @@
       }
       if (!currentTrip) {
         try {
-          currentTrip = normaliseTrip(window.AppState?.getTrip())
-            || normaliseTrip(JSON.parse(localStorage.getItem('currentTrip')));
+          currentTrip = normaliseTrip(window.AppState?.getTrip());
         } catch (error) {
           currentTrip = null;
         }
@@ -446,13 +448,6 @@
 
     function syncAssistantReplacement(replacement, dayNumber, originalId) {
       const record = { ...replacement, id: originalId || replacement.id || `assistant-${Date.now()}`, name: replacement.place, description: replacement.activity, title: replacement.place, day: dayNumber, day_number: dayNumber, added: true };
-      try {
-        const local = JSON.parse(localStorage.getItem('myTripActivities') || '[]');
-        const next = Array.isArray(local) && local.some((item) => item.id === record.id)
-          ? local.map((item) => item.id === record.id ? { ...item, ...record } : item)
-          : [...(Array.isArray(local) ? local : []), record];
-        localStorage.setItem('myTripActivities', JSON.stringify(next));
-      } catch (error) {}
       try {
         const state = window.AppState?.getAll?.();
         if (state) {
@@ -597,8 +592,7 @@
       const sources = [];
       try {
         const stateActivities = window.AppState?.getActivities?.() || [];
-        const localActivities = JSON.parse(localStorage.getItem('myTripActivities') || '[]');
-        sources.push(...stateActivities, ...(Array.isArray(localActivities) ? localActivities : []));
+        sources.push(...stateActivities);
       } catch (error) {
       }
       return sources.filter((item, index, all) => item && all.findIndex((candidate) => (
@@ -635,9 +629,6 @@
           time: activity.time,
           day_number: itinerary[dayIndex].day
         });
-        const saved = JSON.parse(localStorage.getItem('myTripActivities') || '[]');
-        if (!saved.some((item) => item.id === activity.id)) saved.push({ ...activity, day: itinerary[dayIndex].day, day_number: itinerary[dayIndex].day, date: itinerary[dayIndex].date });
-        localStorage.setItem('myTripActivities', JSON.stringify(saved));
         saveItinerary();
         renderDayPlan(readLiveActivities());
       }));
@@ -651,8 +642,7 @@
      // <!-- QA15-SYNC: merge every saved activity source and keep the day assignment -->
      function readStoredItinerary() {
        try {
-         const value = JSON.parse(localStorage.getItem('currentItinerary') || 'null');
-         return Array.isArray(value) ? value : [];
+         return window.AppState?.getItinerary?.() || [];
        } catch (error) { return []; }
      }
 
@@ -661,10 +651,6 @@
          ...(tripData.remoteActivities || []),
          ...(window.AppState?.getActivities?.() || [])
        ];
-       try {
-         const stored = JSON.parse(localStorage.getItem('myTripActivities') || '[]');
-         if (Array.isArray(stored)) sources.push(...stored);
-       } catch (error) {}
        savedItinerary.forEach((day) => (day.activities || []).forEach((activity) => {
          if (activity.added) sources.push({ ...activity, day_number: day.day });
        }));

@@ -48,11 +48,12 @@
 <!-- Banner Alerts Container -->
 <div id="alerts-container"></div>
 </div>
+<script src="./utils/appState.js"></script>
 <script type="module">
     import { evaluateAlerts } from './utils/proactive.js';
     import { evaluateHealth } from './utils/health.js';
 
-    const trip = JSON.parse(localStorage.getItem('currentTrip') || 'null') || JSON.parse(localStorage.getItem('sb_trip') || 'null') || {};
+    const trip = window.AppState?.getTrip?.() || {};
     const normalized = window.MySindbadCity?.normalizeCityName(trip.destinationDisplay || trip.destination || trip.destinationName || trip.city || 'مراكش') || { display: trip.destination || 'مراكش' };
     const destinationDisplay = normalized.display || 'مراكش';
     const lang = () => window.MySindbadI18n?.getLang?.() || localStorage.getItem('userLang') || 'ar';
@@ -71,7 +72,7 @@
       }
     } catch {}
 
-    const savedActs = JSON.parse(localStorage.getItem('myTripActivities') || '[]');
+    const savedActs = window.AppState?.getActivities?.() || [];
     const daysActivities = Array.isArray(trip.itinerary) ? trip.itinerary : (savedActs.length ? [{ activities: savedActs, totalHours: savedActs.length * 2 }] : []);
     const tripBudget = Number(trip?.budget?.amount ?? trip?.budget ?? 0);
     const currentSpent = savedActs.reduce((sum, activity) => sum + Number(activity?.cost || activity?.price || 0), 0);

@@ -28,6 +28,9 @@
 </div>
 </div>
 <script>
+    const esc = (str) => String(str ?? '').replace(/[&<>"']/g, (c) => ({
+      '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+    }[c]));
     try {
       const hash = window.location.hash.slice(1);
       if (!hash) throw new Error('No hash');
@@ -39,7 +42,7 @@
       document.getElementById('trip-meta').textContent = `${trip.days || 1} أيام • ${trip.budget || 0} MAD`;
       const container = document.getElementById('trip-activities');
       const acts = trip.activities || [];
-      container.innerHTML = acts.map(a => `<div class="p-3 bg-amber-50 rounded-xl border border-amber-100"><div class="font-bold">${a.title || 'نشاط'}</div><div class="text-xs text-slate-500">${a.cost || 0} MAD</div></div>`).join('');
+      container.innerHTML = acts.map(a => `<div class="p-3 bg-amber-50 rounded-xl border border-amber-100"><div class="font-bold">${esc(a.title || 'نشاط')}</div><div class="text-xs text-slate-500">${esc(a.cost || 0)} MAD</div></div>`).join('');
     } catch {
       document.getElementById('loading').classList.add('hidden');
       document.getElementById('error').classList.remove('hidden');

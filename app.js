@@ -137,17 +137,17 @@ function pgHome(P){const t=lg('sb_trip',null)||lg('currentTrip',null);
   ${t?`<a href="./today.html" class="today-entry" style="display:block;margin:0 0 .85rem;padding:1rem;border-radius:1rem;background:linear-gradient(135deg,#D4AF37,#b8941f);color:#0A192F;text-decoration:none"><b>وضع اليوم — شنو ندير الآن؟</b><small style="display:block;margin-top:.25rem">افتح نشاطك الحالي والطقس والتقدم اليومي.</small></a>`:''}
   <div class="how-it-works" style="margin:0 0 .85rem;padding:.9rem 1rem;border:1px solid #D4AF37;border-radius:1rem;background:#fffaf0"><b>كيف يعمل؟</b><div style="display:flex;justify-content:space-between;gap:.4rem;margin-top:.5rem;font-size:.75rem;color:#64748b"><span>١ خطط</span><span>٢ استكشف</span><span>٣ سافر برفقة</span></div></div>
      <div class="service-rail" aria-label="خدمات التطبيق">
-       <button class="service-slide" onclick="tab='hotels';go('explore')"><span class="service-icon">${ic('hotel',18)}</span><strong data-i18n="service_hotels">الفنادق</strong><small data-i18n="service_hotels_desc">إقامات مناسبة لرحلتك</small><span class="service-arrow">←</span></button>
-       <button class="service-slide" onclick="tab='rest';go('explore')"><span class="service-icon">${ic('food',18)}</span><strong data-i18n="service_restaurants">المطاعم</strong><small data-i18n="service_restaurants_desc">تجارب ومذاقات محلية</small><span class="service-arrow">←</span></button>
-       <button class="service-slide" onclick="tab='spots';go('explore')"><span class="service-icon">${ic('pin',18)}</span><strong data-i18n="service_places">الأماكن</strong><small data-i18n="service_places_desc">معالم تستحق الزيارة</small><span class="service-arrow">←</span></button>
-       <button class="service-slide" onclick="go('trip')"><span class="service-icon">${ic('cal',18)}</span><strong data-i18n="service_trip">رحلتي</strong><small data-i18n="service_trip_desc">خطة سفر منظمة</small><span class="service-arrow">←</span></button>
-       <button class="service-slide" onclick="go('bot')"><span class="service-icon">${ic('chat',18)}</span><strong data-i18n="service_assistant">مساعد السفر</strong><small data-i18n="service_assistant_desc">رفيقك في كل خطوة</small><span class="service-arrow">←</span></button>
+       <button class="service-slide" onclick="tab='hotels';window.location.href='./explore.html?dest='+encodeURIComponent(city)+'&tab='+encodeURIComponent(tab)"><span class="service-icon">${ic('hotel',18)}</span><strong data-i18n="service_hotels">الفنادق</strong><small data-i18n="service_hotels_desc">إقامات مناسبة لرحلتك</small><span class="service-arrow">←</span></button>
+       <button class="service-slide" onclick="tab='rest';window.location.href='./explore.html?dest='+encodeURIComponent(city)+'&tab='+encodeURIComponent(tab)"><span class="service-icon">${ic('food',18)}</span><strong data-i18n="service_restaurants">المطاعم</strong><small data-i18n="service_restaurants_desc">تجارب ومذاقات محلية</small><span class="service-arrow">←</span></button>
+       <button class="service-slide" onclick="tab='spots';window.location.href='./explore.html?dest='+encodeURIComponent(city)+'&tab='+encodeURIComponent(tab)"><span class="service-icon">${ic('pin',18)}</span><strong data-i18n="service_places">الأماكن</strong><small data-i18n="service_places_desc">معالم تستحق الزيارة</small><span class="service-arrow">←</span></button>
+       <button class="service-slide" onclick="window.location.href='./itinerary.html'"><span class="service-icon">${ic('cal',18)}</span><strong data-i18n="service_trip">رحلتي</strong><small data-i18n="service_trip_desc">خطة سفر منظمة</small><span class="service-arrow">←</span></button>
+       <button class="service-slide" onclick="window.location.href='./itinerary.html?assistant=1'"><span class="service-icon">${ic('chat',18)}</span><strong data-i18n="service_assistant">مساعد السفر</strong><small data-i18n="service_assistant_desc">رفيقك في كل خطوة</small><span class="service-arrow">←</span></button>
   </div>
   <div class="sec" data-i18n="home_upcoming">رحلتي القادمة</div>
   ${t?`
   <div class="trip-summary">
    <div><h2>رحلتك إلى ${CITIES[t.city]?CITIES[t.city].n:esc(t.city)}</h2><p>${esc(t.from || t.dates?.start || '')} ← ${esc(t.to || t.dates?.end || '')}</p></div>
-   <button class="btn sm ghost" onclick="go('trip')" data-i18n="view_plan">عرض الخطة</button>
+   <button class="btn sm ghost" onclick="window.location.href='./itinerary.html'" data-i18n="view_plan">عرض الخطة</button>
   </div>`:`
   <div class="empty-state">
    <div class="es-icon">${ic('plane',22)}</div>
@@ -157,7 +157,7 @@ function pgHome(P){const t=lg('sb_trip',null)||lg('currentTrip',null);
   </div>`}
    
    <div class="destination-grid">
-    ${Object.keys(CITIES).map(c=>`<button class="destination-card" onclick="city='${c}';go('explore')" aria-label="استكشف ${CITIES[c].n}">
+    ${Object.keys(CITIES).map(c=>`<button class="destination-card" onclick="city='${c}';window.location.href='./explore.html?dest='+encodeURIComponent(city)+'&tab='+encodeURIComponent(tab)" aria-label="استكشف ${CITIES[c].n}">
        <img src="${CITY_IMAGES[c]}" alt="" loading="lazy" onerror="this.style.display='none';this.parentElement.dataset.city='${esc(CITIES[c].n)}';this.parentElement.classList.add('image-fallback')">
       <span class="dc-arrow">←</span>
       <span class="dc-copy"><b>${CITIES[c].n}</b><span>${CITIES[c].c}</span></span>
@@ -225,8 +225,8 @@ function pgExplore(P){const C=CITIES[city];
    <div class="es-icon">${ic(tab==='hotels'?'hotel':tab==='rest'?'food':'pin',24)}</div>
    <h3>اكتشف وجهتك القادمة</h3>
    <div style="display:flex;gap:.5rem;justify-content:center;flex-wrap:wrap">
-    <button class="btn navy sm" onclick="go('map')">عرض على الخريطة</button>
-    <button class="btn ghost sm" onclick="go('trip')">إضافة إلى خطة رحلتي</button>
+    <button class="btn navy sm" onclick="window.location.href='./map.html'">عرض على الخريطة</button>
+    <button class="btn ghost sm" onclick="window.location.href='./itinerary.html'">إضافة إلى خطة رحلتي</button>
    </div>
   </div>`;}
 
@@ -369,7 +369,7 @@ function ask(q){const txt=q||$('bIn').value.trim();if(!txt)return;
    ls('sb_destination', item);
    livePlaces = [];
    liveError = '';
-   go('explore');
+   window.location.href='./explore.html?dest='+encodeURIComponent(city)+'&tab='+encodeURIComponent(tab);
  };
   function render() {
     if (!session) {
@@ -401,13 +401,13 @@ function ask(q){const txt=q||$('bIn').value.trim();if(!txt)return;
     <div id="searchResults"></div>
     <div class="card" style="margin:0 0 1rem;padding:.85rem 1rem;background:#fffaf0;border:1px solid #D4AF37"><b style="color:var(--navy-900)">كيف يعمل؟</b><div style="display:flex;justify-content:space-between;gap:.35rem;margin-top:.55rem;font-size:.72rem;color:var(--text-muted)"><span>١ خطط</span><span>٢ استكشف</span><span>٣ سافر برفقة</span></div></div>
     <div class="cats">
-      <button class="cat" onclick="tab='hotels';go('explore')"><span class="ci">${ic('hotel',18)}</span>الفنادق</button>
-      <button class="cat" onclick="tab='rest';go('explore')"><span class="ci">${ic('food',18)}</span>المطاعم</button>
-      <button class="cat" onclick="tab='spots';go('explore')"><span class="ci">${ic('pin',18)}</span>الأماكن</button>
-      <button class="cat" onclick="go('trip')"><span class="ci">${ic('cal',18)}</span>رحلتي</button>
+      <button class="cat" onclick="tab='hotels';window.location.href='./explore.html?dest='+encodeURIComponent(city)+'&tab='+encodeURIComponent(tab)"><span class="ci">${ic('hotel',18)}</span>الفنادق</button>
+      <button class="cat" onclick="tab='rest';window.location.href='./explore.html?dest='+encodeURIComponent(city)+'&tab='+encodeURIComponent(tab)"><span class="ci">${ic('food',18)}</span>المطاعم</button>
+      <button class="cat" onclick="tab='spots';window.location.href='./explore.html?dest='+encodeURIComponent(city)+'&tab='+encodeURIComponent(tab)"><span class="ci">${ic('pin',18)}</span>الأماكن</button>
+      <button class="cat" onclick="window.location.href='./itinerary.html'"><span class="ci">${ic('cal',18)}</span>رحلتي</button>
     </div>
     <div class="sec">رحلتي الحالية</div>
-      ${t ? `<div class="trip-summary" style="background-image:linear-gradient(180deg,rgba(4,17,28,.08),rgba(4,17,28,.82)),url('${imageForCity(tripDestinationText(t))}')"><img src="${imageForCity(tripDestinationText(t))}" alt="${esc(tripDestinationText(t) || 'وجهتك')}" style="display:none" onerror="this.parentElement.style.backgroundImage='linear-gradient(135deg,#0A192F,#D4AF37)';this.parentElement.dataset.city='${esc(tripDestinationText(t) || 'وجهتك')}'"><div><h2>${esc(tripDestinationText(t) || 'وجهتك')}</h2><p>${esc(t.from || t.dates?.start || '')} ← ${esc(t.to || t.dates?.end || '')}</p></div><button class="btn sm ghost" onclick="go('trip')">عرض الخطة</button></div>` : `<div class="empty-state"><div class="es-icon">${ic('plane',22)}</div><h3>لم تنشئ رحلة بعد</h3><a class="btn navy sm" href="./create-trip.html">إنشاء رحلة</a></div>`}
+      ${t ? `<div class="trip-summary" style="background-image:linear-gradient(180deg,rgba(4,17,28,.08),rgba(4,17,28,.82)),url('${imageForCity(tripDestinationText(t))}')"><img src="${imageForCity(tripDestinationText(t))}" alt="${esc(tripDestinationText(t) || 'وجهتك')}" style="display:none" onerror="this.parentElement.style.backgroundImage='linear-gradient(135deg,#0A192F,#D4AF37)';this.parentElement.dataset.city='${esc(tripDestinationText(t) || 'وجهتك')}'"><div><h2>${esc(tripDestinationText(t) || 'وجهتك')}</h2><p>${esc(t.from || t.dates?.start || '')} ← ${esc(t.to || t.dates?.end || '')}</p></div><button class="btn sm ghost" onclick="window.location.href='./itinerary.html'">عرض الخطة</button></div>` : `<div class="empty-state"><div class="es-icon">${ic('plane',22)}</div><h3>لم تنشئ رحلة بعد</h3><a class="btn navy sm" href="./create-trip.html">إنشاء رحلة</a></div>`}
       <!-- QA14-SERVICES -->
       ${t ? `<a href="./today.html" class="card" style="display:block;margin:0 0 1rem;background:linear-gradient(135deg,#D4AF37,#b8941f);color:#0A192F;text-decoration:none"><b style="font-size:1rem">وضع اليوم — شنو ندير الآن؟</b><small style="display:block;margin-top:.25rem">افتح نشاطك الحالي وتقدم اليوم والطقس.</small></a>` : ''}
       <div class="card" style="margin-top:1rem"><b style="color:var(--navy-900)">خدمات مباشرة</b><div class="tools" style="margin-top:.7rem"><a class="btn ghost" href="./explore.html">الطقس</a><a class="btn ghost" href="./map.html">خريطتي</a><a class="btn ghost" href="./community.html">المجتمع</a></div></div>`;
@@ -482,7 +482,7 @@ function ask(q){const txt=q||$('bIn').value.trim();if(!txt)return;
     apiGet('/api/rates?base=MAD').then((data) => { liveRates=data; doCv(); }).catch(()=>{if($('cvR'))$('cvR').textContent='تعذر تحميل سعر الصرف';});
  }
  function doCv() { const box=$('cvR'); if(!box||!liveRates)return; const amount=Number($('cvA').value)||0, from=$('cvF').value, to=$('cvT').value; const rates={MAD:1,...liveRates.rates}; if(from==='MAD'&&rates[to])box.textContent=`${(amount*rates[to]).toFixed(2)} ${to}`; else if(rates[from]&&rates[to])box.textContent=`${(amount/rates[from]*rates[to]).toFixed(2)} ${to}`; }
- function pgBot(P) { P.innerHTML=`<div class="sec">مساعد السفر</div><div class="card"><div class="es-icon">${ic('chat',22)}</div><h3>مساعدك أثناء الرحلة</h3><p style="font-size:.8rem;line-height:1.7;color:var(--text-muted)">هذه الصفحة تجمع أدوات السفر الأساسية في مكان واحد. اختر إحدى الأدوات للوصول بسرعة إلى معلومات وجهتك وخطة رحلتك.</p><div class="tools"><button class="btn ghost" onclick="go('explore')">استكشاف الأماكن</button><button class="btn ghost" onclick="go('map')">الطقس والصرف</button><button class="btn ghost" onclick="go('trip')">إدارة الرحلة</button><button class="btn ghost" onclick="go('home')">البحث عن وجهة</button></div></div>`; }
+ function pgBot(P) { P.innerHTML=`<div class="sec">مساعد السفر</div><div class="card"><div class="es-icon">${ic('chat',22)}</div><h3>مساعدك أثناء الرحلة</h3><p style="font-size:.8rem;line-height:1.7;color:var(--text-muted)">هذه الصفحة تجمع أدوات السفر الأساسية في مكان واحد. اختر إحدى الأدوات للوصول بسرعة إلى معلومات وجهتك وخطة رحلتك.</p><div class="tools"><button class="btn ghost" onclick="window.location.href='./explore.html?dest='+encodeURIComponent(city)+'&tab='+encodeURIComponent(tab)">استكشاف الأماكن</button><button class="btn ghost" onclick="window.location.href='./map.html'">الطقس والصرف</button><button class="btn ghost" onclick="window.location.href='./itinerary.html'">إدارة الرحلة</button><button class="btn ghost" onclick="go('home')">البحث عن وجهة</button></div></div>`; }
   try {
     render();
     window.__hideMySindbadSplash?.();
