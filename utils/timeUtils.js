@@ -81,10 +81,10 @@ if (typeof globalThis !== 'undefined' && !globalThis.CITY_IMAGES) {
 
   const showStartupError = (error) => {
     if (finished || failed) return;
+    const splash = getSplash();
+    if (!splash) { finished = true; return; }
     failed = true;
     console.error('[My Sindbad] startup failed', error);
-    const splash = getSplash();
-    if (!splash) return;
     splash.innerHTML = '<div style="max-width:22rem;padding:1.5rem;text-align:center;color:#fff;font-family:system-ui,sans-serif;direction:rtl"><strong style="display:block;color:#D4AF37;font-size:1.25rem;margin-bottom:.6rem">تعذر تشغيل My Sindbad</strong><p style="line-height:1.7;margin:0 0 1rem;color:#fff">حدث خطأ أثناء تحميل الصفحة. أعد المحاولة من فضلك.</p><button type="button" id="startupRetry" style="border:0;border-radius:.6rem;padding:.7rem 1.1rem;background:#D4AF37;color:#0A192F;font-weight:700;cursor:pointer">إعادة المحاولة</button></div>';
     splash.querySelector('#startupRetry')?.addEventListener('click', () => root.location.reload());
   };
