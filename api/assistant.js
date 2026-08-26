@@ -70,8 +70,18 @@ function isWeatherMessage(message) {
   return /طقس|جو|مطر|شتا|شتاء|برد|سخون|حرارة|رطوبة|rain|weather/i.test(message);
 }
 
+function isGreetingMessage(message) {
+  return /السلام عليكم|سلام|لاباس|كيف حالك|كيف داير|الحمد لله|hello|hi|how are you/i.test(String(message || ''));
+}
+
+function greetingResponse(message, trip) {
+  const destination = tripDestination(trip);
+  if (/لاباس|كيف حالك|كيف داير|how are you/i.test(message)) return { type: 'TEXT', message: `لاباس الحمد لله، شكراً على السؤال. نقدر نعاونك ترتب رحلتك فـ${destination} أو نجاوبك على الطقس والأنشطة.` };
+  return { type: 'TEXT', message: `وعليكم السلام! مرحبا بك. أنا سندباد، رفيقك فالسفر. شنو بغيتي نديرو فـ${destination}؟` };
+}
+
 function isTravelMessage(message) {
-  return /سفر|رحل|وجه|نشاط|طقس|جو|مطر|شتا|برد|حرارة|خريطة|فندق|مطعم|مقهى|مطار|قطار|ميزاني|شنطة|تجهيز|بدل|استبدل|أرخص|يوم|اليوم|غدا|غداً|travel|trip|weather|hotel|restaurant|map|airport/i.test(message);
+  return /سفر|رحل|وجه|نشاط|طقس|جو|مطر|شتا|برد|حرارة|خريطة|فندق|مطعم|مقهى|مطار|قطار|ميزاني|شنطة|تجهيز|بدل|استبدل|أرخص|حيد|احذف|نقل|رتب|خطة|يوم|اليوم|غدا|غداً|travel|trip|weather|hotel|restaurant|map|airport|replace|remove|move|replan/i.test(message);
 }
 
 function tripDestination(trip) {
@@ -194,24 +204,33 @@ async function buildReplacementOptions(trip, day, activityIndex, aiOptions = [])
 }
 
 function fallbackResponse(message, trip) {
+  const removeRequested = /حيد|احذف|remove|delete/i.test(message);
+  const moveRequested = /حرك|نقل|بدل الوقت|move|reschedule/i.test(message);
+  const replanRequested = /رتب|خطة من جديد|عاود خطط|replan|rearrange/i.test(message);
   const replaceRequested = /بدل|استبدل|أرخص|غيّر|replace|cheaper/i.test(message);
-  if (!replaceRequested) return { type: 'TEXT', message: 'نقدر نعاونك فالتخطيط. جرّب تطلب تبديل نشاط بشي أرخص أو ترتيب يومك.' };
   const day = numberFromText(message, 1);
   const activityIndex = Math.max(0, numberFromText(message.match(/النشاط\s*(\d+)|activity\s*(\d+)/i)?.[0], 2) - 1);
+  if (removeRequested) return { type: 'REMOVE', day, activityIndex, preview: `معاينة: حذف النشاط ${activityIndex + 1} من اليوم ${day}. أكّد قبل التنفيذ.` };
+  if (moveRequested) return { type: 'MOVE', day, activityIndex, preview: `معاينة: نقل النشاط ${activityIndex + 1} في اليوم ${day} إلى وقت أنسب. أكّد قبل التنفيذ.` };
+  if (replanRequested) return { type: 'REPLAN', day, activityIndex, preview: `معاينة: إعادة ترتيب برنامج اليوم ${day} حسب تفضيلاتك. أكّد قبل التنفيذ.` };
+  if (!replaceRequested) return { type: 'TEXT', message: 'نقدر نعاونك فالتخطيط. جرّب تطلب تبديل نشاط بشي أرخص أو ترتيب يومك.' };
   const current = findActivity(trip, day, activityIndex) || flattenActivities(trip)[activityIndex];
   const currentCost = activityCost(current);
   const alternatives = localAlternatives(trip, current, currentCost, categoryFor(current));
   return { type: 'REPLACE_ACTIVITY', day, activityIndex, options: alternatives };
 }
 
-async function askGemini(message, trip) {
+const ASSISTANT_SYSTEM_PROMPT = 'أنت سندباد، رفيق سفر مغربي ودود. رد على السلام والمجاملة ("لاباس"، "كيف حالك") بود وبإيجاز ثم وجّه للرحلة. نفّذ أي طلب ضمن نطاق السفر. خارج النطاق → جملة لطيفة تعيد للسفر. أرجع JSON فقط. الأنواع المسموحة: TEXT، REPLACE_ACTIVITY، REMOVE، MOVE، REPLAN. عند أي تعديل، أضف preview واضحاً ولا تنفّذ التعديل دون تأكيد. لا تخترع أماكن أو أرقام طقس؛ استخدم بيانات الرحلة أو المصادر الواقعية المتاحة.';
+
+async function askGemini(message, trip, history = []) {
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) return null;
-  const prompt = `أنت مساعد سفر. المستخدم قال: '${message}'. الرحلة الحالية: ${JSON.stringify(trip)}. إذا طلب تغيير، أرجع JSON فقط بصيغة: {"type":"REPLACE_ACTIVITY","day":1,"activityIndex":1,"options":[{"title":"...","cost":...,"coords":{"lat":...,"lng":...},"reason":"أرخص بـ 50 MAD"}]}. إذا كان سؤالاً عادياً، أرجع {"type":"TEXT","message":"..."}. لا تخترع أماكن؛ استخدم فقط أنشطة من الرحلة أو بدائل واقعية في نفس المدينة.`;
+  const contents = (Array.isArray(history) ? history.slice(-8) : []).map((item) => ({ role: item.role === 'assistant' || item.role === 'model' ? 'model' : 'user', parts: [{ text: String(item.content || item.text || '') }] })).filter((item) => item.parts[0].text);
+  contents.push({ role: 'user', parts: [{ text: `الرحلة الحالية: ${JSON.stringify(trip)}\nرسالة المستخدم: ${message}` }] });
   const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${encodeURIComponent(apiKey)}`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ contents: [{ role: 'user', parts: [{ text: prompt }] }], generationConfig: { temperature: 0.3, responseMimeType: 'application/json' } })
+    body: JSON.stringify({ systemInstruction: { parts: [{ text: ASSISTANT_SYSTEM_PROMPT }] }, contents, generationConfig: { temperature: 0.3, responseMimeType: 'application/json' } })
   });
   if (!response.ok) throw new Error('Gemini assistant request failed');
   const payload = await response.json();
@@ -229,19 +248,22 @@ export default async function handler(req, res) {
   const body = req.body || {};
   const message = String(body.message || '').trim();
   const trip = body.trip && typeof body.trip === 'object' ? body.trip : {};
+  const history = Array.isArray(body.history) ? body.history.slice(-8) : [];
   if (!message) return jsonResponse(res, 400, { type: 'TEXT', message: 'اكتب طلبك وسنعاونك في الرحلة.' });
-  if (!isTravelMessage(message)) return jsonResponse(res, 200, { type: 'TEXT', message: 'أنا مختص بمساعدتك في رحلتك فقط.' });
+  if (isGreetingMessage(message)) return jsonResponse(res, 200, greetingResponse(message, trip));
+  if (!isTravelMessage(message)) return jsonResponse(res, 200, { type: 'TEXT', message: 'أنا مختص بمساعدتك في رحلتك فقط؛ نقدر نعاونك فالوجهة والطقس والأنشطة والميزانية.' });
   if (isWeatherMessage(message)) return jsonResponse(res, 200, await weatherResponse(trip));
 
   try {
-    const aiResponse = await askGemini(message, trip);
+    const aiResponse = await askGemini(message, trip, history);
     const response = aiResponse && typeof aiResponse === 'object' ? aiResponse : fallbackResponse(message, trip);
-    if (response.type === 'REPLACE_ACTIVITY') {
+    if (response.type === 'REPLACE_ACTIVITY' || response.type === 'REPLACE') {
       const day = Number(response.day) || 1;
       const activityIndex = Math.max(0, Number(response.activityIndex) || 0);
       const options = await buildReplacementOptions(trip, day, activityIndex, response.options);
-      return jsonResponse(res, 200, { type: 'REPLACE_ACTIVITY', day, activityIndex, options });
+      return jsonResponse(res, 200, { type: 'REPLACE_ACTIVITY', day, activityIndex, options, preview: response.preview || '' });
     }
+    if (['REMOVE', 'REMOVE_ACTIVITY', 'MOVE', 'MOVE_ACTIVITY', 'REPLAN'].includes(response.type)) return jsonResponse(res, 200, { ...response, preview: response.preview || response.message || 'معاينة التعديل جاهزة للتأكيد.' });
     if (response.type === 'TEXT' && typeof response.message === 'string') return jsonResponse(res, 200, response);
     return jsonResponse(res, 200, fallbackResponse(message, trip));
   } catch (error) {

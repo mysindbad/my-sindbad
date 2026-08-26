@@ -1,0 +1,29 @@
+:root {
+  --surface-0: #fbf9f5;
+  --surface-1: #ffffff;
+  --surface-2: #fffaf0;
+  --text-strong: #0c1624;
+  --text-muted: #64748b;
+  --border-soft: #e5e7eb;
+  color-scheme: light;
+}
+html[data-theme='dark'] {
+  --surface-0: #101a2b;
+  --surface-1: #17243a;
+  --surface-2: #202f48;
+  --text-strong: #f8fafc;
+  --text-muted: #c4cfdd;
+  --border-soft: #33445f;
+  color-scheme: dark;
+}
+html[data-theme='dark'] body { background: #060e1a !important; color: var(--text-strong) !important; }
+html[data-theme='dark'] .shell, html[data-theme='dark'] main.shell { background: var(--surface-0) !important; color: var(--text-strong) !important; }
+html[data-theme='dark'] .bg-white, html[data-theme='dark'] dialog, html[data-theme='dark'] .card, html[data-theme='dark'] .setting, html[data-theme='dark'] .stat, html[data-theme='dark'] .trip, html[data-theme='dark'] .empty, html[data-theme='dark'] input, html[data-theme='dark'] select, html[data-theme='dark'] textarea { background-color: var(--surface-1) !important; color: var(--text-strong) !important; border-color: var(--border-soft) !important; }
+html[data-theme='dark'] .bg-slate-50, html[data-theme='dark'] .bg-gray-50 { background-color: var(--surface-0) !important; }
+html[data-theme='dark'] .text-slate-500, html[data-theme='dark'] .text-slate-600, html[data-theme='dark'] .text-gray-500, html[data-theme='dark'] .text-gray-600 { color: var(--text-muted) !important; }
+html[data-theme='dark'] .assistant-sheet, html[data-theme='dark'] .assistant-form, html[data-theme='dark'] .assistant-quick { background: var(--surface-1) !important; color: var(--text-strong) !important; border-color: var(--border-soft) !important; }
+html[data-theme='dark'] .assistant-head h2, html[data-theme='dark'] .assistant-bubble, html[data-theme='dark'] .assistant-quick button { color: var(--text-strong) !important; }
+html[data-theme='dark'] .assistant-bubble, html[data-theme='dark'] .assistant-quick button { background: var(--surface-2) !important; border-color: var(--border-soft) !important; }
+html[data-theme='dark'] .trip-panel, html[data-theme='dark'] .trip-activity, html[data-theme='dark'] .saved-place { background: var(--surface-1) !important; color: var(--text-strong) !important; border-color: var(--border-soft) !important; }
+html[data-theme='dark'] .trip-activity small, html[data-theme='dark'] .saved-place small { color: var(--text-muted) !important; }
+html[data-theme='dark'] .profile-card, html[data-theme='dark'] .settings, html[data-theme='dark'] .stats, html[data-theme='dark'] .trips { color: var(--text-strong); }

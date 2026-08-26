@@ -1,22 +1,23 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+
+<html dir="rtl" lang="ar">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <title>حسابي — My Sindbad</title>
-  <meta name="theme-color" content="#0A192F">
-  <meta name="description" content="إدارة حسابك ورحلاتك المحفوظة وتفضيلاتك في My Sindbad">
-  <link rel="manifest" href="./manifest.json">
-  <link rel="icon" type="image/jpeg" href="./icons/brand-logo.jpg">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="./utils/navigation.css">
-  <link rel="stylesheet" href="./utils/header.css">
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script type="module" src="./utils/supabaseClient.js"></script>
-  <script src="./utils/auth.js"></script>
-  <style>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1, viewport-fit=cover" name="viewport"/>
+<title>حسابي — My Sindbad</title>
+<meta content="#0A192F" name="theme-color"/>
+<meta content="إدارة حسابك ورحلاتك المحفوظة وتفضيلاتك في My Sindbad" name="description"/>
+<link href="./manifest.json" rel="manifest"/>
+<link href="./icons/brand-logo.jpg" rel="icon" type="image/jpeg"/>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&amp;family=Playfair+Display:wght@700&amp;display=swap" rel="stylesheet"/>
+<link href="./utils/navigation.css" rel="stylesheet"/>
+<link href="./utils/header.css" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="./utils/supabaseClient.js" type="module"></script>
+<script src="./utils/auth.js"></script>
+<style>
     :root { --navy: #0A192F; --navy-soft: #243b53; --gold: #D4AF37; --gold-dark: #b8941f; --bg: #fbf9f5; --line: #e8ecf2; --muted: #64748b; --danger: #dc2626; }
     * { box-sizing: border-box; font-family: 'Cairo', system-ui, sans-serif; }
     body { margin: 0; min-height: 100vh; background: #060e1a; color: #0c1624; }
@@ -63,36 +64,40 @@
     .nav a.active { color: var(--gold); background: #d4af3729; font-weight: 800; }
     @media (min-width: 700px) { .shell { margin: 22px auto; min-height: calc(100vh - 44px); border-radius: 28px; overflow: hidden; } .nav { position: absolute; border-radius: 0 0 28px 28px; } }
   </style>
-  <script type="module" src="./utils/i18n.js?m3=fbf30d2"></script>
+<script src="./utils/i18n.js?m3=fbf30d2" type="module"></script>
+<script>(function(){try{var p=localStorage.getItem('themePreference')||'auto';var d=window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches;document.documentElement.dataset.themePreference=p;document.documentElement.dataset.theme=(p==='dark'||(p==='auto'&&d))?'dark':'light';}catch(e){document.documentElement.dataset.theme='light';}})();</script>
+<link href="./theme.css" rel="stylesheet"/>
+<script defer="" src="./theme.js"></script>
 </head>
 <body>
-  <main class="shell">
-    <div data-site-header></div>
-    <section class="content">
-      <section class="profile-card" aria-labelledby="profile-title">
-        <div class="avatar" aria-hidden="true">👤</div>
-         <div><h1 id="profile-title">زائر My Sindbad</h1><p id="profile-email"></p></div>
-      </section>
-      <h2 class="section-title" data-i18n="quick_view">نظرة سريعة</h2>
-      <section class="stats" aria-label="إحصائيات الحساب">
-        <div class="stat"><strong id="saved-count">0</strong><span>الرحلات المحفوظة</span></div>
-        <div class="stat"><strong id="favorite-count">0</strong><span>المفضلة</span></div>
-        <div class="stat"><strong id="points-count">0</strong><span>النقاط</span></div>
-      </section>
-      <h2 class="section-title" data-i18n="settings">الإعدادات</h2>
-      <section class="settings" aria-label="إعدادات الحساب">
-        <label class="setting"><span class="setting-info"><span class="setting-icon" aria-hidden="true">文</span>اللغة</span><select id="language" data-language-select aria-label="اختيار اللغة"><option value="ar">العربية</option><option value="en">English</option><option value="fr">Français</option><option value="es">Español</option><option value="de">Deutsch</option><option value="tr">Türkçe</option></select></label>
-        <label class="setting"><span class="setting-info"><span class="setting-icon" aria-hidden="true">¤</span>العملة</span><select id="currency" aria-label="اختيار العملة"><option value="MAD">MAD</option></select><small id="currency-note" style="display:block;color:#64748b;font-size:.68rem;margin-top:.25rem">العملة المدعومة حالياً: MAD.</small></label>
-        <div class="setting"><span class="setting-info"><span class="setting-icon" aria-hidden="true">♧</span>الإشعارات</span><button id="notifications" class="toggle" type="button" role="switch" aria-checked="false" aria-label="تفعيل الإشعارات"></button></div>
-      </section>
-      <h2 class="section-title" data-i18n="saved_trips">الرحلات المحفوظة</h2>
-      <section id="saved-trips" class="trips" aria-live="polite"></section>
-      <button id="logout" class="logout" type="button">تسجيل الخروج</button>
-    </section>
-    <nav data-site-nav data-active="profile"></nav>
-  </main>
-  <div id="toast" class="toast" role="status" aria-live="polite">تم حفظ الإعدادات بنجاح</div>
-  <script>
+<main class="shell">
+<div data-site-header=""></div>
+<section class="content">
+<section aria-labelledby="profile-title" class="profile-card">
+<div aria-hidden="true" class="avatar">👤</div>
+<div><h1 id="profile-title">زائر My Sindbad</h1><p id="profile-email"></p></div>
+</section>
+<h2 class="section-title" data-i18n="quick_view">نظرة سريعة</h2>
+<section aria-label="إحصائيات الحساب" class="stats">
+<div class="stat"><strong id="saved-count">0</strong><span data-i18n="saved_trips">الرحلات المحفوظة</span></div>
+<div class="stat"><strong id="favorite-count">0</strong><span>المفضلة</span></div>
+<div class="stat"><strong id="points-count">0</strong><span>النقاط</span></div>
+</section>
+<h2 class="section-title" data-i18n="settings">الإعدادات</h2>
+<section aria-label="إعدادات الحساب" class="settings">
+<label class="setting"><span class="setting-info"><span aria-hidden="true" class="setting-icon">文</span><span data-i18n="language">اللغة</span></span><select aria-label="اختيار اللغة" data-language-select="" id="language"><option value="ar">العربية</option><option value="en">English</option></select></label>
+<label class="setting"><span class="setting-info"><span aria-hidden="true" class="setting-icon">¤</span>العملة</span><select aria-label="اختيار العملة" id="currency"><option value="MAD">MAD</option></select><small id="currency-note" style="display:block;color:#64748b;font-size:.68rem;margin-top:.25rem">العملة المدعومة حالياً: MAD.</small></label>
+<div class="setting"><span class="setting-info"><span aria-hidden="true" class="setting-icon">♧</span><span data-i18n="notifications">الإشعارات</span></span><button aria-checked="false" aria-label="تفعيل الإشعارات" class="toggle" id="notifications" role="switch" type="button"></button></div>
+<label class="setting"><span class="setting-info"><span aria-hidden="true" class="setting-icon">◐</span><span data-i18n="theme">المظهر</span></span><select aria-label="اختيار المظهر" id="theme"><option data-i18n="theme_auto" value="auto">تلقائي</option><option data-i18n="theme_light" value="light">نهاري</option><option data-i18n="theme_dark" value="dark">ليلي</option></select></label>
+</section>
+<h2 class="section-title" data-i18n="saved_trips">الرحلات المحفوظة</h2>
+<section aria-live="polite" class="trips" id="saved-trips"></section>
+<button class="logout" id="logout" type="button">تسجيل الخروج</button>
+</section>
+<nav data-active="profile" data-site-nav=""></nav>
+</main>
+<div aria-live="polite" class="toast" id="toast" role="status">تم حفظ الإعدادات بنجاح</div>
+<script>
     const readLocal = (key, fallback) => { try { const value = localStorage.getItem(key); return value === null ? fallback : JSON.parse(value); } catch (error) { return fallback; } };
     const writeLocal = (key, value) => { try { localStorage.setItem(key, JSON.stringify(value)); return true; } catch (error) { return false; } };
     const toast = document.getElementById('toast');
@@ -125,13 +130,16 @@
     const language = document.getElementById('language');
     const currency = document.getElementById('currency');
     const notifications = document.getElementById('notifications');
+    const theme = document.getElementById('theme');
     language.value = readLocal('userLang', 'ar');
     currency.value = readLocal('userCurrency', 'MAD');
     const notificationsEnabled = Boolean(readLocal('notificationsEnabled', false));
     notifications.classList.toggle('on', notificationsEnabled); notifications.setAttribute('aria-checked', String(notificationsEnabled));
+    theme.value = window.MySindbadTheme?.get?.() || readLocal('themePreference', 'auto');
     language.addEventListener('change', () => { writeLocal('userLang', language.value); showToast(); });
     currency.addEventListener('change', () => { writeLocal('userCurrency', currency.value); showToast(); });
     notifications.addEventListener('click', () => { const enabled = !notifications.classList.contains('on'); notifications.classList.toggle('on', enabled); notifications.setAttribute('aria-checked', String(enabled)); writeLocal('notificationsEnabled', enabled); showToast(enabled ? 'سيظهر تذكير checklist عند وجود رحلة.' : 'تم إيقاف تذكير checklist.'); });
+    theme.addEventListener('change', () => { writeLocal('themePreference', theme.value); window.MySindbadTheme?.set?.(theme.value); showToast('تم حفظ المظهر.'); });
     if (notificationsEnabled && readLocal('currentTrip', null)) setTimeout(() => showToast('تذكير checklist: راجع قائمة التجهيزات في رحلتك.'), 700);
     document.getElementById('favorite-count').textContent = Array.isArray(readLocal('favorites', [])) ? readLocal('favorites', []).length : 0;
     document.getElementById('points-count').textContent = Number(readLocal('points', readLocal('sb_points', 0))) || 0;

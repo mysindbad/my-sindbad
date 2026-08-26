@@ -1,54 +1,54 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+
+<html dir="rtl" lang="ar">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>وضع اليوم - سندباد</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script src="./utils/cityImages.js"></script>
-  <link rel="stylesheet" href="./utils/navigation.css" />
-  <script type="module" src="./utils/i18n.js?m3=fbf30d2"></script>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>وضع اليوم - سندباد</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="./utils/cityImages.js"></script>
+<link href="./utils/navigation.css" rel="stylesheet"/>
+<script src="./utils/i18n.js?m3=fbf30d2" type="module"></script>
+<script>(function(){try{var p=localStorage.getItem('themePreference')||'auto';var d=window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches;document.documentElement.dataset.themePreference=p;document.documentElement.dataset.theme=(p==='dark'||(p==='auto'&&d))?'dark':'light';}catch(e){document.documentElement.dataset.theme='light';}})();</script>
+<link href="./theme.css" rel="stylesheet"/>
+<script defer="" src="./theme.js"></script>
 </head>
 <body class="bg-slate-50 text-slate-900 pb-20">
-  <div class="max-w-md mx-auto p-4 space-y-4">
-    <!-- Header Weather -->
-    <header class="bg-gradient-to-r from-amber-500 to-amber-600 rounded-2xl p-4 text-white shadow-lg flex justify-between items-center">
-      <div>
-        <h1 class="text-xl font-black" data-i18n="today_heading">وضع اليوم 📍</h1>
-        <p id="today-city" class="text-sm font-bold text-white">وجهتك</p>
-        <p id="today-date" class="text-xs text-amber-100">جاري التحميل...</p>
-      </div>
-      <div id="weather-box" class="text-left text-xs bg-white/20 p-2 rounded-xl backdrop-blur-sm">
-        <span id="weather-temp">--°C</span> • <span id="weather-desc">مشمس</span>
-      </div>
-    </header>
-
-    <!-- Progress Bar -->
-    <div class="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm space-y-2">
-      <div class="flex justify-between text-xs font-bold text-slate-600">
-        <span>تقدم اليوم</span>
-        <span id="progress-percent">0%</span>
-      </div>
-      <div class="w-full bg-slate-100 rounded-full h-3 overflow-hidden">
-        <div id="progress-bar" class="bg-amber-500 h-full w-0 transition-all duration-500"></div>
-      </div>
-    </div>
-
-    <!-- Active & Next Cards -->
-    <div class="space-y-3">
-      <h2 class="text-sm font-bold text-slate-500" data-i18n="today_activity">النشاط الحالي</h2>
-      <div id="current-card" class="bg-white p-5 rounded-2xl border-2 border-amber-400 shadow-md">
-        <div id="current-title" class="text-lg font-black text-slate-800">لا أنشطة لهذا اليوم</div>
-        <p id="current-time" class="text-xs text-slate-400 mb-4">--:--</p>
-        <button id="btn-arrived" class="hidden w-full bg-amber-500 hover:bg-amber-600 text-white font-bold py-3 rounded-xl shadow transition">وصلت ✓</button>
-      </div>
-    </div>
-
-    <!-- Banner Alerts Container -->
-    <div id="alerts-container"></div>
-  </div>
-
-  <script type="module">
+<div class="max-w-md mx-auto p-4 space-y-4">
+<!-- Header Weather -->
+<header class="bg-gradient-to-r from-amber-500 to-amber-600 rounded-2xl p-4 text-white shadow-lg flex justify-between items-center">
+<div>
+<h1 class="text-xl font-black" data-i18n="today_heading">وضع اليوم 📍</h1>
+<p class="text-sm font-bold text-white" id="today-city">وجهتك</p>
+<p class="text-xs text-amber-100" id="today-date">جاري التحميل...</p>
+</div>
+<div class="text-left text-xs bg-white/20 p-2 rounded-xl backdrop-blur-sm" id="weather-box">
+<span id="weather-temp">--°C</span> • <span id="weather-desc">مشمس</span>
+</div>
+</header>
+<!-- Progress Bar -->
+<div class="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm space-y-2">
+<div class="flex justify-between text-xs font-bold text-slate-600">
+<span>تقدم اليوم</span>
+<span id="progress-percent">0%</span>
+</div>
+<div class="w-full bg-slate-100 rounded-full h-3 overflow-hidden">
+<div class="bg-amber-500 h-full w-0 transition-all duration-500" id="progress-bar"></div>
+</div>
+</div>
+<!-- Active & Next Cards -->
+<div class="space-y-3">
+<h2 class="text-sm font-bold text-slate-500" data-i18n="today_activity">النشاط الحالي</h2>
+<div class="bg-white p-5 rounded-2xl border-2 border-amber-400 shadow-md" id="current-card">
+<div class="text-lg font-black text-slate-800" id="current-title">لا أنشطة لهذا اليوم</div>
+<p class="text-xs text-slate-400 mb-4" id="current-time">--:--</p>
+<button class="hidden w-full bg-amber-500 hover:bg-amber-600 text-white font-bold py-3 rounded-xl shadow transition" id="btn-arrived">وصلت ✓</button>
+</div>
+</div>
+<!-- Banner Alerts Container -->
+<div id="alerts-container"></div>
+</div>
+<script type="module">
     import { evaluateAlerts } from './utils/proactive.js';
     import { evaluateHealth } from './utils/health.js';
 

@@ -1,24 +1,25 @@
-<!doctype html>
-<html lang="ar" dir="rtl">
+<!DOCTYPE html>
+
+<html dir="rtl" lang="ar">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <title>الخريطة — My Sindbad</title>
-  <meta name="theme-color" content="#0A192F">
-  <link rel="icon" type="image/jpeg" href="./icons/brand-logo.jpg">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="./utils/navigation.css">
-  <link rel="stylesheet" href="./utils/header.css">
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script type="module" src="./utils/supabaseClient.js"></script>
-  <script src="./utils/auth.js"></script>
-  <script src="./utils/appState.js"></script>
-  <script src="./utils/cityImages.js"></script>
-  <script src="./utils/geocode.js"></script>
-  <link rel="stylesheet" href="https://api.mapbox.com/mapbox-gl-js/v3.5.1/mapbox-gl.css">
-  <style>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1, viewport-fit=cover" name="viewport"/>
+<title>الخريطة — My Sindbad</title>
+<meta content="#0A192F" name="theme-color"/>
+<link href="./icons/brand-logo.jpg" rel="icon" type="image/jpeg"/>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&amp;family=Playfair+Display:wght@700&amp;display=swap" rel="stylesheet"/>
+<link href="./utils/navigation.css" rel="stylesheet"/>
+<link href="./utils/header.css" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="./utils/supabaseClient.js" type="module"></script>
+<script src="./utils/auth.js"></script>
+<script src="./utils/appState.js"></script>
+<script src="./utils/cityImages.js"></script>
+<script src="./utils/geocode.js"></script>
+<link href="https://api.mapbox.com/mapbox-gl-js/v3.5.1/mapbox-gl.css" rel="stylesheet"/>
+<style>
     :root{--navy:#0A192F;--gold:#D4AF37;--dark:#b8941f;--bg:#fbf9f5;--line:#e8ecf2}
     *{box-sizing:border-box;font-family:Cairo,system-ui,sans-serif}body{margin:0;min-height:100vh;background:#060e1a;color:#0c1624}
     .shell{width:100%;max-width:480px;min-height:100vh;margin:auto;padding-bottom:calc(86px + env(safe-area-inset-bottom));background:var(--bg);box-shadow:0 0 60px #0005}
@@ -26,7 +27,7 @@
     .brand{display:flex;align-items:center;gap:.7rem;color:#fff;text-decoration:none}.brand img{width:46px;height:46px;border-radius:14px;border:1px solid #d4af3770;object-fit:cover}.brand b{display:block;color:var(--gold);font:700 1.2rem 'Playfair Display',Georgia,serif}.brand small{display:block;color:#fffb;font-size:.65rem}
     .content{padding:18px}.intro p{margin:0;color:var(--dark);font-size:.68rem;font-weight:800}.intro h1{margin:.25rem 0 14px;color:var(--navy);font-size:1.45rem;font-weight:800}
     .trip-panel{margin-bottom:12px;padding:12px;border:1px solid #d4af3780;border-radius:16px;background:#fff;box-shadow:0 8px 20px #0b1b5110}.trip-toolbar{display:flex;align-items:center;gap:8px}.trip-toolbar label{flex:1;color:var(--navy);font-size:.72rem;font-weight:800}.trip-toolbar select{width:100%;margin-top:5px;padding:8px;border:1px solid var(--line);border-radius:10px;background:#fffaf0;color:var(--navy);font-weight:700}.trip-summary{min-width:145px;padding:8px;border-radius:10px;background:#0a192f;color:#fff;font-size:.64rem;line-height:1.7;text-align:center}.trip-activities{display:grid;gap:6px;margin-top:10px}.trip-activity{display:flex;align-items:center;gap:8px;padding:8px;border:1px solid var(--line);border-radius:10px;background:#fbf9f5;color:var(--navy);cursor:pointer;text-align:right}.trip-activity.current{border-color:var(--gold);background:#fffaf0}.trip-activity .number{display:grid;place-items:center;width:24px;height:24px;flex:none;border-radius:8px;background:var(--navy);color:#fff;font-size:.7rem;font-weight:800}.trip-activity.current .number{background:var(--gold);color:var(--navy)}.trip-activity strong{display:block;font-size:.68rem}.trip-activity small{display:block;color:#64748b;font-size:.6rem}.trip-empty{margin:10px 0 0;color:#64748b;font-size:.68rem;line-height:1.8}
-    .map-wrap{position:relative;z-index:1;overflow:hidden;border:2px solid var(--gold);border-radius:18px;box-shadow:0 12px 28px #0b1b5124}#map{height:70vh;min-height:420px;max-height:610px}
+    .map-wrap{position:relative;z-index:1;display:none;overflow:hidden;border:2px solid var(--gold);border-radius:18px;box-shadow:0 12px 28px #0b1b5124}.map-wrap.expanded{display:block}#map{height:70vh;min-height:420px;max-height:610px}.trip-search{width:100%;margin-top:10px;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:#fff;color:var(--navy);outline:0;font-size:.72rem}.trip-search:focus{border-color:var(--gold)}
     .search{position:absolute;z-index:500;top:12px;right:12px;left:12px;display:flex;gap:7px;padding:6px;background:#fffffff2;border:1px solid #d4af3780;border-radius:14px;box-shadow:0 8px 22px #06101c2e}.search input{width:100%;min-height:40px;padding:0 .7rem;border:0;outline:0;background:transparent;color:var(--navy);font-size:.8rem}.search button,.locate{display:grid;place-items:center;min-width:42px;min-height:40px;border:0;border-radius:10px;background:var(--navy);color:#fff;cursor:pointer;font-weight:800}.locate{position:absolute;z-index:500;bottom:14px;left:14px;border:2px solid #fff;background:var(--dark);box-shadow:0 4px 14px #0004}
     .modes{display:flex;gap:8px;margin:12px 0}.modes button{flex:1;min-height:44px;border:1px solid var(--line);border-radius:12px;background:#fff;color:#516174;cursor:pointer;font-size:.8rem;font-weight:700}.modes button.active{border-color:var(--gold);background:#fffaf0;color:var(--navy)}
     .status{min-height:22px;margin:0 2px 8px;color:#64748b;font-size:.7rem}.place{display:none;margin-top:12px;padding:15px;border:1px solid #d4af3775;border-radius:18px;background:#0a192fe8;color:#fff;box-shadow:0 12px 28px #06101c33;backdrop-filter:blur(14px)}.place.show{display:block}.place h2{margin:0 0 7px;font-size:1rem}.meta{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}.meta div{padding:8px;border:1px solid #fff2;border-radius:10px;background:#fff1}.meta small{display:block;color:#fffa;font-size:.62rem}.meta b{display:block;color:var(--gold);font-size:.78rem}.add{width:100%;min-height:44px;border:0;border-radius:12px;background:var(--gold);color:var(--navy);cursor:pointer;font-weight:800}
@@ -35,25 +36,29 @@
     @media(min-width:700px){body{padding:22px 0}.shell{min-height:calc(100vh - 44px);border-radius:28px;overflow:hidden}.nav{position:absolute;border-radius:0 0 28px 28px}}
     .saved-places{display:grid;gap:8px;margin-top:16px}.saved-place{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:10px;border:1px solid var(--line);border-radius:12px;background:#fff}.saved-place strong{font-size:.72rem;color:var(--navy)}.saved-place small{display:block;color:#64748b;font-size:.62rem}.saved-place div:last-child{display:flex;gap:5px}.saved-place button{min-height:34px;padding:0 8px;border:1px solid var(--line);border-radius:8px;background:#fffaf0;color:var(--navy);font-size:.62rem;font-weight:700;cursor:pointer}
   </style>
-  <script type="module" src="./utils/i18n.js?m3=fbf30d2"></script>
+<script src="./utils/i18n.js?m3=fbf30d2" type="module"></script>
+<script>(function(){try{var p=localStorage.getItem('themePreference')||'auto';var d=window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches;document.documentElement.dataset.themePreference=p;document.documentElement.dataset.theme=(p==='dark'||(p==='auto'&&d))?'dark':'light';}catch(e){document.documentElement.dataset.theme='light';}})();</script>
+<link href="./theme.css" rel="stylesheet"/>
+<script defer="" src="./theme.js"></script>
 </head>
 <body>
 <main class="shell">
-  <div data-site-header></div>
-  <section class="content">
-    <div class="intro"><p>MY SINDBAD · ملاحتك الذكية</p><h1 data-i18n="map_heading">اكتشف المكان، وابدأ الرحلة</h1></div>
-    <section class="trip-panel" aria-label="أنشطة الرحلة على الخريطة">
-      <div class="trip-toolbar"><label for="trip-day">عرض اليوم<select id="trip-day" aria-label="اختر يوم الرحلة"></select></label><div id="trip-summary" class="trip-summary">لا توجد رحلة محددة</div></div>
-      <div id="trip-activities" class="trip-activities"></div>
-      <p id="trip-empty" class="trip-empty">أنشئ رحلة أو أضف أنشطة ذات إحداثيات لعرضها على الخريطة.</p>
-    </section>
-    <div class="map-wrap"><div id="map" aria-label="خريطة تفاعلية"></div><form class="search" id="search"><input id="query" type="search" placeholder="ابحث عن مكان أو مدينة..." aria-label="البحث عن مكان"><button aria-label="بحث">⌕</button></form><button class="locate" id="locate" type="button" aria-label="موقعي الحالي">⌖</button></div>
-    <div class="modes"><button class="active" data-mode="driving" type="button">قيادة 🚗</button><button data-mode="walking" type="button">مشي 🚶</button></div>
-    <p class="status" id="status" role="status">ابحث عن مكان أو اضغط على الخريطة لاختيار وجهة.</p>
-    <article class="place" id="place"><h2 id="name">المكان المختار</h2><div class="meta"><div><small>المسافة</small><b id="distance">—</b></div><div><small>الوقت المتوقع</small><b id="duration">—</b></div></div><button class="add" id="add" type="button">أضف إلى رحلتي ➕</button></article>
-    <section><h2 style="margin:18px 0 8px;color:var(--navy);font-size:.9rem" data-i18n="my_places">أماكن رحلتي</h2><div id="saved-places" class="saved-places"></div></section>
-  </section>
-  <nav data-site-nav data-active="map"></nav>
+<div data-site-header=""></div>
+<section class="content">
+<div class="intro"><p>MY SINDBAD · ملاحتك الذكية</p><h1 data-i18n="map_heading">اكتشف المكان، وابدأ الرحلة</h1></div>
+<section aria-label="أنشطة الرحلة على الخريطة" class="trip-panel">
+<div class="trip-toolbar"><label for="trip-day">عرض اليوم<select aria-label="اختر يوم الرحلة" id="trip-day"></select></label><div class="trip-summary" id="trip-summary">لا توجد رحلة محددة</div></div>
+<input aria-label="ابحث في أماكن رحلتي" class="trip-search" id="trip-search" placeholder="ابحث في أماكن رحلتي..." type="search"/>
+<div class="trip-activities" id="trip-activities"></div>
+<p class="trip-empty" id="trip-empty">أنشئ رحلة أو أضف أنشطة ذات إحداثيات لعرضها على الخريطة.</p>
+</section>
+<div class="map-wrap" id="map-wrap"><div aria-label="خريطة تفاعلية" id="map"></div><form class="search" id="search"><input aria-label="البحث عن مكان" id="query" placeholder="ابحث عن مكان أو مدينة..." type="search"/><button aria-label="بحث">⌕</button></form><button aria-label="موقعي الحالي" class="locate" id="locate" type="button">⌖</button></div>
+<div class="modes" id="modes" style="display:none"><button class="active" data-mode="driving" type="button">قيادة 🚗</button><button data-mode="walking" type="button">مشي 🚶</button></div>
+<p class="status" id="status" role="status">اختر مكاناً من أماكن رحلتك لفتح الخريطة.</p><div aria-live="polite" class="status" hidden="" id="map-toast" role="status"></div>
+<article class="place" id="place"><h2 id="name">المكان المختار</h2><div class="meta"><div><small>المسافة</small><b id="distance">—</b></div><div><small>الوقت المتوقع</small><b id="duration">—</b></div></div><button class="add" data-i18n="add_to_trip" id="add" type="button">أضف إلى رحلتي ➕</button></article>
+<section><h2 data-i18n="my_places" style="margin:18px 0 8px;color:var(--navy);font-size:.9rem">أماكن رحلتي</h2><div class="saved-places" id="saved-places"></div></section>
+</section>
+<nav data-active="map" data-site-nav=""></nav>
 </main>
 <script src="https://api.mapbox.com/mapbox-gl-js/v3.5.1/mapbox-gl.js"></script>
 <script>
@@ -62,7 +67,7 @@
   let map,user=null,selectedPlace=null,selectedMarker=null,userMarker=null,mode='driving',searchController;
   let tripDays=[], selectedDay=Number(new URLSearchParams(location.search).get('day')) || 1, selectedTripIndex=Number(new URLSearchParams(location.search).get('activity')) || 0, tripMarkers=[];
   const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-  const status=m=>$('status').textContent=m;
+  const status=m=>$('status').textContent=m; const showToast=m=>{const toast=$('map-toast');if(!toast)return;toast.textContent=m;toast.hidden=false;clearTimeout(showToast.timer);showToast.timer=setTimeout(()=>{toast.hidden=true},3200)}; function expandMap(){const wrap=$('map-wrap');if(!wrap.classList.contains('expanded')){wrap.classList.add('expanded');$('modes').style.display='flex';requestAnimationFrame(()=>map?.resize())}}
   const dist=m=>m>1000?`${(m/1000).toFixed(1)} كم`:`${Math.round(m)} م`;
   const time=s=>{const m=Math.max(1,Math.round(s/60));return m>59?`${Math.floor(m/60)} س و ${m%60} د`:`${m} دقيقة`};
   function markerElement(current=false){const e=document.createElement('div');e.className=`marker${current?' current':''}`;return e}
@@ -108,14 +113,15 @@
       drawRoute(route);$('trip-summary').textContent=`${dist(route.distance)} · ${time(route.duration)}`;status(`مسار اليوم ${selectedDay} مرتب حسب وقت الأنشطة.`);
     }catch(error){fitCoordinates(points);$('trip-summary').textContent='تعذر حساب المسار';status('تعذر حساب مسار اليوم؛ تظهر العلامات المتاحة فقط.')}
   }
-  function renderTripDay(focusIndex=selectedTripIndex){
+  function renderTripDay(focusIndex=selectedTripIndex, filter=''){
     tripDays=readTripDays();const select=$('trip-day'),list=$('trip-activities'),empty=$('trip-empty');
     select.innerHTML=tripDays.length?tripDays.map((day,index)=>`<option value="${index+1}">اليوم ${day.day||index+1}</option>`).join(''):'<option value="1">لا توجد أيام</option>';
     const day=tripDays.find(item=>item.day===selectedDay)||tripDays[selectedDay-1]||tripDays[0];
     if(!day){selectedDay=1;list.innerHTML='';empty.textContent='أنشئ رحلة أو أضف أنشطة ذات إحداثيات لعرضها على الخريطة.';empty.hidden=false;clearTripMarkers();clearRoute();$('trip-summary').textContent='لا توجد رحلة محددة';return}
     selectedDay=day.day;select.value=String(selectedDay);const activities=sortedActivities(day),withCoords=activities.map(validCoords).filter(Boolean);empty.hidden=activities.length>0;empty.textContent=activities.length&&!withCoords.length?'الإحداثيات غير متوفرة لهذا النشاط':'أنشئ رحلة أو أضف أنشطة ذات إحداثيات لعرضها على الخريطة.';
-    list.innerHTML=activities.map((activity,index)=>{const c=validCoords(activity);return `<button type="button" class="trip-activity${index===focusIndex?' current':''}" data-trip-index="${index}"><span class="number">${index+1}</span><span><strong>${esc(activity.place||activity.name||activity.title||'نشاط')}</strong><small>${c?`${esc(activity.time||'')} · ${esc(activity.duration||'')}`:'الإحداثيات غير متوفرة لهذا النشاط'}</small></span></button>`}).join('');
-    list.querySelectorAll('[data-trip-index]').forEach(button=>button.addEventListener('click',()=>{selectedTripIndex=Number(button.dataset.tripIndex);renderTripDay(selectedTripIndex);focusTripActivity(selectedTripIndex)}));
+    const query=String(filter||'').trim().toLowerCase();
+    list.innerHTML=activities.map((activity,index)=>({ activity,index })).filter(({activity})=>!query||activityTitle(activity).toLowerCase().includes(query)).map(({activity,index})=>{const c=validCoords(activity);return `<button type="button" class="trip-activity${index===focusIndex?' current':''}" data-trip-index="${index}"><span class="number">${index+1}</span><span><strong>${esc(activity.place||activity.name||activity.title||'نشاط')}</strong><small>${c?`${esc(activity.time||'')} · ${esc(activity.duration||'')}`:'الإحداثيات غير متوفرة لهذا النشاط'}</small></span></button>`}).join('');
+    list.querySelectorAll('[data-trip-index]').forEach(button=>button.addEventListener('click',()=>{selectedTripIndex=Number(button.dataset.tripIndex);expandMap();renderTripDay(selectedTripIndex);focusTripActivity(selectedTripIndex)}));
     clearTripMarkers();clearRoute();if(!map||!map.loaded())return;
     activities.forEach((activity,index)=>{const c=validCoords(activity);if(!c)return;const marker=new mapboxgl.Marker({element:markerElement(index===focusIndex)}).setLngLat([c.lng,c.lat]).setPopup(new mapboxgl.Popup({offset:18}).setHTML(`<strong>${esc(activity.place||activity.name||activity.title||'نشاط')}</strong><br><small>${esc(activity.time||'')}</small>`)).addTo(map);marker.getElement().addEventListener('click',()=>{selectedTripIndex=index;renderTripDay(index)});tripMarkers.push(marker)});
     if(withCoords.length)drawTripRoute(withCoords);else $('trip-summary').textContent='لا توجد إحداثيات';
@@ -128,15 +134,15 @@
       if(Array.isArray(stored)) localStorage.setItem('currentItinerary',JSON.stringify(stored));
     } catch (error) {}
   }
-  async function focusTripActivity(index){const day=tripDays.find(item=>item.day===selectedDay)||tripDays[0];const activity=day?.activities?.[index];if(!activity)return;const hadCoords=Boolean(validCoords(activity));const resolved=await resolveActivityCoords(activity);if(!hadCoords&&resolved&&resolved.source!=='city'&&resolved.source!=='morocco'){activity.coords={lat:resolved.lat,lng:resolved.lng};activity.__coordSource=resolved.source;persistActivityCoords(activity);renderTripDay(index)}const c=validCoords(activity),marker=tripMarkers[index];if(marker){marker.togglePopup();map.flyTo({center:[c.lng,c.lat],zoom:zoomFor(activity.__coordSource||resolved.source)})}status(`تم تحديد ${activityTitle(activity)}.`)}
+  async function focusTripActivity(index){const day=tripDays.find(item=>item.day===selectedDay)||tripDays[0];const activity=day?.activities?.[index];if(!activity)return;expandMap();const hadCoords=Boolean(validCoords(activity));const resolved=await resolveActivityCoords(activity);if(!hadCoords&&resolved&&resolved.source!=='city'&&resolved.source!=='morocco'){activity.coords={lat:resolved.lat,lng:resolved.lng};activity.__coordSource=resolved.source;persistActivityCoords(activity);renderTripDay(index)}  const c=validCoords(activity);if(c){selectedPlace={name:activityTitle(activity),lat:c.lat,lon:c.lng};routeTo()}const marker=tripMarkers[index];if(marker&&c){marker.togglePopup();map.flyTo({center:[c.lng,c.lat],zoom:16})}status(`تم تحديد ${activityTitle(activity)}.`)}
   function routeTo(){if(!selectedPlace||!Number.isFinite(Number(selectedPlace.lat))||!Number.isFinite(Number(selectedPlace.lon))||!map){status('اختر مكاناً صالحاً أولاً لحساب المسار.');return}const start=user||{lng:map.getCenter().lng,lat:map.getCenter().lat};$('distance').textContent='جارٍ الحساب...';$('duration').textContent='جارٍ الحساب...';const profile=mode==='walking'?'walking':'driving';try{const u=`https://api.mapbox.com/directions/v5/mapbox/${profile}/${start.lng},${start.lat};${selectedPlace.lon},${selectedPlace.lat}?alternatives=false&geometries=geojson&overview=full&access_token=${encodeURIComponent(token||'')}`;fetch(u).then(async response=>{if(!response.ok)throw Error('directions');const data=await response.json(),summary=data.routes?.[0];if(!summary)throw Error('no_route');drawRoute(summary);$('distance').textContent=dist(summary.distance);$('duration').textContent=time(summary.duration);status(`تم تحديد المسار إلى ${selectedPlace.name}.`)}).catch(()=>{clearRoute();status('تعذر حساب المسار الآن؛ تحقق من Mapbox Token والاتصال.');$('distance').textContent='—';$('duration').textContent='—'})}catch(e){status('تعذر حساب المسار الآن.')}}
-  function choose(place){if(!map||!Number.isFinite(Number(place.lat))||!Number.isFinite(Number(place.lon))||(Number(place.lat)===0&&Number(place.lon)===0)){status('لا يمكن اختيار موقع غير صالح.');return}selectedPlace={...place,lat:Number(place.lat),lon:Number(place.lon)};$('name').textContent=place.name;setModeButtonsDisabled(false);$('place').classList.add('show');if(selectedMarker)selectedMarker.remove();selectedMarker=new mapboxgl.Marker({element:markerElement(true)}).setLngLat([place.lon,place.lat]).setPopup(new mapboxgl.Popup().setText(place.name)).addTo(map);map.flyTo({center:[place.lon,place.lat],zoom:place.zoom||16});selectedMarker.togglePopup();routeTo()}
+  function choose(place){if(!map||!Number.isFinite(Number(place.lat))||!Number.isFinite(Number(place.lon))||(Number(place.lat)===0&&Number(place.lon)===0)){status('لا يمكن اختيار موقع غير صالح.');return}expandMap();selectedPlace={...place,lat:Number(place.lat),lon:Number(place.lon)};$('name').textContent=place.name;setModeButtonsDisabled(false);$('place').classList.add('show');if(selectedMarker)selectedMarker.remove();selectedMarker=new mapboxgl.Marker({element:markerElement(true)}).setLngLat([place.lon,place.lat]).setPopup(new mapboxgl.Popup().setText(place.name)).addTo(map);map.flyTo({center:[place.lon,place.lat],zoom:place.zoom||16});selectedMarker.togglePopup();routeTo()}
   async function geocode(query){if(searchController)searchController.abort();searchController=new AbortController();status('جارٍ البحث في الخريطة...');try{const r=await fetch(`https://nominatim.openstreetmap.org/search?format=jsonv2&limit=6&accept-language=ar,en&q=${encodeURIComponent(query)}`,{signal:searchController.signal,headers:{Accept:'application/json'}});if(!r.ok)throw Error('search');const rows=await r.json();if(!rows.length){status('لم نجد هذا المكان.');return}const p=rows[0];choose({name:p.display_name?.split(',')[0]||query,lat:Number(p.lat),lon:Number(p.lon),zoom:/city|town|village|municipality|administrative|county|state|country/i.test(p.type)?13:16})}catch(e){if(e.name!=='AbortError')status('تعذر البحث الآن. تحقق من الاتصال وحاول مرة أخرى.')}}
   function renderSavedPlaces(){const items=window.AppState?.getActivities?.()||[];$('saved-places').innerHTML=items.length?items.filter(i=>Number.isFinite(Number(i.lat||i.coords?.lat))&&Number.isFinite(Number(i.lon||i.coords?.lng))).map(i=>{const p={name:i.name||i.place||'مكان محفوظ',lat:Number(i.lat||i.coords?.lat),lon:Number(i.lon||i.coords?.lng)};return `<article class="saved-place"><div><strong>${esc(p.name)}</strong><small>${esc(i.type||'')}</small></div><div><button data-show='${JSON.stringify(p)}'>عرض</button><button data-route='${JSON.stringify(p)}'>اتجاهات</button></div></article>`}).join(''):'<p style="color:#64748b;font-size:.7rem">أضف أماكن إلى رحلتك لتظهر هنا.</p>'}
-  async function initMap(){if(!window.mapboxgl)return;mapboxgl.accessToken=token;map=new mapboxgl.Map({container:'map',style:'mapbox://styles/mapbox/streets-v12',center:MOROCCO,zoom:5});map.addControl(new mapboxgl.NavigationControl(),'bottom-right');map.on('load',async()=>{const params=new URLSearchParams(location.search),queryLat=Number(params.get('lat')),queryLng=Number(params.get('lng')),queryName=params.get('name');if(Number.isFinite(queryLat)&&Number.isFinite(queryLng)&&!(queryLat===0&&queryLng===0)){choose({name:queryName||'المكان المحدد',lat:queryLat,lon:queryLng})}else{renderTripDay(selectedTripIndex);const day=tripDays.find(item=>item.day===selectedDay)||tripDays[0],activity=day?.activities?.[selectedTripIndex];if(activity){const resolved=await resolveActivityCoords(activity);if(!validCoords(activity)){activity.coords={lat:resolved.lat,lng:resolved.lng};activity.__coordSource=resolved.source;renderTripDay(selectedTripIndex)}focusTripActivity(selectedTripIndex)}else if(!tripDays.length){const destination=tripDestination();if(destination)try{const r=await fetch(`https://nominatim.openstreetmap.org/search?format=jsonv2&limit=1&accept-language=ar,en&q=${encodeURIComponent(destination)}`,{headers:{Accept:'application/json'}}),rows=await r.json();if(rows[0])choose({name:rows[0].display_name?.split(',')[0]||destination,lat:Number(rows[0].lat),lon:Number(rows[0].lon),zoom:13});else status('لم نجد وجهة الرحلة؛ الخريطة تبدأ من المغرب.')}catch(e){status('الخريطة جاهزة؛ تعذر تحديد وجهة الرحلة.')}}}});map.on('click',e=>choose({name:'المكان المختار',lat:e.lngLat.lat,lon:e.lngLat.lng}));}
+  async function initMap(){if(!window.mapboxgl)return;mapboxgl.accessToken=token;map=new mapboxgl.Map({container:'map',style:'mapbox://styles/mapbox/streets-v12',center:MOROCCO,zoom:5});map.addControl(new mapboxgl.NavigationControl(),'bottom-right');map.on('load',async()=>{    const params=new URLSearchParams(location.search),queryLat=Number(params.get('lat')),queryLng=Number(params.get('lng')),queryName=params.get('name'),hasSelection=params.has('activity')||params.has('lat');if(Number.isFinite(queryLat)&&Number.isFinite(queryLng)&&!(queryLat===0&&queryLng===0)){choose({name:queryName||'المكان المحدد',lat:queryLat,lon:queryLng})}else{renderTripDay(selectedTripIndex);const day=tripDays.find(item=>item.day===selectedDay)||tripDays[0],activity=day?.activities?.[selectedTripIndex];if(activity&&hasSelection){const resolved=await resolveActivityCoords(activity);if(!validCoords(activity)){activity.coords={lat:resolved.lat,lng:resolved.lng};activity.__coordSource=resolved.source;renderTripDay(selectedTripIndex)}focusTripActivity(selectedTripIndex)}else if(!tripDays.length){const destination=tripDestination();if(destination)try{const r=await fetch(`https://nominatim.openstreetmap.org/search?format=jsonv2&limit=1&accept-language=ar,en&q=${encodeURIComponent(destination)}`,{headers:{Accept:'application/json'}}),rows=await r.json();if(rows[0])choose({name:rows[0].display_name?.split(',')[0]||destination,lat:Number(rows[0].lat),lon:Number(rows[0].lon),zoom:13});else status('لم نجد وجهة الرحلة؛ الخريطة تبدأ من المغرب.')}catch(e){status('الخريطة جاهزة؛ تعذر تحديد وجهة الرحلة.')}}}});map.on('click',e=>choose({name:'المكان المختار',lat:e.lngLat.lat,lon:e.lngLat.lng}));}
   setModeButtonsDisabled(true);
-  $('trip-day').addEventListener('change',event=>{selectedDay=Number(event.target.value)||1;selectedTripIndex=0;renderTripDay(0)});
-  $('search').addEventListener('submit',e=>{e.preventDefault();const q=$('query').value.trim();if(q.length>1)geocode(q)});document.querySelectorAll('[data-mode]').forEach(b=>b.addEventListener('click',()=>{mode=b.dataset.mode;document.querySelectorAll('[data-mode]').forEach(x=>x.classList.toggle('active',x===b));renderTripDay(selectedTripIndex);routeTo()}));$('locate').addEventListener('click',()=>navigator.geolocation?.getCurrentPosition(p=>{user={lng:p.coords.longitude,lat:p.coords.latitude};if(userMarker)userMarker.remove();userMarker=new mapboxgl.Marker({color:'#0A192F'}).setLngLat([user.lng,user.lat]).setPopup(new mapboxgl.Popup().setText('موقعك الحالي')).addTo(map);map.flyTo({center:[user.lng,user.lat],zoom:13});status('تم تحديد موقعك الحالي.');routeTo()},()=>status('لم نتمكن من الوصول إلى موقعك. يمكنك البحث يدوياً.')));
+  $('trip-day').addEventListener('change',event=>{selectedDay=Number(event.target.value)||1;selectedTripIndex=0;renderTripDay(0,$('trip-search').value)});$('trip-search').addEventListener('input',event=>renderTripDay(selectedTripIndex,event.target.value));
+  $('search').addEventListener('submit',e=>{e.preventDefault();const q=$('query').value.trim();if(q.length>1)geocode(q)});document.querySelectorAll('[data-mode]').forEach(b=>b.addEventListener('click',()=>{mode=b.dataset.mode;document.querySelectorAll('[data-mode]').forEach(x=>x.classList.toggle('active',x===b));renderTripDay(selectedTripIndex);routeTo()}));  navigator.geolocation?.getCurrentPosition(p=>{user={lng:p.coords.longitude,lat:p.coords.latitude};if(map){if(userMarker)userMarker.remove();userMarker=new mapboxgl.Marker({color:'#0A192F'}).setLngLat([user.lng,user.lat]).addTo(map);status('تم تحديد موقعك تلقائياً.');if(selectedPlace)routeTo();}},()=>showToast('لم نتمكن من الوصول إلى موقعك؛ سنستخدم مركز المدينة عند حساب المسار.'),{enableHighAccuracy:true,maximumAge:300000,timeout:5000});$('locate').addEventListener('click',()=>navigator.geolocation?.getCurrentPosition(p=>{user={lng:p.coords.longitude,lat:p.coords.latitude};if(userMarker)userMarker.remove();userMarker=new mapboxgl.Marker({color:'#0A192F'}).setLngLat([user.lng,user.lat]).setPopup(new mapboxgl.Popup().setText('موقعك الحالي')).addTo(map);map.flyTo({center:[user.lng,user.lat],zoom:13});status('تم تحديد موقعك الحالي.');routeTo()},()=>status('لم نتمكن من الوصول إلى موقعك. يمكنك البحث يدوياً.')));
   $('add').addEventListener('click',async()=>{if(!selectedPlace)return;const ok=await window.AppState?.addActivity?.({id:`map-${selectedPlace.lat}-${selectedPlace.lon}`,name:selectedPlace.name,place:selectedPlace.name,description:'وجهة من الخريطة',type:'وجهة من الخريطة',lat:selectedPlace.lat,lon:selectedPlace.lon,coords:{lat:selectedPlace.lat,lng:selectedPlace.lon},distance:$('distance').textContent,duration:$('duration').textContent,time:'10:00',addedAt:new Date().toISOString()});if(ok){$('add').textContent='✓ تمت الإضافة إلى رحلتك';renderSavedPlaces();renderTripDay(selectedTripIndex);status('تم حفظ المكان في رحلتك بنجاح.')}});
   $('saved-places').addEventListener('click',e=>{const b=e.target;if(b.dataset.show||b.dataset.route){const p=JSON.parse(b.dataset.show||b.dataset.route);choose(p);if(b.dataset.route)routeTo()}});
   window.addEventListener('storage',()=>{renderSavedPlaces();if(map?.loaded())renderTripDay(selectedTripIndex)});window.addEventListener('appstate:activity-added',()=>{renderSavedPlaces();if(map?.loaded())renderTripDay(selectedTripIndex)});renderSavedPlaces();

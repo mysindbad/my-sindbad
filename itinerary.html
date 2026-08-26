@@ -1,23 +1,24 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+
+<html dir="rtl" lang="ar">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <title>برنامج الرحلة — My Sindbad</title>
-  <meta name="theme-color" content="#0A192F">
-  <link rel="manifest" href="./manifest.json">
-  <link rel="icon" type="image/jpeg" href="./icons/brand-logo.jpg">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="./utils/navigation.css">
-  <link rel="stylesheet" href="./utils/header.css">
-   <script src="https://cdn.tailwindcss.com"></script>
-   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-   <script type="module" src="./utils/supabaseClient.js"></script>
-   <script src="./utils/auth.js"></script>
-  <script src="./utils/cityImages.js"></script>
-  <script src="./utils/geocode.js"></script>
-  <script>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1, viewport-fit=cover" name="viewport"/>
+<title>برنامج الرحلة — My Sindbad</title>
+<meta content="#0A192F" name="theme-color"/>
+<link href="./manifest.json" rel="manifest"/>
+<link href="./icons/brand-logo.jpg" rel="icon" type="image/jpeg"/>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&amp;family=Playfair+Display:wght@700&amp;display=swap" rel="stylesheet"/>
+<link href="./utils/navigation.css" rel="stylesheet"/>
+<link href="./utils/header.css" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="./utils/supabaseClient.js" type="module"></script>
+<script src="./utils/auth.js"></script>
+<script src="./utils/cityImages.js"></script>
+<script src="./utils/geocode.js"></script>
+<script>
     tailwind.config = {
       theme: {
         extend: {
@@ -29,7 +30,7 @@
       },
     };
   </script>
-  <style>
+<style>
     :root {
       --navy-900: #0A192F;
       --navy-800: #243b53;
@@ -50,59 +51,59 @@
     dialog::backdrop { background: rgba(6,14,26,.7); backdrop-filter: blur(4px); }
     .edit-field { width: 100%; border: 2px solid #e5e7eb; border-radius: .75rem; padding: .65rem .8rem; outline: none; }
     .edit-field:focus { border-color: var(--gold); box-shadow: 0 0 0 3px rgba(212,175,55,.15); }
-    .assistant-fab{position:fixed;right:max(18px,calc(50% - 222px));bottom:calc(92px + env(safe-area-inset-bottom));z-index:45;display:flex;align-items:center;gap:8px;min-height:52px;padding:7px 13px 7px 9px;border:2px solid #fff;border-radius:999px;background:var(--gold);color:var(--navy-900);font-weight:800;box-shadow:0 12px 28px rgba(6,14,26,.3);cursor:pointer;transition:transform .18s ease,box-shadow .18s ease}.assistant-fab:hover,.assistant-fab:focus-visible{transform:translateY(-2px);box-shadow:0 16px 32px rgba(6,14,26,.38);outline:0}.assistant-fab-icon{display:grid;place-items:center;width:34px;height:34px;border-radius:50%;background:var(--navy-900);color:var(--gold);font-size:1.1rem}.assistant-fab-label{max-width:0;overflow:hidden;white-space:nowrap;opacity:0;transition:max-width .2s ease,opacity .2s ease}.assistant-fab:hover .assistant-fab-label,.assistant-fab:focus-visible .assistant-fab-label{max-width:130px;opacity:1}.assistant-backdrop{position:fixed;inset:0;z-index:46;background:rgba(6,14,26,.58);backdrop-filter:blur(3px)}.assistant-sheet{position:fixed;right:50%;bottom:0;z-index:47;display:flex;width:min(100%,480px);height:min(70vh,680px);transform:translateX(50%);flex-direction:column;border-radius:24px 24px 0 0;background:#fbf9f5;box-shadow:0 -18px 60px rgba(0,0,0,.3);overflow:hidden;transition:transform .22s cubic-bezier(.23,1,.32,1)}.assistant-sheet[hidden],.assistant-backdrop[hidden]{display:none}.assistant-grabber{width:48px;height:5px;margin:9px auto 0;border-radius:99px;background:#cbd5e1}.assistant-head{display:flex;align-items:center;justify-content:space-between;padding:10px 17px 12px;border-bottom:1px solid #e5e7eb}.assistant-head h2{margin:0;color:var(--navy-900);font-size:1rem;font-weight:800}.assistant-head p{margin:2px 0 0;color:#64748b;font-size:.66rem}.assistant-close{width:34px;height:34px;border:0;border-radius:10px;background:#eef2f7;color:var(--navy-900);font-size:1.2rem;cursor:pointer}.assistant-context{margin:10px 14px 0;padding:9px 11px;border:1px solid #d4af3780;border-radius:12px;background:#fffaf0;color:#516174;font-size:.66rem;line-height:1.7}.assistant-messages{flex:1;overflow:auto;padding:12px 14px}.assistant-message{display:flex;margin-bottom:9px}.assistant-message.user{justify-content:flex-start}.assistant-message.ai{justify-content:flex-end}.assistant-bubble{max-width:86%;padding:9px 11px;border-radius:15px;color:#fff;font-size:.72rem;line-height:1.8;white-space:pre-wrap}.assistant-message.user .assistant-bubble{border-bottom-right-radius:4px;background:var(--navy-900)}.assistant-message.ai .assistant-bubble{border-bottom-left-radius:4px;background:#fff;border:1px solid #e5e7eb;color:var(--navy-900)}.assistant-options{display:grid;gap:8px;width:100%;margin-top:7px}.assistant-option{padding:9px;border:1px solid #d4af3780;border-radius:12px;background:#fffaf0;text-align:right}.assistant-option strong{display:block;color:var(--navy-900);font-size:.72rem}.assistant-option small{display:block;margin:3px 0 7px;color:#64748b;font-size:.64rem}.assistant-option button{width:100%;padding:7px;border:0;border-radius:9px;background:var(--gold);color:var(--navy-900);font-size:.66rem;font-weight:800;cursor:pointer}.assistant-confirm{display:block;width:100%;margin-top:8px;padding:8px;border:0;border-radius:9px;background:#15803d;color:#fff;font-size:.66rem;font-weight:800;cursor:pointer}.assistant-loading{display:inline-flex;align-items:center;gap:7px;color:#64748b;font-size:.68rem}.assistant-spinner{width:14px;height:14px;border:2px solid #d4af37;border-top-color:transparent;border-radius:50%;animation:assistant-spin .7s linear infinite}@keyframes assistant-spin{to{transform:rotate(360deg)}}.assistant-quick{display:flex;gap:6px;overflow:auto;padding:8px 14px;border-top:1px solid #e5e7eb}.assistant-quick button{flex:none;padding:7px 9px;border:1px solid #dbe2ea;border-radius:999px;background:#fff;color:var(--navy-900);font-size:.63rem;font-weight:700;cursor:pointer}.assistant-form{display:flex;gap:8px;padding:9px 14px calc(12px + env(safe-area-inset-bottom));border-top:1px solid #e5e7eb;background:#fff}.assistant-form input{min-width:0;flex:1;padding:10px 11px;border:1px solid #dbe2ea;border-radius:12px;outline:0;color:var(--navy-900);font-size:.72rem}.assistant-form input:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(212,175,55,.15)}.assistant-form button{width:42px;border:0;border-radius:12px;background:var(--navy-900);color:#fff;font-size:1rem;cursor:pointer}.assistant-toast{position:fixed;right:50%;bottom:calc(150px + env(safe-area-inset-bottom));z-index:60;display:none;transform:translateX(50%);padding:10px 14px;border-radius:12px;background:var(--navy-900);color:#fff;font-size:.72rem;font-weight:800;box-shadow:0 8px 22px rgba(0,0,0,.25)}.assistant-toast.show{display:block;animation:assistant-toast-in .2s ease both}@keyframes assistant-toast-in{from{opacity:0;transform:translate(50%,8px)}to{opacity:1;transform:translate(50%,0)}}
+    .assistant-fab{position:fixed;right:max(18px,calc(50% - 222px));bottom:calc(92px + env(safe-area-inset-bottom));z-index:1080;display:flex;align-items:center;gap:8px;min-height:52px;padding:7px 13px 7px 9px;border:2px solid #fff;border-radius:999px;background:var(--gold);color:var(--navy-900);font-weight:800;box-shadow:0 12px 28px rgba(6,14,26,.3);cursor:pointer;transition:transform .18s ease,box-shadow .18s ease}.assistant-fab:hover,.assistant-fab:focus-visible{transform:translateY(-2px);box-shadow:0 16px 32px rgba(6,14,26,.38);outline:0}.assistant-fab-icon{display:grid;place-items:center;width:34px;height:34px;border-radius:50%;background:var(--navy-900);color:var(--gold);font-size:1.1rem}.assistant-fab-label{max-width:0;overflow:hidden;white-space:nowrap;opacity:0;transition:max-width .2s ease,opacity .2s ease}.assistant-fab:hover .assistant-fab-label,.assistant-fab:focus-visible .assistant-fab-label{max-width:130px;opacity:1}.assistant-backdrop{position:fixed;inset:0;z-index:1090;background:rgba(6,14,26,.58);backdrop-filter:blur(3px)}.assistant-sheet{position:fixed;right:50%;bottom:0;z-index:1100;display:flex;width:min(100%,480px);height:min(85vh,720px);max-height:85vh;transform:translateX(50%);flex-direction:column;border-radius:24px 24px 0 0;background:#fbf9f5;box-shadow:0 -18px 60px rgba(0,0,0,.3);overflow:hidden;transition:transform .22s cubic-bezier(.23,1,.32,1)}.assistant-sheet[hidden],.assistant-backdrop[hidden]{display:none}.assistant-grabber{width:48px;height:5px;margin:9px auto 0;border-radius:99px;background:#cbd5e1}.assistant-head{display:flex;align-items:center;justify-content:space-between;padding:10px 17px 12px;border-bottom:1px solid #e5e7eb}.assistant-head h2{margin:0;color:var(--navy-900);font-size:1rem;font-weight:800}.assistant-head p{margin:2px 0 0;color:#64748b;font-size:.66rem}.assistant-close{width:34px;height:34px;border:0;border-radius:10px;background:#eef2f7;color:var(--navy-900);font-size:1.2rem;cursor:pointer}.assistant-context{margin:10px 14px 0;padding:9px 11px;border:1px solid #d4af3780;border-radius:12px;background:#fffaf0;color:#516174;font-size:.66rem;line-height:1.7}.assistant-messages{flex:1;min-height:0;overflow:auto;padding:12px 14px}.assistant-message{display:flex;margin-bottom:9px}.assistant-message.user{justify-content:flex-start}.assistant-message.ai{justify-content:flex-end}.assistant-bubble{max-width:86%;padding:9px 11px;border-radius:15px;color:#fff;font-size:.72rem;line-height:1.8;white-space:pre-wrap}.assistant-message.user .assistant-bubble{border-bottom-right-radius:4px;background:var(--navy-900)}.assistant-message.ai .assistant-bubble{border-bottom-left-radius:4px;background:#fff;border:1px solid #e5e7eb;color:var(--navy-900)}.assistant-options{display:grid;gap:8px;width:100%;margin-top:7px}.assistant-option{padding:9px;border:1px solid #d4af3780;border-radius:12px;background:#fffaf0;text-align:right}.assistant-option strong{display:block;color:var(--navy-900);font-size:.72rem}.assistant-option small{display:block;margin:3px 0 7px;color:#64748b;font-size:.64rem}.assistant-option button{width:100%;padding:7px;border:0;border-radius:9px;background:var(--gold);color:var(--navy-900);font-size:.66rem;font-weight:800;cursor:pointer}.assistant-confirm{display:block;width:100%;margin-top:8px;padding:8px;border:0;border-radius:9px;background:#15803d;color:#fff;font-size:.66rem;font-weight:800;cursor:pointer}.assistant-loading{display:inline-flex;align-items:center;gap:7px;color:#64748b;font-size:.68rem}.assistant-spinner{width:14px;height:14px;border:2px solid #d4af37;border-top-color:transparent;border-radius:50%;animation:assistant-spin .7s linear infinite}@keyframes assistant-spin{to{transform:rotate(360deg)}}.assistant-quick{display:flex;flex:none;gap:6px;overflow:auto;padding:8px 14px;border-top:1px solid #e5e7eb;position:sticky;bottom:58px;z-index:3}.assistant-quick button{flex:none;padding:7px 9px;border:1px solid #dbe2ea;border-radius:999px;background:#fff;color:var(--navy-900);font-size:.63rem;font-weight:700;cursor:pointer}.assistant-form{position:sticky;bottom:0;z-index:4;display:flex;flex:none;gap:8px;padding:9px 14px calc(12px + env(safe-area-inset-bottom));border-top:1px solid #e5e7eb;background:#fff}.assistant-form input{min-width:0;flex:1;padding:10px 11px;border:1px solid #dbe2ea;border-radius:12px;outline:0;color:var(--navy-900);font-size:.72rem}.assistant-form input:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(212,175,55,.15)}.assistant-form button{width:42px;border:0;border-radius:12px;background:var(--navy-900);color:#fff;font-size:1rem;cursor:pointer}.assistant-toast{position:fixed;right:50%;bottom:calc(150px + env(safe-area-inset-bottom));z-index:1110;display:none;transform:translateX(50%);padding:10px 14px;border-radius:12px;background:var(--navy-900);color:#fff;font-size:.72rem;font-weight:800;box-shadow:0 8px 22px rgba(0,0,0,.25)}.assistant-toast.show{display:block;animation:assistant-toast-in .2s ease both}@keyframes assistant-toast-in{from{opacity:0;transform:translate(50%,8px)}to{opacity:1;transform:translate(50%,0)}}
       .image-fallback { background: linear-gradient(135deg, #0A192F, #D4AF37); }
       .image-fallback-label { display: none; }
       .image-fallback .image-fallback-label { display: block; }
     @media (min-width: 700px) { .shell { margin: 22px auto; min-height: calc(100vh - 44px); border-radius: 28px; overflow: hidden; } }
   </style>
-  <script type="module" src="./utils/i18n.js?m3=fbf30d2"></script>
+<script src="./utils/i18n.js?m3=fbf30d2" type="module"></script>
+<script>(function(){try{var p=localStorage.getItem('themePreference')||'auto';var d=window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches;document.documentElement.dataset.themePreference=p;document.documentElement.dataset.theme=(p==='dark'||(p==='auto'&&d))?'dark':'light';}catch(e){document.documentElement.dataset.theme='light';}})();</script>
+<link href="./theme.css" rel="stylesheet"/>
+<script defer="" src="./theme.js"></script>
 </head>
 <body>
-  <div id="aiLoadingScreen" class="fixed inset-0 bg-navy-900/95 z-50 flex flex-col items-center justify-center hidden">
-    <div class="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-gold-500 mb-4"></div>
-    <p class="text-gold-500 text-lg font-bold animate-pulse">مولد الخطط الذكي يحلل تفضيلاتك...</p>
-    <p class="text-white text-sm mt-2" data-i18n="itinerary_loading_meta">جاري حساب المسافات والميزانية</p>
-  </div>
-  <div id="loading" class="loading-screen flex flex-col items-center justify-center px-6 text-center text-white">
-    <div class="relative mb-7 flex h-28 w-28 items-center justify-center">
-      <div class="bot-orbit absolute inset-0 rounded-full border-2 border-dashed border-gold-500/70"></div>
-      <div class="bot-pulse flex h-20 w-20 items-center justify-center rounded-3xl border border-gold-400/40 bg-white/10 text-4xl shadow-[0_0_35px_rgba(212,175,55,.2)]">🤖</div>
-    </div>
-    <h1 class="text-xl font-extrabold text-gold-400" data-i18n="itinerary_loading">مولد الخطط الذكي يجهز رحلتك الآن...</h1>
-    <p class="mt-3 text-sm text-white/65" data-i18n="itinerary_subtitle">نرتب لك أياماً مليئة بالتجارب المناسبة لأسلوبك.</p>
-    <div class="mt-7 h-1.5 w-48 overflow-hidden rounded-full bg-white/15"><div class="h-full w-1/2 animate-pulse rounded-full bg-gold-500"></div></div>
-  </div>
-
-  <main id="app" class="shell hidden"></main>
-
-  <dialog id="edit-dialog">
-    <form id="edit-form" class="bg-white p-5" method="dialog">
-      <div class="mb-5 flex items-center justify-between">
-        <div>
-          <p class="text-xs font-bold text-gold-600" data-i18n="edit_activity">تعديل النشاط</p>
-          <h2 class="mt-1 text-xl font-extrabold text-navy-900">خصّص برنامجك</h2>
-        </div>
-        <button type="button" id="close-edit" class="rounded-xl bg-gray-100 px-3 py-2 text-lg text-gray-600" aria-label="إغلاق">×</button>
-      </div>
-      <div class="space-y-3">
-        <label class="block text-xs font-bold text-slate-500">الوقت<input id="edit-time" class="edit-field mt-1" required></label>
-        <label class="block text-xs font-bold text-slate-500">المكان<input id="edit-place" class="edit-field mt-1" required></label>
-        <label class="block text-xs font-bold text-slate-500">النشاط<input id="edit-activity" class="edit-field mt-1" required></label>
-        <div class="grid grid-cols-2 gap-3">
-          <label class="block text-xs font-bold text-slate-500">المسافة<input id="edit-distance" class="edit-field mt-1" required></label>
-          <label class="block text-xs font-bold text-slate-500">المدة<input id="edit-duration" class="edit-field mt-1" required></label>
-        </div>
-      </div>
-      <div class="mt-5 grid grid-cols-2 gap-3">
-        <button type="submit" class="rounded-xl bg-gold-500 px-4 py-3 text-sm font-bold text-white hover:bg-gold-600">حفظ التعديل</button>
-        <button type="button" id="cancel-edit" class="rounded-xl bg-gray-200 px-4 py-3 text-sm font-bold text-gray-700">إلغاء</button>
-      </div>
-    </form>
-  </dialog>
-
-  <script src="./utils/appState.js"></script>
-  <script type="module">
+<div class="fixed inset-0 bg-navy-900/95 z-50 flex flex-col items-center justify-center hidden" id="aiLoadingScreen">
+<div class="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-gold-500 mb-4"></div>
+<p class="text-gold-500 text-lg font-bold animate-pulse">مولد الخطط الذكي يحلل تفضيلاتك...</p>
+<p class="text-white text-sm mt-2" data-i18n="itinerary_loading_meta">جاري حساب المسافات والميزانية</p>
+</div>
+<div class="loading-screen flex flex-col items-center justify-center px-6 text-center text-white" id="loading">
+<div class="relative mb-7 flex h-28 w-28 items-center justify-center">
+<div class="bot-orbit absolute inset-0 rounded-full border-2 border-dashed border-gold-500/70"></div>
+<div class="bot-pulse flex h-20 w-20 items-center justify-center rounded-3xl border border-gold-400/40 bg-white/10 text-4xl shadow-[0_0_35px_rgba(212,175,55,.2)]">🤖</div>
+</div>
+<h1 class="text-xl font-extrabold text-gold-400" data-i18n="itinerary_loading">مولد الخطط الذكي يجهز رحلتك الآن...</h1>
+<p class="mt-3 text-sm text-white/65" data-i18n="itinerary_subtitle">نرتب لك أياماً مليئة بالتجارب المناسبة لأسلوبك.</p>
+<div class="mt-7 h-1.5 w-48 overflow-hidden rounded-full bg-white/15"><div class="h-full w-1/2 animate-pulse rounded-full bg-gold-500"></div></div>
+</div>
+<main class="shell hidden" id="app"></main>
+<dialog id="edit-dialog">
+<form class="bg-white p-5" id="edit-form" method="dialog">
+<div class="mb-5 flex items-center justify-between">
+<div>
+<p class="text-xs font-bold text-gold-600" data-i18n="edit_activity">تعديل النشاط</p>
+<h2 class="mt-1 text-xl font-extrabold text-navy-900">خصّص برنامجك</h2>
+</div>
+<button aria-label="إغلاق" class="rounded-xl bg-gray-100 px-3 py-2 text-lg text-gray-600" id="close-edit" type="button">×</button>
+</div>
+<div class="space-y-3">
+<label class="block text-xs font-bold text-slate-500">الوقت<input class="edit-field mt-1" id="edit-time" required=""/></label>
+<label class="block text-xs font-bold text-slate-500">المكان<input class="edit-field mt-1" id="edit-place" required=""/></label>
+<label class="block text-xs font-bold text-slate-500">النشاط<input class="edit-field mt-1" id="edit-activity" required=""/></label>
+<div class="grid grid-cols-2 gap-3">
+<label class="block text-xs font-bold text-slate-500">المسافة<input class="edit-field mt-1" id="edit-distance" required=""/></label>
+<label class="block text-xs font-bold text-slate-500">المدة<input class="edit-field mt-1" id="edit-duration" required=""/></label>
+</div>
+</div>
+<div class="mt-5 grid grid-cols-2 gap-3">
+<button class="rounded-xl bg-gold-500 px-4 py-3 text-sm font-bold text-white hover:bg-gold-600" type="submit">حفظ التعديل</button>
+<button class="rounded-xl bg-gray-200 px-4 py-3 text-sm font-bold text-gray-700" data-i18n="cancel" id="cancel-edit" type="button">إلغاء</button>
+</div>
+</form>
+</dialog>
+<script src="./utils/appState.js"></script>
+<script type="module">
     import { shareTrip, buildTripLink } from './utils/share.js';
     import { evaluateHealth } from './utils/health.js';
     const loading = document.getElementById('loading');
@@ -403,11 +404,13 @@
       return `الوجهة: ${tripLabel()} · ${itinerary.length} أيام · الميزانية: ${budget} · النمط: ${tripData.travelStyle || 'متنوع'}`;
     }
 
+    function assistantText(key, fallback) { return window.MySindbadI18n?.getTranslation?.(window.MySindbadI18n?.getLang?.() || 'ar', key) || fallback; }
+
     function renderAssistantMessages() {
       const container = document.getElementById('assistant-messages');
       if (!container) return;
       container.innerHTML = assistantMessages.map((message, messageIndex) => `
-        <div class="assistant-message ${message.role}"><div class="assistant-bubble">${message.loading ? `<span class="assistant-loading"><span class="assistant-spinner"></span>${escapeHtml(message.text)}</span>` : escapeHtml(message.text)}${Array.isArray(message.options) && message.options.length ? `<div class="assistant-options">${message.options.map((option, optionIndex) => `<article class="assistant-option"><strong>${escapeHtml(option.title)}</strong><small>≈ ${escapeHtml(option.cost)} ${escapeHtml(option.currency || tripData.budget?.currency || 'MAD')} · ${escapeHtml(option.reason || 'بديل مناسب في نفس المدينة')}</small><button type="button" data-assistant-option="${messageIndex}:${optionIndex}">استبدال</button></article>`).join('')}</div>` : ''}${message.action ? `<button type="button" class="assistant-confirm" data-assistant-action="${escapeHtml(message.action.type)}">${escapeHtml(message.action.label || 'تأكيد الاقتراح')}</button>` : ''}</div></div>`).join('');
+        <div class="assistant-message ${message.role}"><div class="assistant-bubble">${message.loading ? `<span class="assistant-loading"><span class="assistant-spinner"></span>${escapeHtml(message.text)}</span>` : escapeHtml(message.text)}${Array.isArray(message.options) && message.options.length ? `<div class="assistant-options">${message.options.map((option, optionIndex) => `<article class="assistant-option"><strong>${escapeHtml(option.title)}</strong><small>≈ ${escapeHtml(option.cost)} ${escapeHtml(option.currency || tripData.budget?.currency || 'MAD')} · ${escapeHtml(option.reason || 'بديل مناسب في نفس المدينة')}</small><button type="button" data-assistant-option="${messageIndex}:${optionIndex}">${escapeHtml(assistantText('assistant_replace', 'استبدال'))}</button></article>`).join('')}</div>` : ''}${message.preview ? `<div class="mt-2 rounded-lg bg-slate-100 px-2 py-1 text-[.65rem] text-slate-600">${escapeHtml(message.preview)}</div>` : ''}${message.action ? `<button type="button" class="assistant-confirm" data-assistant-action="${escapeHtml(message.action.type)}">${escapeHtml(message.action.label || 'تأكيد الاقتراح')}</button>` : ''}</div></div>`).join('');
       container.scrollTop = container.scrollHeight;
       container.querySelectorAll('[data-assistant-option]').forEach((button) => button.addEventListener('click', () => {
         const [messageIndex, optionIndex] = button.dataset.assistantOption.split(':').map(Number);
@@ -433,7 +436,7 @@
       backdrop.hidden = !open;
       if (open) {
         document.getElementById('assistant-context').textContent = assistantContextText();
-        if (!assistantMessages.length) addAssistantMessage('ai', 'مرحبا! قول ليا شنو بغيتي نعاونك فيه.');
+        if (!assistantMessages.length) addAssistantMessage('ai', assistantText('assistant_greeting', 'مرحبا! قول ليا شنو بغيتي نعاونك فيه.'));
         document.getElementById('assistant-input')?.focus();
       }
     }
@@ -476,32 +479,36 @@
       syncAssistantReplacement(replacement, day.day, current.id);
       saveItinerary();
       assistantMessages = assistantMessages.map((message) => ({ ...message, options: [] }));
-      assistantMessages.push({ role: 'ai', text: 'تم استبدال النشاط بنجاح' });
+      assistantMessages.push({ role: 'ai', text: assistantText('assistant_replaced', 'تم استبدال النشاط بنجاح') });
       render();
       window.requestAnimationFrame(() => { setAssistantOpen(true); showAssistantToast('تم استبدال النشاط بنجاح'); });
     }
+
+    function assistantHistory() { return assistantMessages.filter((item) => !item.loading && item.text).slice(0, -1).slice(-8).map((item) => ({ role: item.role === 'ai' ? 'assistant' : 'user', content: item.text })); }
 
     async function sendAssistantMessage(text) {
       const message = String(text || '').trim();
       if (!message || assistantSending) return;
       assistantSending = true;
       addAssistantMessage('user', message);
-      addAssistantMessage('ai', 'سندباد كيخطط...', { loading: true });
+      addAssistantMessage('ai', assistantText('assistant_loading', 'سندباد كيخطط...'), { loading: true });
       const loadingMessageIndex = assistantMessages.length - 1;
       try {
-        const response = await fetch('/api/assistant', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ message, trip: assistantTripPayload() }) });
+        const response = await fetch('/api/assistant', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ message, trip: assistantTripPayload(), history: assistantHistory() }) });
         if (!response.ok) throw new Error('assistant');
         const result = await response.json();
         assistantMessages.splice(loadingMessageIndex, 1);
         if (result.type === 'REPLACE_ACTIVITY') {
           const options = Array.isArray(result.options) ? result.options.filter((option) => Number(option.cost) < Number((itinerary.find((day) => Number(day.day) === Number(result.day))?.activities?.[result.activityIndex])?.cost ?? Infinity)) : [];
-          addAssistantMessage('ai', options.length ? 'لقيت ليك هاد البدائل الأرخص. اختار واحد باش نبدلو:' : 'ما لقيتش بديل أرخص متاح دابا.', { day: result.day, activityIndex: result.activityIndex, options });
+          addAssistantMessage('ai', options.length ? assistantText('assistant_has_options', 'لقيت ليك هاد البدائل الأرخص. اختار واحد باش نبدلو:') : assistantText('assistant_no_cheaper', 'ما لقيتش بديل أرخص متاح دابا.'), { day: result.day, activityIndex: result.activityIndex, options, preview: result.preview || '' });
+        } else if (['REMOVE_ACTIVITY', 'MOVE_ACTIVITY', 'REPLAN'].includes(result.type)) {
+          addAssistantMessage('ai', result.message || 'حضّرت لك معاينة التعديل قبل التأكيد.', { preview: result.preview || result.message || 'معاينة التعديل جاهزة للمراجعة.', action: result.action || null });
         } else {
-          addAssistantMessage('ai', result.message || 'نقدر نعاونك فتنظيم الرحلة.', { action: result.action || null });
+          addAssistantMessage('ai', result.message || 'نقدر نعاونك فتنظيم الرحلة.', { action: result.action || null, preview: result.preview || '' });
         }
       } catch (error) {
         assistantMessages.splice(loadingMessageIndex, 1);
-        addAssistantMessage('ai', 'تعذر فهم الطلب. حاول مرة أخرى.');
+        addAssistantMessage('ai', assistantText('assistant_error', 'تعذر فهم الطلب. حاول مرة أخرى.'));
       } finally {
         assistantSending = false;
       }
@@ -551,18 +558,18 @@
           ${renderHealthCard()}
            <div class="mb-3 mt-5 flex items-center justify-between"><h2 class="text-lg font-extrabold text-navy-900">برنامج يوم بيوم</h2></div>
           <div id="activitiesContainer" class="space-y-6"></div>
-          <div class="mt-7 grid grid-cols-3 gap-2"><button id="share-trip" type="button" class="min-h-12 rounded-xl bg-gold-500 px-3 py-3 text-xs font-bold text-navy-900 transition hover:bg-gold-600">مشاركة الرحلة</button><a href="./today.html" class="flex min-h-12 items-center justify-center rounded-xl bg-navy-900 px-3 py-3 text-xs font-bold text-white transition hover:bg-navy-800">وضع اليوم</a><a href="./create-trip.html" class="flex min-h-12 items-center justify-center rounded-xl border-2 border-navy-900 px-3 py-3 text-xs font-bold text-navy-900 transition hover:bg-navy-900 hover:text-white">تعديل البيانات</a></div><p id="share-status" class="mt-2 min-h-5 text-center text-xs text-slate-500"></p>
+          <div class="mt-7 grid grid-cols-3 gap-2"><button id="share-trip" type="button" data-i18n="share_trip" class="min-h-12 rounded-xl bg-gold-500 px-3 py-3 text-xs font-bold text-navy-900 transition hover:bg-gold-600">مشاركة الرحلة</button><a href="./today.html" data-i18n="today_heading" class="flex min-h-12 items-center justify-center rounded-xl bg-navy-900 px-3 py-3 text-xs font-bold text-white transition hover:bg-navy-800">وضع اليوم</a><a href="./create-trip.html" class="flex min-h-12 items-center justify-center rounded-xl border-2 border-navy-900 px-3 py-3 text-xs font-bold text-navy-900 transition hover:bg-navy-900 hover:text-white">تعديل البيانات</a></div><p id="share-status" class="mt-2 min-h-5 text-center text-xs text-slate-500"></p>
         </section>
         <nav data-site-nav data-active="trip"></nav>
         <div id="assistant-backdrop" class="assistant-backdrop" hidden></div>
         <button id="assistant-fab" class="assistant-fab" type="button" aria-label="مساعد سندباد" title="مساعد سندباد"><span class="assistant-fab-icon">🤖</span><span class="assistant-fab-label">مساعد سندباد</span></button>
         <section id="assistant-sheet" class="assistant-sheet" role="dialog" aria-modal="true" aria-labelledby="assistant-title" hidden>
           <div class="assistant-grabber" aria-hidden="true"></div>
-          <header class="assistant-head"><div><h2 id="assistant-title">مساعد سندباد</h2><p>نعاونك تعدل الرحلة ديالك</p></div><button id="assistant-close" class="assistant-close" type="button" aria-label="إغلاق">×</button></header>
+          <header class="assistant-head"><div><h2 id="assistant-title" data-i18n="assistant_title">مساعد سندباد</h2><p data-i18n="assistant_subtitle">نعاونك تعدل الرحلة ديالك</p></div><button id="assistant-close" class="assistant-close" type="button" aria-label="إغلاق" data-i18n="close">×</button></header>
           <div id="assistant-context" class="assistant-context"></div>
           <div id="assistant-messages" class="assistant-messages" aria-live="polite"></div>
-          <div class="assistant-quick" aria-label="إجراءات سريعة"><button type="button" data-assistant-prompt="بدل نشاط">بدل نشاط</button><button type="button" data-assistant-prompt="حيد نشاط">حيد نشاط</button><button type="button" data-assistant-prompt="رتب اليوم">رتب اليوم</button><button type="button" data-assistant-prompt="شنو ندير إلا شتات">شنو ندير إلا شتات</button></div>
-          <form id="assistant-form" class="assistant-form"><input id="assistant-input" type="text" autocomplete="off" placeholder="قول ليا شنو بغيتي نبدلو..." aria-label="رسالة المساعد" required><button type="submit" aria-label="إرسال">➤</button></form>
+          <div class="assistant-quick" aria-label="إجراءات سريعة"><button type="button" data-assistant-prompt="السلام عليكم" data-i18n="assistant_salutation">السلام عليكم</button><button type="button" data-assistant-prompt="لاباس؟" data-i18n="assistant_wellbeing">لاباس؟</button><button type="button" data-assistant-prompt="شنو نقدر ندير اليوم؟" data-i18n="assistant_today_prompt">شنو نقدر ندير اليوم؟</button><button type="button" data-assistant-prompt="بدل نشاط">بدل نشاط</button><button type="button" data-assistant-prompt="حيد نشاط">حيد نشاط</button><button type="button" data-assistant-prompt="رتب اليوم">رتب اليوم</button><button type="button" data-assistant-prompt="شنو ندير إلا شتات">شنو ندير إلا شتات</button></div>
+          <form id="assistant-form" class="assistant-form"><input id="assistant-input" type="text" autocomplete="off" placeholder="قول ليا شنو بغيتي نبدلو..." data-i18n-placeholder="assistant_input" aria-label="رسالة المساعد" required><button type="submit" aria-label="إرسال" data-i18n="assistant_send">➤</button></form>
         </section>
         <div id="assistant-toast" class="assistant-toast" role="status"></div>`;
       document.getElementById('tripHeaderImg').src = getCityImage(tripLabel());
@@ -711,7 +718,7 @@
       document.getElementById('aiLoadingScreen').classList.add('hidden');
     }, 2500);
   </script>
-  <script src="./utils/navigation.js"></script>
-  <script src="./utils/header.js"></script>
+<script src="./utils/navigation.js"></script>
+<script src="./utils/header.js"></script>
 </body>
 </html>

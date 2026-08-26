@@ -1,24 +1,25 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+
+<html dir="rtl" lang="ar">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1, viewport-fit=cover" name="viewport"/>
 <title>My Sindbad — رفيق السفر</title>
-<meta name="theme-color" content="#0B1B33">
-<meta name="application-name" content="My Sindbad">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="My Sindbad">
-<link rel="manifest" href="./manifest.json">
-<link rel="icon" type="image/jpeg" href="./icons/brand-logo.jpg">
-<link rel="apple-touch-icon" href="./icons/brand-logo.jpg">
-<link rel="stylesheet" href="./utils/navigation.css">
-<link rel="stylesheet" href="./utils/header.css">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+<meta content="#0B1B33" name="theme-color"/>
+<meta content="My Sindbad" name="application-name"/>
+<meta content="yes" name="apple-mobile-web-app-capable"/>
+<meta content="black-translucent" name="apple-mobile-web-app-status-bar-style"/>
+<meta content="My Sindbad" name="apple-mobile-web-app-title"/>
+<link href="./manifest.json" rel="manifest"/>
+<link href="./icons/brand-logo.jpg" rel="icon" type="image/jpeg"/>
+<link href="./icons/brand-logo.jpg" rel="apple-touch-icon"/>
+<link href="./utils/navigation.css" rel="stylesheet"/>
+<link href="./utils/header.css" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&amp;family=Playfair+Display:wght@700&amp;display=swap" rel="stylesheet"/>
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script type="module" src="./utils/supabaseClient.js"></script>
+<script src="./utils/supabaseClient.js" type="module"></script>
 <script src="./utils/auth.js"></script>
 <script src="./utils/cityImages.js"></script>
 <script>
@@ -768,20 +769,23 @@ body{background:#060e1a}.shell{max-width:480px;background:#fbf9f5;padding-bottom
          .hdr .user-name { display: none; }
        }
       </style>
-  <script type="module" src="./utils/i18n.js?m3=fbf30d2"></script>
+<script src="./utils/i18n.js?m3=fbf30d2" type="module"></script>
+<script>(function(){try{var p=localStorage.getItem('themePreference')||'auto';var d=window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches;document.documentElement.dataset.themePreference=p;document.documentElement.dataset.theme=(p==='dark'||(p==='auto'&&d))?'dark':'light';}catch(e){document.documentElement.dataset.theme='light';}})();</script>
+<link href="./theme.css" rel="stylesheet"/>
+<script defer="" src="./theme.js"></script>
 </head>
 <body>
-<div id="splashScreen" class="fixed inset-0 bg-navy-900 z-[100] flex items-center justify-center" aria-label="جاري تحميل My Sindbad">
-  <div class="text-center drop-shadow-lg animate-pulse" role="img" aria-label="My Sindbad">
-    <svg width="64" height="64" viewBox="0 0 32 32" fill="none" class="mx-auto mb-3">
-      <path d="M4 20L8 16L12 20L16 16L20 20L24 16L28 20" stroke="#D4AF37" stroke-width="2" stroke-linecap="round"/>
-      <path d="M8 20V26H24V20" fill="#D4AF37"/>
-      <path d="M16 8V16" stroke="#D4AF37" stroke-width="2"/>
-      <path d="M16 8L22 12L16 16Z" fill="#D4AF37"/>
-    </svg>
-    <strong class="block text-gold-500 text-2xl font-bold">My Sindbad</strong>
-    <span class="block text-white text-sm mt-1">رفيق السفر</span>
-  </div>
+<div aria-label="جاري تحميل My Sindbad" class="fixed inset-0 bg-navy-900 z-[100] flex items-center justify-center" id="splashScreen">
+<div aria-label="My Sindbad" class="text-center drop-shadow-lg animate-pulse" role="img">
+<svg class="mx-auto mb-3" fill="none" height="64" viewbox="0 0 32 32" width="64">
+<path d="M4 20L8 16L12 20L16 16L20 20L24 16L28 20" stroke="#D4AF37" stroke-linecap="round" stroke-width="2"></path>
+<path d="M8 20V26H24V20" fill="#D4AF37"></path>
+<path d="M16 8V16" stroke="#D4AF37" stroke-width="2"></path>
+<path d="M16 8L22 12L16 16Z" fill="#D4AF37"></path>
+</svg>
+<strong class="block text-gold-500 text-2xl font-bold">My Sindbad</strong>
+<span class="block text-white text-sm mt-1" data-i18n="header_tagline">رفيق السفر</span>
+</div>
 </div>
 <script>
   // <!-- QA14-SPLASH -->

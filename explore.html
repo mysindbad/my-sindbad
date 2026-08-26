@@ -1,23 +1,24 @@
-<!doctype html>
-<html lang="ar" dir="rtl">
+<!DOCTYPE html>
+
+<html dir="rtl" lang="ar">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <title>استكشف — My Sindbad</title>
-  <meta name="theme-color" content="#0A192F">
-  <link rel="manifest" href="./manifest.json">
-  <link rel="icon" type="image/jpeg" href="./icons/brand-logo.jpg">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="./utils/navigation.css">
-  <link rel="stylesheet" href="./utils/header.css">
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script type="module" src="./utils/supabaseClient.js"></script>
-  <script src="./utils/auth.js"></script>
-  <script src="./utils/appState.js"></script>
-  <script src="./utils/cityImages.js"></script>
-  <style>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1, viewport-fit=cover" name="viewport"/>
+<title>استكشف — My Sindbad</title>
+<meta content="#0A192F" name="theme-color"/>
+<link href="./manifest.json" rel="manifest"/>
+<link href="./icons/brand-logo.jpg" rel="icon" type="image/jpeg"/>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&amp;family=Playfair+Display:wght@700&amp;display=swap" rel="stylesheet"/>
+<link href="./utils/navigation.css" rel="stylesheet"/>
+<link href="./utils/header.css" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="./utils/supabaseClient.js" type="module"></script>
+<script src="./utils/auth.js"></script>
+<script src="./utils/appState.js"></script>
+<script src="./utils/cityImages.js"></script>
+<style>
     :root{--navy:#0A192F;--navy2:#243b53;--gold:#D4AF37;--dark:#b8941f;--bg:#fbf9f5;--line:#e8ecf2;--muted:#64748b}
     *{box-sizing:border-box;font-family:Cairo,system-ui,sans-serif}body{margin:0;min-height:100vh;background:#060e1a;color:#0c1624}.shell{width:100%;max-width:480px;min-height:100vh;margin:auto;padding-bottom:calc(86px + env(safe-area-inset-bottom));background:var(--bg);box-shadow:0 0 60px #0005}
     .header{position:sticky;top:0;z-index:20;display:flex;align-items:center;justify-content:space-between;min-height:76px;padding:calc(14px + env(safe-area-inset-top)) 18px 12px;background:#0a192ff7;border-bottom:1px solid #d4af374d;color:#fff}.brand{display:flex;align-items:center;gap:.7rem;color:#fff;text-decoration:none}.brand img{width:46px;height:46px;border-radius:14px;border:1px solid #d4af3770;object-fit:cover}.brand b{display:block;color:var(--gold);font:700 1.2rem 'Playfair Display',Georgia,serif}.brand small{display:block;color:#fffb;font-size:.65rem}
@@ -29,19 +30,22 @@
     .nav{position:fixed;bottom:0;left:50%;z-index:30;display:flex;width:100%;max-width:480px;transform:translateX(-50%);padding:8px 8px calc(8px + env(safe-area-inset-bottom));background:#0a192ff7;border-top:1px solid #fff2;box-shadow:0 -4px 18px #0003;backdrop-filter:blur(14px)}.nav a{display:flex;min-height:52px;flex:1;flex-direction:column;align-items:center;justify-content:center;gap:3px;border-radius:12px;color:#fffa;text-decoration:none;font-size:.6rem}.nav a.active{background:#d4af3729;color:var(--gold);font-weight:800}
     @media(min-width:700px){body{padding:22px 0}.shell{min-height:calc(100vh - 44px);border-radius:28px;overflow:hidden}.nav{position:absolute;border-radius:0 0 28px 28px}}
   </style>
-  <script type="module" src="./utils/i18n.js?m3=fbf30d2"></script>
+<script src="./utils/i18n.js?m3=fbf30d2" type="module"></script>
+<script>(function(){try{var p=localStorage.getItem('themePreference')||'auto';var d=window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches;document.documentElement.dataset.themePreference=p;document.documentElement.dataset.theme=(p==='dark'||(p==='auto'&&d))?'dark':'light';}catch(e){document.documentElement.dataset.theme='light';}})();</script>
+<link href="./theme.css" rel="stylesheet"/>
+<script defer="" src="./theme.js"></script>
 </head>
 <body>
 <main class="shell">
-  <div data-site-header></div>
-  <section class="content">
-    <div class="intro"><p>MY SINDBAD · اكتشف حولك</p><h1 data-i18n="explore_heading">أماكن تستحق الزيارة</h1><small id="destination-label" data-i18n-ignore>وجهتك الحالية</small></div>
-      <section class="weather" aria-live="polite"><span class="weather-label" data-i18n="explore_weather">الطقس الآن</span><h2 id="weather-city" data-i18n-ignore>الدار البيضاء</h2><div class="weather-row"><strong class="temperature" id="temperature">—</strong><span class="weather-text" id="weather-text" data-i18n="weather_loading">جارٍ تحميل حالة الطقس</span></div><small id="forecast" style="color:#fffb;font-size:.65rem" data-i18n="forecast_pending">التوقعات متاحة بعد التحميل</small></section>
-      <section class="budget" aria-label="متابعة الميزانية"><div class="budget-title"><span>مراقبة الميزانية</span><span id="budget-percent">0% مستخدم</span></div><div class="budget-grid"><div><small>إجمالي الميزانية</small><b id="total-budget">1500 MAD</b></div><div><small>الفندق (تقديري)</small><b id="accommodation-budget">0 MAD</b></div><div><small>الأكل (تقديري)</small><b id="food-budget">0 MAD</b></div><div><small>الأنشطة (تقديري)</small><b id="activities-budget">0 MAD</b></div><div><small>التنقل (تقديري)</small><b id="transport-budget">0 MAD</b></div><div><small>المتبقي</small><b class="remaining" id="left-budget">1500 MAD</b></div></div><div class="progress" aria-label="نسبة الميزانية المستخدمة"><i id="budget-progress"></i></div><div id="budget-warning" class="budget-warning" role="alert" hidden><span>⚠️ الميزانية قريبة من النفاد</span><button id="optimise-budget" type="button">تحسين بالذكاء الاصطناعي</button></div></section>
-    <div class="tabs"><button class="active" data-type="hotels" data-i18n="hotels_tab" type="button">فنادق 🏨</button><button data-type="restaurants" data-i18n="restaurants_tab" type="button">مطاعم 🍽️</button></div>
-    <div class="cards" id="cards"></div>
-  </section>
-  <nav data-site-nav data-active="explore"></nav>
+<div data-site-header=""></div>
+<section class="content">
+<div class="intro"><p data-i18n="explore_kicker">MY SINDBAD · اكتشف حولك</p><h1 data-i18n="explore_heading">أماكن تستحق الزيارة</h1><small data-i18n-ignore="" id="destination-label">وجهتك الحالية</small></div>
+<section aria-live="polite" class="weather"><span class="weather-label" data-i18n="explore_weather">الطقس الآن</span><h2 data-i18n-ignore="" id="weather-city">الدار البيضاء</h2><div class="weather-row"><strong class="temperature" id="temperature">—</strong><span class="weather-text" data-i18n="weather_loading" id="weather-text">جارٍ تحميل حالة الطقس</span></div><small data-i18n="forecast_pending" id="forecast" style="color:#fffb;font-size:.65rem">التوقعات متاحة بعد التحميل</small></section>
+<section aria-label="متابعة الميزانية" class="budget"><div class="budget-title"><span data-i18n="budget_monitor">مراقبة الميزانية</span><span id="budget-percent">0% مستخدم</span></div><div class="budget-grid"><div><small data-i18n="total_budget">إجمالي الميزانية</small><b id="total-budget">1500 MAD</b></div><div><small data-i18n="estimated_hotel">الفندق (تقديري)</small><b id="accommodation-budget">0 MAD</b></div><div><small data-i18n="estimated_food">الأكل (تقديري)</small><b id="food-budget">0 MAD</b></div><div><small data-i18n="estimated_activities">الأنشطة (تقديري)</small><b id="activities-budget">0 MAD</b></div><div><small data-i18n="estimated_transport">التنقل (تقديري)</small><b id="transport-budget">0 MAD</b></div><div><small data-i18n="remaining">المتبقي</small><b class="remaining" id="left-budget">1500 MAD</b></div></div><div aria-label="نسبة الميزانية المستخدمة" class="progress"><i id="budget-progress"></i></div><div class="budget-warning" hidden="" id="budget-warning" role="alert"><span>⚠️ الميزانية قريبة من النفاد</span><button id="optimise-budget" type="button">تحسين بالذكاء الاصطناعي</button></div></section>
+<div class="tabs"><button class="active" data-i18n="hotels_tab" data-type="hotels" type="button">فنادق 🏨</button><button data-i18n="restaurants_tab" data-type="restaurants" type="button">مطاعم 🍽️</button></div>
+<div class="cards" id="cards"></div>
+</section>
+<nav data-active="explore" data-site-nav=""></nav>
 </main>
 <div class="toast" id="toast" role="status">تمت الإضافة إلى رحلتك بنجاح!</div>
 <script>

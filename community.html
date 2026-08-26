@@ -1,16 +1,17 @@
-<!doctype html>
-<html lang="ar" dir="rtl">
+<!DOCTYPE html>
+
+<html dir="rtl" lang="ar">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1, viewport-fit=cover" name="viewport"/>
 <title>مجتمع السفر — My Sindbad</title>
-<meta name="theme-color" content="#0A192F">
-<link rel="manifest" href="./manifest.json">
-<link rel="icon" type="image/jpeg" href="./icons/brand-logo.jpg">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="./utils/navigation.css">
-<link rel="stylesheet" href="./utils/header.css">
+<meta content="#0A192F" name="theme-color"/>
+<link href="./manifest.json" rel="manifest"/>
+<link href="./icons/brand-logo.jpg" rel="icon" type="image/jpeg"/>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&amp;family=Playfair+Display:wght@700&amp;display=swap" rel="stylesheet"/>
+<link href="./utils/navigation.css" rel="stylesheet"/>
+<link href="./utils/header.css" rel="stylesheet"/>
 <script src="https://cdn.tailwindcss.com"></script>
 <style>
 :root{--navy:#0A192F;--navy-soft:#243b53;--gold:#D4AF37;--gold-dark:#b8941f;--bg:#fbf9f5;--line:#e8ecf2;--muted:#64748b;--danger:#dc2626}
@@ -18,13 +19,16 @@
  .add-trip{width:auto;min-height:42px;margin-top:13px;padding:0 18px;border-radius:10px;font-size:.7rem}
  .post-image.image-fallback{object-fit:contain;background:linear-gradient(135deg,#0A192F,#D4AF37);color:#fff;font-weight:800}
  </style>
+<script>(function(){try{var p=localStorage.getItem('themePreference')||'auto';var d=window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches;document.documentElement.dataset.themePreference=p;document.documentElement.dataset.theme=(p==='dark'||(p==='auto'&&d))?'dark':'light';}catch(e){document.documentElement.dataset.theme='light';}})();</script>
+<link href="./theme.css" rel="stylesheet"/>
+<script defer="" src="./theme.js"></script>
 </head>
 <body>
 <main class="shell">
-<div data-site-header></div>
-<section class="content"><div class="intro"><p>MY SINDBAD · مجتمع المسافرين</p><h1>إلهام من رحلات حقيقية</h1><span>اكتشف أماكن جديدة من تجارب مسافرين مثلك، وأضفها إلى رحلتك بضغطة واحدة.</span></div><section id="feed" class="feed" aria-live="polite"></section></section>
-<nav data-site-nav data-active="community"></nav>
-</main><div id="toast" class="toast" role="status" aria-live="polite"></div>
+<div data-site-header=""></div>
+<section class="content"><div class="intro"><p>MY SINDBAD · مجتمع المسافرين</p><h1 data-i18n="travel_inspiration">إلهام من رحلات حقيقية</h1><span data-i18n="community_intro">اكتشف أماكن جديدة من تجارب مسافرين مثلك، وأضفها إلى رحلتك بضغطة واحدة.</span></div><section aria-live="polite" class="feed" id="feed"></section></section>
+<nav data-active="community" data-site-nav=""></nav>
+</main><div aria-live="polite" class="toast" id="toast" role="status"></div>
 <script>
 function generateMockPosts(){return[
   {id:1,user:{name:'أحمد المسافر',avatar:'https://i.pravatar.cc/96?img=12'},image:'https://image.qwenlm.ai/public_source/e519404d-4d50-460e-a07e-5e2fe0b81811/87cd0db02-30ad-437f-9eec-3aa3c0dcbdf49390.png',location:'مراكش، المغرب',description:'تجربة لا تُنسى بين ألوان المدينة القديمة وروائح التوابل. لا تفوّت غروب الشمس من سطح أحد الرياضات.',likes:124,isLiked:false,isSaved:false},
