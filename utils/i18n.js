@@ -56,6 +56,7 @@ function markAndApply(root = typeof document !== 'undefined' ? document : null) 
     if (el.hasAttribute('data-i18n-ignore')) return;
     if (!el.hasAttribute('data-i18n') && el.children.length) return;
     const key = el.getAttribute('data-i18n');
+    if (current === 'en' && (el.id === 'toast' || el.classList.contains('toast'))) { const translatedToast = translateValue(el.textContent.trim()); if (translatedToast && el.textContent.trim() !== translatedToast) el.textContent = translatedToast; return; }
     const raw = el.dataset.i18nOriginal || (key && translations.ar[key]) || el.textContent.trim();
     if (!el.dataset.i18nOriginal && raw) el.dataset.i18nOriginal = raw;
     const inferred = key || exact[raw];
