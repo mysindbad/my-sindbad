@@ -17,32 +17,10 @@
 <link href="./utils/header.css" rel="stylesheet"/>
 <link href="https://fonts.googleapis.com" rel="preconnect"/>
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&amp;family=Playfair+Display:wght@700&amp;display=swap" rel="stylesheet"/>
-<script defer src="https://cdn.tailwindcss.com"></script>
 <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script defer src="./utils/supabaseClient.js"></script>
 <script defer src="./utils/auth.js"></script>
 <script defer src="./utils/cityImages.js"></script>
-<script>
-  window.tailwind = window.tailwind || {};
-  window.tailwind.config = {
-    theme: {
-      extend: {
-        colors: {
-          navy: {
-            900: '#0A192F',
-            800: '#243b53',
-            700: '#334e68',
-          },
-          gold: {
-            500: '#D4AF37',
-            400: '#ffcc33',
-            600: '#b8941f',
-          },
-        },
-      },
-    },
-  };
-</script>
 <style>
 :root {
   --navy-950: #060e1a;
@@ -776,16 +754,16 @@ body{background:#060e1a}.shell{max-width:480px;background:#fbf9f5;padding-bottom
 <script defer="" src="./theme.js"></script>
 </head>
 <body>
-<div aria-label="جاري تحميل My Sindbad" class="fixed inset-0 bg-navy-900 z-[100] flex items-center justify-center" id="splashScreen">
-<div aria-label="My Sindbad" class="text-center drop-shadow-lg animate-pulse" role="img">
-<svg class="mx-auto mb-3" fill="none" height="64" viewbox="0 0 32 32" width="64">
+<div aria-label="جاري تحميل My Sindbad" id="splashScreen" style="position:fixed;inset:0;background:#0A192F;z-index:100;display:flex;align-items:center;justify-content:center;">
+<div aria-label="My Sindbad" role="img" style="text-align:center;">
+<svg fill="none" height="64" viewbox="0 0 32 32" width="64" style="display:block;margin:0 auto .75rem;">
 <path d="M4 20L8 16L12 20L16 16L20 20L24 16L28 20" stroke="#D4AF37" stroke-linecap="round" stroke-width="2"></path>
 <path d="M8 20V26H24V20" fill="#D4AF37"></path>
 <path d="M16 8V16" stroke="#D4AF37" stroke-width="2"></path>
 <path d="M16 8L22 12L16 16Z" fill="#D4AF37"></path>
 </svg>
-<strong class="block text-gold-500 text-2xl font-bold">My Sindbad</strong>
-<span class="block text-white text-sm mt-1" data-i18n="header_tagline">رفيق السفر</span>
+<strong style="display:block;color:#D4AF37;font-size:1.5rem;font-weight:700;">My Sindbad</strong>
+<span data-i18n="header_tagline" style="display:block;color:#fff;font-size:.875rem;margin-top:.25rem;">رفيق السفر</span>
 </div>
 </div>
 <script>
