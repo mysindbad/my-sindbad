@@ -26,6 +26,12 @@
 
   function start() {
     mount();
+    if (document.body && window.MutationObserver) {
+      const observer = new MutationObserver(() => {
+        if (document.querySelector('[data-site-nav]:not([data-mounted])')) mount();
+      });
+      observer.observe(document.body, { childList: true, subtree: true });
+    }
   }
 
   if (document.body) start();
