@@ -1,29 +1,121 @@
-:root {
+:root,
+html[data-theme='light'] {
+  --background: #fbf9f5;
+  --color: #0c1624;
+  --card-bg: #ffffff;
+  --border: #e5e7eb;
   --surface-0: #fbf9f5;
   --surface-1: #ffffff;
   --surface-2: #fffaf0;
   --text-strong: #0c1624;
   --text-muted: #64748b;
   --border-soft: #e5e7eb;
+  --navy-brand: #0A192F;
+  --gold-brand: #D4AF37;
   color-scheme: light;
 }
+
 html[data-theme='dark'] {
+  --background: #060e1a;
+  --color: #f8fafc;
+  --card-bg: #17243a;
+  --border: #33445f;
   --surface-0: #101a2b;
   --surface-1: #17243a;
   --surface-2: #202f48;
   --text-strong: #f8fafc;
   --text-muted: #c4cfdd;
   --border-soft: #33445f;
+  --navy-brand: #0A192F;
+  --gold-brand: #D4AF37;
   color-scheme: dark;
 }
-html[data-theme='dark'] body { background: #060e1a !important; color: var(--text-strong) !important; }
-html[data-theme='dark'] .shell, html[data-theme='dark'] main.shell { background: var(--surface-0) !important; color: var(--text-strong) !important; }
-html[data-theme='dark'] .bg-white, html[data-theme='dark'] dialog, html[data-theme='dark'] .card, html[data-theme='dark'] .setting, html[data-theme='dark'] .stat, html[data-theme='dark'] .trip, html[data-theme='dark'] .empty, html[data-theme='dark'] input, html[data-theme='dark'] select, html[data-theme='dark'] textarea { background-color: var(--surface-1) !important; color: var(--text-strong) !important; border-color: var(--border-soft) !important; }
-html[data-theme='dark'] .bg-slate-50, html[data-theme='dark'] .bg-gray-50 { background-color: var(--surface-0) !important; }
-html[data-theme='dark'] .text-slate-500, html[data-theme='dark'] .text-slate-600, html[data-theme='dark'] .text-gray-500, html[data-theme='dark'] .text-gray-600 { color: var(--text-muted) !important; }
-html[data-theme='dark'] .assistant-sheet, html[data-theme='dark'] .assistant-form, html[data-theme='dark'] .assistant-quick { background: var(--surface-1) !important; color: var(--text-strong) !important; border-color: var(--border-soft) !important; }
-html[data-theme='dark'] .assistant-head h2, html[data-theme='dark'] .assistant-bubble, html[data-theme='dark'] .assistant-quick button { color: var(--text-strong) !important; }
-html[data-theme='dark'] .assistant-bubble, html[data-theme='dark'] .assistant-quick button { background: var(--surface-2) !important; border-color: var(--border-soft) !important; }
-html[data-theme='dark'] .trip-panel, html[data-theme='dark'] .trip-activity, html[data-theme='dark'] .saved-place { background: var(--surface-1) !important; color: var(--text-strong) !important; border-color: var(--border-soft) !important; }
-html[data-theme='dark'] .trip-activity small, html[data-theme='dark'] .saved-place small { color: var(--text-muted) !important; }
-html[data-theme='dark'] .profile-card, html[data-theme='dark'] .settings, html[data-theme='dark'] .stats, html[data-theme='dark'] .trips { color: var(--text-strong); }
+
+html[data-theme] body {
+  background: var(--background) !important;
+  color: var(--color) !important;
+}
+html[data-theme] .shell,
+html[data-theme] main.shell {
+  background: var(--surface-0) !important;
+  color: var(--color) !important;
+}
+html[data-theme] .bg-white,
+html[data-theme] dialog,
+html[data-theme] .card,
+html[data-theme] .setting,
+html[data-theme] .stat,
+html[data-theme] .trip,
+html[data-theme] .empty,
+html[data-theme] input,
+html[data-theme] select,
+html[data-theme] textarea,
+html[data-theme] .place-card,
+html[data-theme] .saved-place {
+  background-color: var(--card-bg) !important;
+  color: var(--color) !important;
+  border-color: var(--border) !important;
+}
+html[data-theme] .bg-slate-50,
+html[data-theme] .bg-gray-50 {
+  background-color: var(--surface-0) !important;
+}
+html[data-theme] .text-slate-500,
+html[data-theme] .text-slate-600,
+html[data-theme] .text-gray-500,
+html[data-theme] .text-gray-600,
+html[data-theme] small,
+html[data-theme] .muted {
+  color: var(--text-muted) !important;
+}
+html[data-theme] .assistant-sheet,
+html[data-theme] .assistant-form,
+html[data-theme] .assistant-quick,
+html[data-theme] .m6-assistant-sheet,
+html[data-theme] .m6-assistant-form,
+html[data-theme] .m6-assistant-quick {
+  background: var(--card-bg) !important;
+  color: var(--color) !important;
+  border-color: var(--border) !important;
+}
+html[data-theme] .assistant-head h2,
+html[data-theme] .assistant-bubble,
+html[data-theme] .assistant-quick button,
+html[data-theme] .m6-assistant-head h2,
+html[data-theme] .m6-assistant-message,
+html[data-theme] .m6-assistant-quick button {
+  color: var(--color) !important;
+}
+html[data-theme] .assistant-bubble,
+html[data-theme] .assistant-quick button,
+html[data-theme] .m6-assistant-message.ai,
+html[data-theme] .m6-assistant-quick button {
+  background: var(--surface-2) !important;
+  border-color: var(--border) !important;
+}
+html[data-theme] .trip-panel,
+html[data-theme] .trip-activity,
+html[data-theme] .profile-card,
+html[data-theme] .settings,
+html[data-theme] .stats,
+html[data-theme] .trips {
+  background: var(--card-bg) !important;
+  color: var(--color) !important;
+  border-color: var(--border) !important;
+}
+html[data-theme] button,
+html[data-theme] a {
+  border-color: var(--border);
+}
+html[data-theme] .bg-navy-900,
+html[data-theme] .bg-navy-800,
+html[data-theme] .assistant-form button,
+html[data-theme] .m6-assistant-form button {
+  background-color: var(--navy-brand) !important;
+}
+html[data-theme] .bg-gold-500,
+html[data-theme] .bg-gold-600,
+html[data-theme] .assistant-fab,
+html[data-theme] .m6-assistant-fab {
+  background-color: var(--gold-brand) !important;
+}

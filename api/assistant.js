@@ -225,13 +225,14 @@ function fallbackResponse(message, trip, language = 'ar') {
   return { type: 'REPLACE_ACTIVITY', day, activityIndex, options: alternatives };
 }
 
-const ASSISTANT_SYSTEM_PROMPT = 'أنت سندباد، رفيق سفر مغربي ودود. رد على السلام والمجاملة ("لاباس"، "كيف حالك") بود وبإيجاز ثم وجّه للرحلة. نفّذ أي طلب ضمن نطاق السفر. خارج النطاق → جملة لطيفة تعيد للسفر. أرجع JSON فقط. الأنواع المسموحة: TEXT، REPLACE_ACTIVITY، REMOVE، MOVE، REPLAN. عند أي تعديل، أضف preview واضحاً ولا تنفّذ التعديل دون تأكيد. لا تخترع أماكن أو أرقام طقس؛ استخدم بيانات الرحلة أو المصادر الواقعية المتاحة.';
+const ASSISTANT_SYSTEM_PROMPT = 'أنت سندباد، رفيق سفر مغربي ودود. أجب باللغة المطلوبة فقط. رد على السلام والمجاملة ("لاباس"، "كيف حالك") بود وبإيجاز ثم وجّه للرحلة. نفّذ أي طلب ضمن نطاق السفر. خارج النطاق أعد جملة لطيفة تعيد المستخدم للسفر. استخدم سياق الرحلة والطقس الواقعي المرفق، ولا تخترع أماكن أو أرقاماً. أرجع JSON صالحاً فقط بالشكل {"type":"TEXT|REPLACE_ACTIVITY|REMOVE|MOVE|REPLAN","message":"...","preview":"...","day":1,"activityIndex":0,"options":[]}. عند أي تعديل، أضف preview واضحاً، ولا تدّع تنفيذ التعديل؛ التنفيذ يحتاج تأكيداً من الواجهة.';
 
-async function askGemini(message, trip, history = [], language = 'ar') {
+async function askGemini(message, trip, history = [], language = 'ar', weatherContext = null) {
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) return null;
-  const contents = (Array.isArray(history) ? history.slice(-8) : []).map((item) => ({ role: item.role === 'assistant' || item.role === 'model' ? 'model' : 'user', parts: [{ text: String(item.content || item.text || '') }] })).filter((item) => item.parts[0].text);
-  contents.push({ role: 'user', parts: [{ text: `اللغة المطلوبة للرد: ${normaliseLanguage(language)}\nالرحلة الحالية: ${JSON.stringify(trip)}\nرسالة المستخدم: ${message}` }] });
+  const contents = (Array.isArray(history) ? history.slice(-5) : []).map((item) => ({ role: item.role === 'assistant' || item.role === 'model' ? 'model' : 'user', parts: [{ text: String(item.content || item.text || '') }] })).filter((item) => item.parts[0].text);
+  const tripContext = { destination: tripDestination(trip, language), days: Array.isArray(trip?.days) ? trip.days : [], activities: flattenActivities(trip).slice(0, 40) };
+  contents.push({ role: 'user', parts: [{ text: `لغة الرد المطلوبة: ${normaliseLanguage(language)}\nسياق الرحلة: ${JSON.stringify(tripContext)}\nسياق الطقس الواقعي (إن وجد): ${JSON.stringify(weatherContext || null)}\nرسالة المستخدم: ${message}` }] });
   const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${encodeURIComponent(apiKey)}`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -253,16 +254,16 @@ export default async function handler(req, res) {
   const body = req.body || {};
   const message = String(body.message || '').trim();
   const trip = body.trip && typeof body.trip === 'object' ? body.trip : {};
-  const history = Array.isArray(body.history) ? body.history.slice(-8) : [];
+  const history = Array.isArray(body.history) ? body.history.slice(-5) : [];
   const language = normaliseLanguage(body.language);
   if (!message) return jsonResponse(res, 400, { type: 'TEXT', message: localize(language, 'اكتب طلبك وسنعاونك في الرحلة.', 'Write a request and I will help with your trip.', 'Écrivez votre demande et je vous aiderai pour votre voyage.') });
-  if (isGreetingMessage(message)) return jsonResponse(res, 200, greetingResponse(message, trip, language));
-  if (!isTravelMessage(message)) return jsonResponse(res, 200, { type: 'TEXT', message: localize(language, 'أنا مختص بمساعدتك في رحلتك فقط؛ نقدر نعاونك فالوجهة والطقس والأنشطة والميزانية.', 'I focus on your trip: destinations, weather, activities, and budget.', 'Je suis spécialisé dans votre voyage : destinations, météo, activités et budget.') });
-  if (isWeatherMessage(message)) return jsonResponse(res, 200, await weatherResponse(trip, language));
+  let weatherContext = null;
+  if (isWeatherMessage(message)) weatherContext = await weatherResponse(trip, language);
 
   try {
-    const aiResponse = await askGemini(message, trip, history, language);
-    const response = aiResponse && typeof aiResponse === 'object' ? aiResponse : fallbackResponse(message, trip, language);
+    const aiResponse = await askGemini(message, trip, history, language, weatherContext);
+    const response = aiResponse && typeof aiResponse === 'object' ? aiResponse : (weatherContext || (isGreetingMessage(message) ? greetingResponse(message, trip, language) : fallbackResponse(message, trip, language)));
+    if (weatherContext?.message && response.type === 'TEXT' && /\d/.test(weatherContext.message) && !/\d/.test(response.message || '')) response.message = `${response.message} ${weatherContext.message}`;
     if (response.type === 'REPLACE_ACTIVITY' || response.type === 'REPLACE') {
       const day = Number(response.day) || 1;
       const activityIndex = Math.max(0, Number(response.activityIndex) || 0);
@@ -271,10 +272,10 @@ export default async function handler(req, res) {
     }
     if (['REMOVE', 'REMOVE_ACTIVITY', 'MOVE', 'MOVE_ACTIVITY', 'REPLAN'].includes(response.type)) return jsonResponse(res, 200, { ...response, preview: response.preview || response.message || 'معاينة التعديل جاهزة للتأكيد.' });
     if (response.type === 'TEXT' && typeof response.message === 'string') return jsonResponse(res, 200, response);
-    return jsonResponse(res, 200, fallbackResponse(message, trip));
+    return jsonResponse(res, 200, weatherContext || fallbackResponse(message, trip, language));
   } catch (error) {
     console.warn('Assistant request failed:', error.message);
-    const fallback = fallbackResponse(message, trip, language);
+    const fallback = weatherContext || (isGreetingMessage(message) ? greetingResponse(message, trip, language) : fallbackResponse(message, trip, language));
     if (fallback.type === 'REPLACE_ACTIVITY') {
       fallback.options = await buildReplacementOptions(trip, fallback.day, fallback.activityIndex, fallback.options);
     }

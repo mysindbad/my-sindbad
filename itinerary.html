@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 
-<html dir="rtl" lang="ar">
+<html data-i18n-title="title_itinerary" dir="rtl" lang="ar">
 <head>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1, viewport-fit=cover" name="viewport"/>
@@ -58,7 +58,7 @@
     @media (min-width: 700px) { .shell { margin: 22px auto; min-height: calc(100vh - 44px); border-radius: 28px; overflow: hidden; } }
   </style>
 <script src="./utils/i18n.js?m6=final1" type="module"></script>
-<script>(function(){try{var p=localStorage.getItem('themePreference')||'auto';var d=window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches;document.documentElement.dataset.themePreference=p;document.documentElement.dataset.theme=(p==='dark'||(p==='auto'&&d))?'dark':'light';}catch(e){document.documentElement.dataset.theme='light';}})();</script>
+<script>(function(){try{var p=localStorage.getItem('themePreference')||'auto',h=new Date().getHours(),d=window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches,night=h>=19||h<6;document.documentElement.dataset.themePreference=p;document.documentElement.dataset.theme=(p==='dark'||(p==='auto'&&(night||d)))?'dark':'light';}catch(e){document.documentElement.dataset.theme='light';}})();</script>
 <link href="./theme.css" rel="stylesheet"/>
 <script defer="" src="./theme.js"></script>
 </head>
@@ -410,7 +410,7 @@
       const container = document.getElementById('assistant-messages');
       if (!container) return;
       container.innerHTML = assistantMessages.map((message, messageIndex) => `
-        <div class="assistant-message ${message.role}"><div class="assistant-bubble">${message.loading ? `<span class="assistant-loading"><span class="assistant-spinner"></span>${escapeHtml(message.text)}</span>` : escapeHtml(message.text)}${Array.isArray(message.options) && message.options.length ? `<div class="assistant-options">${message.options.map((option, optionIndex) => `<article class="assistant-option"><strong>${escapeHtml(option.title)}</strong><small>≈ ${escapeHtml(option.cost)} ${escapeHtml(option.currency || tripData.budget?.currency || 'MAD')} · ${escapeHtml(option.reason || 'بديل مناسب في نفس المدينة')}</small><button type="button" data-assistant-option="${messageIndex}:${optionIndex}">${escapeHtml(assistantText('assistant_replace', 'استبدال'))}</button></article>`).join('')}</div>` : ''}${message.preview ? `<div class="mt-2 rounded-lg bg-slate-100 px-2 py-1 text-[.65rem] text-slate-600">${escapeHtml(message.preview)}</div>` : ''}${message.action ? `<button type="button" class="assistant-confirm" data-assistant-action="${escapeHtml(message.action.type)}">${escapeHtml(message.action.label || 'تأكيد الاقتراح')}</button>` : ''}</div></div>`).join('');
+        <div class="assistant-message ${message.role}"><div class="assistant-bubble">${message.loading ? `<span class="assistant-loading"><span class="assistant-spinner"></span>${escapeHtml(message.text)}</span>` : escapeHtml(message.text)}${Array.isArray(message.options) && message.options.length ? `<div class="assistant-options">${message.options.map((option, optionIndex) => `<article class="assistant-option"><strong>${escapeHtml(option.title)}</strong><small>≈ ${escapeHtml(option.cost)} ${escapeHtml(option.currency || tripData.budget?.currency || 'MAD')} · ${escapeHtml(option.reason || 'بديل مناسب في نفس المدينة')}</small><button type="button" data-assistant-option="${messageIndex}:${optionIndex}">${escapeHtml(assistantText('assistant_replace', 'استبدال'))}</button></article>`).join('')}</div>` : ''}${message.preview ? `<div class="mt-2 rounded-lg bg-slate-100 px-2 py-1 text-[.65rem] text-slate-600">${escapeHtml(message.preview)}</div>` : ''}${message.action ? `<button type="button" class="assistant-confirm" data-assistant-action="${messageIndex}:${escapeHtml(message.action.type)}">${escapeHtml(message.action.label || assistantText('confirm', 'تأكيد الاقتراح'))}</button>` : ''}</div></div>`).join('');
       container.scrollTop = container.scrollHeight;
       container.querySelectorAll('[data-assistant-option]').forEach((button) => button.addEventListener('click', () => {
         const [messageIndex, optionIndex] = button.dataset.assistantOption.split(':').map(Number);
@@ -419,7 +419,9 @@
         if (option) applyAssistantReplacement(message.day, message.activityIndex, option);
       }));
       container.querySelectorAll('[data-assistant-action]').forEach((button) => button.addEventListener('click', () => {
-        if (button.dataset.assistantAction === 'CONFIRM_REPLACE_OUTDOOR') sendAssistantMessage('بدل النشاط الخارجي بنشاط داخلي');
+        const [messageIndex, actionType] = button.dataset.assistantAction.split(':'); const message = assistantMessages[Number(messageIndex)];
+        if (actionType === 'CONFIRM_REPLACE_OUTDOOR') sendAssistantMessage('بدل النشاط الخارجي بنشاط داخلي');
+        else if (message && applyAssistantAction(message)) { button.disabled = true; button.textContent = assistantText('added_success', 'تم التنفيذ'); addAssistantMessage('ai', assistantText('added_success', 'تم تطبيق التعديل بنجاح.')); }
       }));
     }
 
@@ -484,7 +486,18 @@
       window.requestAnimationFrame(() => { setAssistantOpen(true); showAssistantToast('تم استبدال النشاط بنجاح'); });
     }
 
-    function assistantHistory() { return assistantMessages.filter((item) => !item.loading && item.text).slice(0, -1).slice(-8).map((item) => ({ role: item.role === 'ai' ? 'assistant' : 'user', content: item.text })); }
+    function applyAssistantAction(message) {
+      const day = itinerary.find((item) => Number(item.day) === Number(message.day)) || itinerary[Number(message.day || 1) - 1];
+      const index = Math.max(0, Number(message.activityIndex) || 0);
+      if (!day) return false;
+      if (message.action?.type === 'REMOVE' || message.action?.type === 'REMOVE_ACTIVITY') day.activities.splice(index, 1);
+      else if (message.action?.type === 'MOVE' || message.action?.type === 'MOVE_ACTIVITY') { const targetDay = Number(message.action.toDay || message.action.targetDay) || Number(day.day) + 1; const target = itinerary.find((item) => Number(item.day) === targetDay); const [activity] = day.activities.splice(index, 1); if (!target || !activity) return false; target.activities.push(activity); }
+      else if (message.action?.type === 'REPLAN') itinerary.forEach((item) => item.activities.sort((a, b) => String(a.time || '').localeCompare(String(b.time || ''))));
+      else return false;
+      saveItinerary(); render(); window.requestAnimationFrame(() => setAssistantOpen(true)); return true;
+    }
+
+    function assistantHistory() { return assistantMessages.filter((item) => !item.loading && item.text).slice(0, -1).slice(-5).map((item) => ({ role: item.role === 'ai' ? 'assistant' : 'user', content: item.text })); }
 
     async function sendAssistantMessage(text) {
       const message = String(text || '').trim();
@@ -501,8 +514,8 @@
         if (result.type === 'REPLACE_ACTIVITY') {
           const options = Array.isArray(result.options) ? result.options.filter((option) => Number(option.cost) < Number((itinerary.find((day) => Number(day.day) === Number(result.day))?.activities?.[result.activityIndex])?.cost ?? Infinity)) : [];
           addAssistantMessage('ai', options.length ? assistantText('assistant_has_options', 'لقيت ليك هاد البدائل الأرخص. اختار واحد باش نبدلو:') : assistantText('assistant_no_cheaper', 'ما لقيتش بديل أرخص متاح دابا.'), { day: result.day, activityIndex: result.activityIndex, options, preview: result.preview || '' });
-        } else if (['REMOVE_ACTIVITY', 'MOVE_ACTIVITY', 'REPLAN'].includes(result.type)) {
-          addAssistantMessage('ai', result.message || 'حضّرت لك معاينة التعديل قبل التأكيد.', { preview: result.preview || result.message || 'معاينة التعديل جاهزة للمراجعة.', action: result.action || null });
+        } else if (['REMOVE', 'REMOVE_ACTIVITY', 'MOVE', 'MOVE_ACTIVITY', 'REPLAN'].includes(result.type)) {
+          addAssistantMessage('ai', result.message || 'حضّرت لك معاينة التعديل قبل التأكيد.', { day: result.day, activityIndex: result.activityIndex, preview: result.preview || result.message || 'معاينة التعديل جاهزة للمراجعة.', action: { ...(result.action || {}), type: result.type, toDay: result.toDay || result.targetDay } });
         } else {
           addAssistantMessage('ai', result.message || 'نقدر نعاونك فتنظيم الرحلة.', { action: result.action || null, preview: result.preview || '' });
         }
@@ -568,7 +581,7 @@
           <header class="assistant-head"><div><h2 id="assistant-title" data-i18n="assistant_title">مساعد سندباد</h2><p data-i18n="assistant_subtitle">نعاونك تعدل الرحلة ديالك</p></div><button id="assistant-close" class="assistant-close" type="button" aria-label="إغلاق" data-i18n="close">×</button></header>
           <div id="assistant-context" class="assistant-context"></div>
           <div id="assistant-messages" class="assistant-messages" aria-live="polite"></div>
-          <div class="assistant-quick" aria-label="إجراءات سريعة"><button type="button" data-assistant-prompt="السلام عليكم" data-i18n="assistant_salutation">السلام عليكم</button><button type="button" data-assistant-prompt="لاباس؟" data-i18n="assistant_wellbeing">لاباس؟</button><button type="button" data-assistant-prompt="شنو نقدر ندير اليوم؟" data-i18n="assistant_today_prompt">شنو نقدر ندير اليوم؟</button><button type="button" data-assistant-prompt="بدل نشاط">بدل نشاط</button><button type="button" data-assistant-prompt="حيد نشاط">حيد نشاط</button><button type="button" data-assistant-prompt="رتب اليوم">رتب اليوم</button><button type="button" data-assistant-prompt="شنو ندير إلا شتات">شنو ندير إلا شتات</button></div>
+          <div class="assistant-quick" aria-label="إجراءات سريعة"><button type="button" data-assistant-prompt="السلام عليكم" data-i18n="assistant_salutation">السلام عليكم</button><button type="button" data-assistant-prompt="لاباس؟" data-i18n="assistant_wellbeing">لاباس؟</button><button type="button" data-assistant-prompt="شنو نقدر ندير اليوم؟" data-i18n="assistant_today_prompt">شنو نقدر ندير اليوم؟</button><button type="button" data-assistant-prompt="بدل نشاط" data-i18n="assistant_replace_request">بدل نشاط</button><button type="button" data-assistant-prompt="حيد نشاط" data-i18n="assistant_remove_request">حيد نشاط</button><button type="button" data-assistant-prompt="رتب اليوم" data-i18n="assistant_replan_request">رتب اليوم</button><button type="button" data-assistant-prompt="شنو ندير إلا شتات" data-i18n="assistant_rain_request">شنو ندير إلا شتات</button></div>
           <form id="assistant-form" class="assistant-form" novalidate><input id="assistant-input" type="text" autocomplete="off" placeholder="قول ليا شنو بغيتي نبدلو..." data-i18n-placeholder="assistant_input" aria-label="رسالة المساعد" required><button type="submit" aria-label="إرسال" data-i18n="assistant_send">➤</button></form>
         </section>
         <div id="assistant-toast" class="assistant-toast" role="status"></div>`;
