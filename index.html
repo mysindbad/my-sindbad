@@ -1256,7 +1256,6 @@ function ask(q){const txt=q||$('bIn').value.trim();if(!txt)return;
  function pgBot(P) { P.innerHTML=`<div class="sec">مساعد السفر</div><div class="card"><div class="es-icon">${ic('chat',22)}</div><h3>مساعدك أثناء الرحلة</h3><p style="font-size:.8rem;line-height:1.7;color:var(--text-muted)">هذه الصفحة تجمع أدوات السفر الأساسية في مكان واحد. اختر إحدى الأدوات للوصول بسرعة إلى معلومات وجهتك وخطة رحلتك.</p><div class="tools"><button class="btn ghost" onclick="go('explore')">استكشاف الأماكن</button><button class="btn ghost" onclick="go('map')">الطقس والصرف</button><button class="btn ghost" onclick="go('trip')">إدارة الرحلة</button><button class="btn ghost" onclick="go('home')">البحث عن وجهة</button></div></div>`; }
  render();
 document.addEventListener('DOMContentLoaded', applyDynamicTheme);
-setInterval(applyDynamicTheme, 60000);
 </script>
 <script>
 if ('serviceWorker' in navigator) {
