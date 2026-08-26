@@ -103,7 +103,7 @@
 
   <script src="./utils/appState.js"></script>
   <script type="module">
-    import { shareTrip } from './utils/share.js';
+    import { shareTrip, buildTripLink } from './utils/share.js';
     import { evaluateHealth } from './utils/health.js';
     const loading = document.getElementById('loading');
     const aiLoadingScreen = document.getElementById('aiLoadingScreen');
@@ -567,7 +567,7 @@
         <div id="assistant-toast" class="assistant-toast" role="status"></div>`;
       document.getElementById('tripHeaderImg').src = getCityImage(tripLabel());
       renderDayPlan(readLiveActivities());
-      document.getElementById('share-trip')?.addEventListener('click', async () => { const status = document.getElementById('share-status'); try { const ok = await shareTrip({ ...tripData, days: itinerary.length, activities: itinerary.flatMap((day) => day.activities || []) }); status.textContent = ok ? 'تم تجهيز رابط المشاركة.' : 'تعذرت المشاركة حالياً.'; } catch { status.textContent = 'تعذرت المشاركة حالياً.'; } });
+      document.getElementById('share-trip')?.addEventListener('click', async () => { const status = document.getElementById('share-status'); const sharedTrip = { ...tripData, days: itinerary.length, activities: itinerary.flatMap((day) => day.activities || []) }; let ok = false; try { ok = await shareTrip(sharedTrip); } catch { ok = false; } if (ok) { status.textContent = 'تم تجهيز رابط المشاركة.'; return; } const link = document.createElement('a'); link.href = buildTripLink(sharedTrip); link.target = '_blank'; link.rel = 'noopener'; link.textContent = 'فتح رابط المشاركة'; status.replaceChildren(link); });
       wireAssistant();
     }
 
