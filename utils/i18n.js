@@ -78,7 +78,10 @@ function markAndApply(root = typeof document !== 'undefined' ? document : null) 
   root.querySelectorAll?.('[data-i18n-title]:not([data-i18n-ignore])').forEach((el) => { el.title = getTranslation(current, el.dataset.i18nTitle); });
   root.querySelectorAll?.('[data-i18n-aria-label]:not([data-i18n-ignore])').forEach((el) => { el.setAttribute('aria-label', getTranslation(current, el.dataset.i18nAriaLabel)); });
   const titleKey = document.documentElement.getAttribute('data-i18n-title') || document.body?.getAttribute('data-i18n-title');
-  if (titleKey) document.title = getTranslation(current, titleKey);
+  if (titleKey) {
+    const translatedTitle = getTranslation(current, titleKey);
+    if (document.title !== translatedTitle) document.title = translatedTitle;
+  }
   applying = false;
 }
 
