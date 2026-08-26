@@ -18,6 +18,9 @@ function activityTitle(activity) {
   return activity?.title || activity?.name || activity?.place || 'نشاط';
 }
 
+function normaliseLanguage(value) { return value === 'en' || value === 'fr' ? value : 'ar'; }
+function localize(language, ar, en, fr) { return normaliseLanguage(language) === 'fr' ? fr : normaliseLanguage(language) === 'en' ? en : ar; }
+
 function activityCost(activity) {
   const cost = Number(activity?.cost ?? activity?.price ?? activity?.estimated_cost);
   return Number.isFinite(cost) ? cost : 0;
@@ -67,32 +70,33 @@ async function geocodeDestination(destination) {
 }
 
 function isWeatherMessage(message) {
-  return /طقس|جو|مطر|شتا|شتاء|برد|سخون|حرارة|رطوبة|rain|weather/i.test(message);
+  return /طقس|جو|مطر|شتا|شتاء|برد|سخون|حرارة|رطوبة|rain|weather|météo|pluie|température/i.test(message);
 }
 
 function isGreetingMessage(message) {
-  return /السلام عليكم|سلام|لاباس|كيف حالك|كيف داير|الحمد لله|hello|hi|how are you/i.test(String(message || ''));
+  return /السلام عليكم|سلام|لاباس|كيف حالك|كيف داير|الحمد لله|hello|hi|how are you|bonjour|salut|comment allez[- ]vous|ça va/i.test(String(message || ''));
 }
 
-function greetingResponse(message, trip) {
+function greetingResponse(message, trip, language = 'ar') {
   const destination = tripDestination(trip);
-  if (/لاباس|كيف حالك|كيف داير|how are you/i.test(message)) return { type: 'TEXT', message: `لاباس الحمد لله، شكراً على السؤال. نقدر نعاونك ترتب رحلتك فـ${destination} أو نجاوبك على الطقس والأنشطة.` };
-  return { type: 'TEXT', message: `وعليكم السلام! مرحبا بك. أنا سندباد، رفيقك فالسفر. شنو بغيتي نديرو فـ${destination}؟` };
+  const wellbeing = /لاباس|كيف حالك|كيف داير|how are you|comment allez[- ]vous|ça va/i.test(message);
+  if (wellbeing) return { type: 'TEXT', message: localize(language, `لاباس الحمد لله، شكراً على السؤال. نقدر نعاونك ترتب رحلتك فـ${destination} أو نجاوبك على الطقس والأنشطة.`, `I’m well, thank you. I can help plan your trip to ${destination || 'your destination'} or answer questions about weather and activities.`, `Je vais bien, merci. Je peux vous aider à organiser votre voyage à ${destination || 'votre destination'} ou répondre sur la météo et les activités.`) };
+  return { type: 'TEXT', message: localize(language, `وعليكم السلام! مرحبا بك. أنا سندباد، رفيقك فالسفر. شنو بغيتي نديرو فـ${destination}؟`, `Hello! I’m Sindbad, your travel companion. What shall we do with your trip to ${destination || 'your destination'}?`, `Bonjour ! Je suis Sindbad, votre compagnon de voyage. Que souhaitez-vous faire pour votre voyage à ${destination || 'votre destination'} ?`) };
 }
 
 function isTravelMessage(message) {
-  return /سفر|رحل|وجه|نشاط|طقس|جو|مطر|شتا|برد|حرارة|خريطة|فندق|مطعم|مقهى|مطار|قطار|ميزاني|شنطة|تجهيز|بدل|استبدل|أرخص|حيد|احذف|نقل|رتب|خطة|يوم|اليوم|غدا|غداً|travel|trip|weather|hotel|restaurant|map|airport|replace|remove|move|replan/i.test(message);
+  return /سفر|رحل|وجه|نشاط|طقس|جو|مطر|شتا|برد|حرارة|خريطة|فندق|مطعم|مقهى|مطار|قطار|ميزاني|شنطة|تجهيز|بدل|استبدل|أرخص|حيد|احذف|نقل|رتب|خطة|يوم|اليوم|غدا|غداً|travel|trip|weather|hotel|restaurant|map|airport|replace|remove|move|replan|voyage|hôtel|restaurant|carte|aéroport|remplacer|supprimer|déplacer/i.test(message);
 }
 
 function tripDestination(trip) {
   return trip?.destinationDisplay || trip?.destination || trip?.destinationName || trip?.city || 'وجهتك';
 }
 
-async function weatherResponse(trip) {
+async function weatherResponse(trip, language = 'ar') {
   const destination = tripDestination(trip);
   let coords = trip?.cityCoords || (Number.isFinite(Number(trip?.lat)) && Number.isFinite(Number(trip?.lng)) ? { lat: Number(trip.lat), lng: Number(trip.lng) } : null);
   if (!coords) coords = await geocodeDestination(destination);
-  if (!coords) return { type: 'TEXT', message: `ما قدرتش نحدد موقع ${destination} باش نعطيك أرقام طقس حقيقية دابا.` };
+  if (!coords) return { type: 'TEXT', message: localize(language, `ما قدرتش نحدد موقع ${destination} باش نعطيك أرقام طقس حقيقية دابا.`, `I could not locate ${destination} to provide real weather numbers right now.`, `Je n’ai pas pu localiser ${destination} pour fournir les chiffres météo réels.`) };
   try {
     const start = trip?.dates?.start || trip?.start_date;
     const end = trip?.dates?.end || trip?.end_date || start;
@@ -112,16 +116,17 @@ async function weatherResponse(trip) {
     const rainy = (Number.isFinite(probability) && probability >= 50) || (Number.isFinite(precipitation) && precipitation > 0);
     const numbers = [temperature, humidity, precipitation, probability, max, min].filter(Number.isFinite).length;
     if (numbers < 2) throw new Error('Incomplete weather data');
-    const range = Number.isFinite(min) && Number.isFinite(max) ? `، والمتوقع نهار الرحلة بين ${Math.round(min)} و${Math.round(max)}°م` : '';
-    const rainText = Number.isFinite(probability) ? `احتمال التساقطات ${Math.round(probability)}%` : `التساقطات الحالية ${precipitation.toFixed(1)} مم`;
+    const range = Number.isFinite(min) && Number.isFinite(max) ? { ar: `، والمتوقع نهار الرحلة بين ${Math.round(min)} و${Math.round(max)}°م`, en: `, with a trip forecast between ${Math.round(min)} and ${Math.round(max)}°C`, fr: `, avec des prévisions entre ${Math.round(min)} et ${Math.round(max)}°C` } : { ar:'', en:'', fr:'' };
+    const rainText = Number.isFinite(probability) ? { ar:`احتمال التساقطات ${Math.round(probability)}%`, en:`Rain probability ${Math.round(probability)}%`, fr:`Probabilité de pluie ${Math.round(probability)}%` } : { ar:`التساقطات الحالية ${precipitation.toFixed(1)} مم`, en:`Current precipitation ${precipitation.toFixed(1)} mm`, fr:`Précipitations actuelles ${precipitation.toFixed(1)} mm` };
+    const message = localize(language, `الطقس الحقيقي فـ${destination}: دابا ${Math.round(temperature)}°م، الرطوبة ${Math.round(humidity)}%، الرياح ${Math.round(Number(current?.wind_speed_10m) || 0)} كم/س، والتساقطات ${precipitation.toFixed(1)} مم. ${rainText.ar}${range.ar}. ${rainy ? 'الأفضل تبدل النشاط الخارجي بنشاط داخلي.' : 'الجو مناسب للنشاط الخارجي.'}`, `Real weather in ${destination}: ${Math.round(temperature)}°C now, humidity ${Math.round(humidity)}%, wind ${Math.round(Number(current?.wind_speed_10m) || 0)} km/h, and ${precipitation.toFixed(1)} mm precipitation. ${rainText.en}${range.en}. ${rainy ? 'Consider an indoor activity.' : 'The weather is suitable for outdoor activities.'}`, `Météo réelle à ${destination} : ${Math.round(temperature)}°C, humidité ${Math.round(humidity)} %, vent ${Math.round(Number(current?.wind_speed_10m) || 0)} km/h et ${precipitation.toFixed(1)} mm de précipitations. ${rainText.fr}${range.fr}. ${rainy ? 'Privilégiez une activité intérieure.' : 'La météo convient aux activités extérieures.'}`);
     return {
       type: 'TEXT',
-      message: `الطقس الحقيقي فـ${destination}: دابا ${Math.round(temperature)}°م، الرطوبة ${Math.round(humidity)}%، الرياح ${Math.round(Number(current?.wind_speed_10m) || 0)} كم/س، والتساقطات ${precipitation.toFixed(1)} مم. ${rainText}${range}. ${rainy ? 'الأفضل تبدل النشاط الخارجي بنشاط داخلي.' : 'الجو مناسب للنشاط الخارجي.'}`,
-      action: rainy ? { type: 'CONFIRM_REPLACE_OUTDOOR', label: 'بدّل النشاط الخارجي بنشاط داخلي' } : null
+      message,
+      action: rainy ? { type: 'CONFIRM_REPLACE_OUTDOOR', label: localize(language, 'بدّل النشاط الخارجي بنشاط داخلي', 'Switch the outdoor activity to an indoor one', 'Remplacer par une activité intérieure') } : null
     };
   } catch (error) {
     console.warn('Assistant weather request failed:', error.message);
-    return { type: 'TEXT', message: `ما قدرتش نوصل لبيانات الطقس الحقيقية فـ${destination} دابا؛ عاود المحاولة بعد شوية.` };
+    return { type: 'TEXT', message: localize(language, `ما قدرتش نوصل لبيانات الطقس الحقيقية فـ${destination} دابا؛ عاود المحاولة بعد شوية.`, `I could not reach real weather data for ${destination}; please try again shortly.`, `Je n’ai pas pu obtenir les données météo réelles pour ${destination} ; réessayez dans un instant.`) };
   }
 }
 
@@ -203,17 +208,17 @@ async function buildReplacementOptions(trip, day, activityIndex, aiOptions = [])
   }).slice(0, 5);
 }
 
-function fallbackResponse(message, trip) {
+function fallbackResponse(message, trip, language = 'ar') {
   const removeRequested = /حيد|احذف|remove|delete/i.test(message);
   const moveRequested = /حرك|نقل|بدل الوقت|move|reschedule/i.test(message);
   const replanRequested = /رتب|خطة من جديد|عاود خطط|replan|rearrange/i.test(message);
   const replaceRequested = /بدل|استبدل|أرخص|غيّر|replace|cheaper/i.test(message);
   const day = numberFromText(message, 1);
   const activityIndex = Math.max(0, numberFromText(message.match(/النشاط\s*(\d+)|activity\s*(\d+)/i)?.[0], 2) - 1);
-  if (removeRequested) return { type: 'REMOVE', day, activityIndex, preview: `معاينة: حذف النشاط ${activityIndex + 1} من اليوم ${day}. أكّد قبل التنفيذ.` };
-  if (moveRequested) return { type: 'MOVE', day, activityIndex, preview: `معاينة: نقل النشاط ${activityIndex + 1} في اليوم ${day} إلى وقت أنسب. أكّد قبل التنفيذ.` };
-  if (replanRequested) return { type: 'REPLAN', day, activityIndex, preview: `معاينة: إعادة ترتيب برنامج اليوم ${day} حسب تفضيلاتك. أكّد قبل التنفيذ.` };
-  if (!replaceRequested) return { type: 'TEXT', message: 'نقدر نعاونك فالتخطيط. جرّب تطلب تبديل نشاط بشي أرخص أو ترتيب يومك.' };
+  if (removeRequested) return { type: 'REMOVE', day, activityIndex, preview: localize(language, `معاينة: حذف النشاط ${activityIndex + 1} من اليوم ${day}. أكّد قبل التنفيذ.`, `Preview: remove activity ${activityIndex + 1} from day ${day}. Confirm before applying.`, `Aperçu : supprimer l’activité ${activityIndex + 1} du jour ${day}. Confirmez avant l’application.`) };
+  if (moveRequested) return { type: 'MOVE', day, activityIndex, preview: localize(language, `معاينة: نقل النشاط ${activityIndex + 1} في اليوم ${day} إلى وقت أنسب. أكّد قبل التنفيذ.`, `Preview: move activity ${activityIndex + 1} on day ${day} to a better time. Confirm before applying.`, `Aperçu : déplacer l’activité ${activityIndex + 1} du jour ${day} à une heure plus adaptée. Confirmez avant l’application.`) };
+  if (replanRequested) return { type: 'REPLAN', day, activityIndex, preview: localize(language, `معاينة: إعادة ترتيب برنامج اليوم ${day} حسب تفضيلاتك. أكّد قبل التنفيذ.`, `Preview: replan day ${day} around your preferences. Confirm before applying.`, `Aperçu : réorganiser le jour ${day} selon vos préférences. Confirmez avant l’application.`) };
+  if (!replaceRequested) return { type: 'TEXT', message: localize(language, 'نقدر نعاونك فالتخطيط. جرّب تطلب تبديل نشاط بشي أرخص أو ترتيب يومك.', 'I can help plan your trip. Try asking to replace an activity with a cheaper option or rearrange a day.', 'Je peux vous aider à planifier votre voyage. Demandez à remplacer une activité par une option moins chère ou à réorganiser une journée.') };
   const current = findActivity(trip, day, activityIndex) || flattenActivities(trip)[activityIndex];
   const currentCost = activityCost(current);
   const alternatives = localAlternatives(trip, current, currentCost, categoryFor(current));
@@ -222,11 +227,11 @@ function fallbackResponse(message, trip) {
 
 const ASSISTANT_SYSTEM_PROMPT = 'أنت سندباد، رفيق سفر مغربي ودود. رد على السلام والمجاملة ("لاباس"، "كيف حالك") بود وبإيجاز ثم وجّه للرحلة. نفّذ أي طلب ضمن نطاق السفر. خارج النطاق → جملة لطيفة تعيد للسفر. أرجع JSON فقط. الأنواع المسموحة: TEXT، REPLACE_ACTIVITY، REMOVE، MOVE، REPLAN. عند أي تعديل، أضف preview واضحاً ولا تنفّذ التعديل دون تأكيد. لا تخترع أماكن أو أرقام طقس؛ استخدم بيانات الرحلة أو المصادر الواقعية المتاحة.';
 
-async function askGemini(message, trip, history = []) {
+async function askGemini(message, trip, history = [], language = 'ar') {
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) return null;
   const contents = (Array.isArray(history) ? history.slice(-8) : []).map((item) => ({ role: item.role === 'assistant' || item.role === 'model' ? 'model' : 'user', parts: [{ text: String(item.content || item.text || '') }] })).filter((item) => item.parts[0].text);
-  contents.push({ role: 'user', parts: [{ text: `الرحلة الحالية: ${JSON.stringify(trip)}\nرسالة المستخدم: ${message}` }] });
+  contents.push({ role: 'user', parts: [{ text: `اللغة المطلوبة للرد: ${normaliseLanguage(language)}\nالرحلة الحالية: ${JSON.stringify(trip)}\nرسالة المستخدم: ${message}` }] });
   const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${encodeURIComponent(apiKey)}`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -249,14 +254,15 @@ export default async function handler(req, res) {
   const message = String(body.message || '').trim();
   const trip = body.trip && typeof body.trip === 'object' ? body.trip : {};
   const history = Array.isArray(body.history) ? body.history.slice(-8) : [];
-  if (!message) return jsonResponse(res, 400, { type: 'TEXT', message: 'اكتب طلبك وسنعاونك في الرحلة.' });
-  if (isGreetingMessage(message)) return jsonResponse(res, 200, greetingResponse(message, trip));
-  if (!isTravelMessage(message)) return jsonResponse(res, 200, { type: 'TEXT', message: 'أنا مختص بمساعدتك في رحلتك فقط؛ نقدر نعاونك فالوجهة والطقس والأنشطة والميزانية.' });
-  if (isWeatherMessage(message)) return jsonResponse(res, 200, await weatherResponse(trip));
+  const language = normaliseLanguage(body.language);
+  if (!message) return jsonResponse(res, 400, { type: 'TEXT', message: localize(language, 'اكتب طلبك وسنعاونك في الرحلة.', 'Write a request and I will help with your trip.', 'Écrivez votre demande et je vous aiderai pour votre voyage.') });
+  if (isGreetingMessage(message)) return jsonResponse(res, 200, greetingResponse(message, trip, language));
+  if (!isTravelMessage(message)) return jsonResponse(res, 200, { type: 'TEXT', message: localize(language, 'أنا مختص بمساعدتك في رحلتك فقط؛ نقدر نعاونك فالوجهة والطقس والأنشطة والميزانية.', 'I focus on your trip: destinations, weather, activities, and budget.', 'Je suis spécialisé dans votre voyage : destinations, météo, activités et budget.') });
+  if (isWeatherMessage(message)) return jsonResponse(res, 200, await weatherResponse(trip, language));
 
   try {
-    const aiResponse = await askGemini(message, trip, history);
-    const response = aiResponse && typeof aiResponse === 'object' ? aiResponse : fallbackResponse(message, trip);
+    const aiResponse = await askGemini(message, trip, history, language);
+    const response = aiResponse && typeof aiResponse === 'object' ? aiResponse : fallbackResponse(message, trip, language);
     if (response.type === 'REPLACE_ACTIVITY' || response.type === 'REPLACE') {
       const day = Number(response.day) || 1;
       const activityIndex = Math.max(0, Number(response.activityIndex) || 0);
@@ -268,7 +274,7 @@ export default async function handler(req, res) {
     return jsonResponse(res, 200, fallbackResponse(message, trip));
   } catch (error) {
     console.warn('Assistant request failed:', error.message);
-    const fallback = fallbackResponse(message, trip);
+    const fallback = fallbackResponse(message, trip, language);
     if (fallback.type === 'REPLACE_ACTIVITY') {
       fallback.options = await buildReplacementOptions(trip, fallback.day, fallback.activityIndex, fallback.options);
     }

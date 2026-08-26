@@ -57,7 +57,7 @@
       .image-fallback .image-fallback-label { display: block; }
     @media (min-width: 700px) { .shell { margin: 22px auto; min-height: calc(100vh - 44px); border-radius: 28px; overflow: hidden; } }
   </style>
-<script src="./utils/i18n.js?m5=b0be6dd" type="module"></script>
+<script src="./utils/i18n.js?m6=final1" type="module"></script>
 <script>(function(){try{var p=localStorage.getItem('themePreference')||'auto';var d=window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches;document.documentElement.dataset.themePreference=p;document.documentElement.dataset.theme=(p==='dark'||(p==='auto'&&d))?'dark':'light';}catch(e){document.documentElement.dataset.theme='light';}})();</script>
 <link href="./theme.css" rel="stylesheet"/>
 <script defer="" src="./theme.js"></script>
@@ -245,7 +245,7 @@
       for (const day of itinerary) {
         for (const activity of (day.activities || [])) {
           if (hasValidCoords(activity)) continue;
-          const resolved = await window.MySindbadGeocode.geocodeActivity(activity.place, tripLabel());
+          const resolved = await window.MySindbadGeocode.geocodeActivity(activity.place, tripLabel(), tripData.cityCoords);
           if (!resolved) continue;
           activity.coords = { lat: resolved.lat, lng: resolved.lng };
           activity.__coordSource = resolved.source;
@@ -494,7 +494,7 @@
       addAssistantMessage('ai', assistantText('assistant_loading', 'سندباد كيخطط...'), { loading: true });
       const loadingMessageIndex = assistantMessages.length - 1;
       try {
-        const response = await fetch('/api/assistant', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ message, trip: assistantTripPayload(), history: assistantHistory() }) });
+        const response = await fetch('/api/assistant', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ message, trip: assistantTripPayload(), history: assistantHistory(), language: window.MySindbadI18n?.getLang?.() || localStorage.getItem('userLang') || 'ar' }) });
         if (!response.ok) throw new Error('assistant');
         const result = await response.json();
         assistantMessages.splice(loadingMessageIndex, 1);
@@ -525,7 +525,7 @@
       fab.addEventListener('click', () => setAssistantOpen(true));
       close.addEventListener('click', () => setAssistantOpen(false));
       backdrop.addEventListener('click', () => setAssistantOpen(false));
-      form.addEventListener('submit', (event) => { event.preventDefault(); const value = input.value; input.value = ''; sendAssistantMessage(value); });
+      form.addEventListener('submit', (event) => { event.preventDefault(); const value = input.value; if (!value.trim()) { showAssistantToast(assistantText('assistant_required', 'اكتب رسالتك أولاً.')); input.focus(); return; } input.value = ''; sendAssistantMessage(value); });
       document.querySelectorAll('[data-assistant-prompt]').forEach((button) => button.addEventListener('click', () => { input.value = button.dataset.assistantPrompt; input.focus(); }));
       const sheet = document.getElementById('assistant-sheet');
       const grabber = sheet.querySelector('.assistant-grabber');
@@ -569,7 +569,7 @@
           <div id="assistant-context" class="assistant-context"></div>
           <div id="assistant-messages" class="assistant-messages" aria-live="polite"></div>
           <div class="assistant-quick" aria-label="إجراءات سريعة"><button type="button" data-assistant-prompt="السلام عليكم" data-i18n="assistant_salutation">السلام عليكم</button><button type="button" data-assistant-prompt="لاباس؟" data-i18n="assistant_wellbeing">لاباس؟</button><button type="button" data-assistant-prompt="شنو نقدر ندير اليوم؟" data-i18n="assistant_today_prompt">شنو نقدر ندير اليوم؟</button><button type="button" data-assistant-prompt="بدل نشاط">بدل نشاط</button><button type="button" data-assistant-prompt="حيد نشاط">حيد نشاط</button><button type="button" data-assistant-prompt="رتب اليوم">رتب اليوم</button><button type="button" data-assistant-prompt="شنو ندير إلا شتات">شنو ندير إلا شتات</button></div>
-          <form id="assistant-form" class="assistant-form"><input id="assistant-input" type="text" autocomplete="off" placeholder="قول ليا شنو بغيتي نبدلو..." data-i18n-placeholder="assistant_input" aria-label="رسالة المساعد" required><button type="submit" aria-label="إرسال" data-i18n="assistant_send">➤</button></form>
+          <form id="assistant-form" class="assistant-form" novalidate><input id="assistant-input" type="text" autocomplete="off" placeholder="قول ليا شنو بغيتي نبدلو..." data-i18n-placeholder="assistant_input" aria-label="رسالة المساعد" required><button type="submit" aria-label="إرسال" data-i18n="assistant_send">➤</button></form>
         </section>
         <div id="assistant-toast" class="assistant-toast" role="status"></div>`;
       document.getElementById('tripHeaderImg').src = getCityImage(tripLabel());

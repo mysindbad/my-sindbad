@@ -8,7 +8,7 @@
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="./utils/cityImages.js"></script>
 <link href="./utils/navigation.css" rel="stylesheet"/>
-<script src="./utils/i18n.js?m5=b0be6dd" type="module"></script>
+<script src="./utils/i18n.js?m6=final1" type="module"></script>
 <script>(function(){try{var p=localStorage.getItem('themePreference')||'auto';var d=window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches;document.documentElement.dataset.themePreference=p;document.documentElement.dataset.theme=(p==='dark'||(p==='auto'&&d))?'dark':'light';}catch(e){document.documentElement.dataset.theme='light';}})();</script>
 <link href="./theme.css" rel="stylesheet"/>
 <script defer="" src="./theme.js"></script>
@@ -19,17 +19,17 @@
 <header class="bg-gradient-to-r from-amber-500 to-amber-600 rounded-2xl p-4 text-white shadow-lg flex justify-between items-center">
 <div>
 <h1 class="text-xl font-black" data-i18n="today_heading">وضع اليوم 📍</h1>
-<p class="text-sm font-bold text-white" id="today-city">وجهتك</p>
-<p class="text-xs text-amber-100" id="today-date">جاري التحميل...</p>
+<p class="text-sm font-bold text-white" data-i18n="destination_default" id="today-city">وجهتك</p>
+<p class="text-xs text-amber-100" data-i18n="date_loading" id="today-date">جاري التحميل...</p>
 </div>
 <div class="text-left text-xs bg-white/20 p-2 rounded-xl backdrop-blur-sm" id="weather-box">
-<span id="weather-temp">--°C</span> • <span id="weather-desc">مشمس</span>
+<span id="weather-temp">--°C</span> • <span data-i18n="weather_sunny" id="weather-desc">مشمس</span>
 </div>
 </header>
 <!-- Progress Bar -->
 <div class="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm space-y-2">
 <div class="flex justify-between text-xs font-bold text-slate-600">
-<span>تقدم اليوم</span>
+<span data-i18n="progress_today">تقدم اليوم</span>
 <span id="progress-percent">0%</span>
 </div>
 <div class="w-full bg-slate-100 rounded-full h-3 overflow-hidden">
@@ -40,9 +40,9 @@
 <div class="space-y-3">
 <h2 class="text-sm font-bold text-slate-500" data-i18n="today_activity">النشاط الحالي</h2>
 <div class="bg-white p-5 rounded-2xl border-2 border-amber-400 shadow-md" id="current-card">
-<div class="text-lg font-black text-slate-800" id="current-title">لا أنشطة لهذا اليوم</div>
+<div class="text-lg font-black text-slate-800" data-i18n="no_today_activity" id="current-title">لا أنشطة لهذا اليوم</div>
 <p class="text-xs text-slate-400 mb-4" id="current-time">--:--</p>
-<button class="hidden w-full bg-amber-500 hover:bg-amber-600 text-white font-bold py-3 rounded-xl shadow transition" id="btn-arrived">وصلت ✓</button>
+<button class="hidden w-full bg-amber-500 hover:bg-amber-600 text-white font-bold py-3 rounded-xl shadow transition" data-i18n="arrived" id="btn-arrived">وصلت ✓</button>
 </div>
 </div>
 <!-- Banner Alerts Container -->
@@ -55,10 +55,12 @@
     const trip = JSON.parse(localStorage.getItem('currentTrip') || 'null') || JSON.parse(localStorage.getItem('sb_trip') || 'null') || {};
     const normalized = window.MySindbadCity?.normalizeCityName(trip.destinationDisplay || trip.destination || trip.destinationName || trip.city || 'مراكش') || { display: trip.destination || 'مراكش' };
     const destinationDisplay = normalized.display || 'مراكش';
+    const lang = () => window.MySindbadI18n?.getLang?.() || localStorage.getItem('userLang') || 'ar';
+    const t = (key, fallback) => window.MySindbadI18n?.getTranslation?.(lang(), key) || fallback;
     document.getElementById('today-city').textContent = destinationDisplay;
-    document.getElementById('today-date').textContent = new Date().toLocaleDateString('ar-MA', { weekday: 'long', month: 'short', day: 'numeric' });
+    document.getElementById('today-date').textContent = new Date().toLocaleDateString(lang() === 'fr' ? 'fr-FR' : lang() === 'en' ? 'en-US' : 'ar-MA', { weekday: 'long', month: 'short', day: 'numeric' });
     const cityCoords = trip.cityCoords || { lat: 31.6295, lng: -7.9811 };
-    const weatherText = (code) => code === 0 ? 'صحو ومشمس' : code < 3 ? 'غائم جزئياً' : code < 70 ? 'أمطار أو غائم' : 'زخات مطرية';
+    const weatherText = (code) => code === 0 ? t('weather_sunny', 'صحو ومشمس') : code < 3 ? t('weather_partly', 'غائم جزئياً') : code < 70 ? t('weather_cloudy', 'أمطار أو غائم') : t('weather_showers', 'زخات مطرية');
     try {
       const res = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${encodeURIComponent(cityCoords.lat)}&longitude=${encodeURIComponent(cityCoords.lng)}&current=temperature_2m,weather_code&timezone=auto`);
       const data = await res.json();
@@ -73,26 +75,27 @@
     const tripBudget = Number(trip?.budget?.amount ?? trip?.budget ?? 0);
     const currentSpent = savedActs.reduce((sum, activity) => sum + Number(activity?.cost || activity?.price || 0), 0);
     const alerts = evaluateAlerts({ weatherDaily: Array.isArray(trip.weatherDaily) ? trip.weatherDaily : [], daysActivities, budget: tripBudget, currentSpent });
-    document.getElementById('alerts-container').innerHTML = alerts.map((alert) => `<aside class="rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-950 shadow-sm"><strong class="block mb-1">تنبيه استباقي</strong><span>${alert.message}</span></aside>`).join('');
+    document.getElementById('alerts-container').innerHTML = alerts.map((alert) => `<aside class="rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-950 shadow-sm"><strong class="block mb-1">${t('proactive_alert', 'تنبيه استباقي')}</strong><span>${alert.message}</span></aside>`).join('');
     if (!savedActs.length) {
       document.getElementById('progress-bar').style.width = '0%';
       document.getElementById('progress-percent').textContent = '0%';
-      document.getElementById('current-title').textContent = 'لا أنشطة لهذا اليوم';
+      document.getElementById('current-title').textContent = t('no_today_activity', 'لا أنشطة لهذا اليوم');
       document.getElementById('btn-arrived').classList.add('hidden');
     } else {
       document.getElementById('btn-arrived').classList.remove('hidden');
-      document.getElementById('current-title').textContent = savedActs[0].title || savedActs[0].place || 'النشاط الأول';
+      document.getElementById('current-title').textContent = savedActs[0].title || savedActs[0].place || t('activity_first', 'النشاط الأول');
       let count = 0;
       document.getElementById('btn-arrived').addEventListener('click', () => {
         count = Math.min(100, count + 33);
         document.getElementById('progress-bar').style.width = count + '%';
         document.getElementById('progress-percent').textContent = count + '%';
         if (count >= 99) {
-          document.getElementById('current-title').textContent = '🎉 أكملت أنشطة اليوم بنجاح!';
+          document.getElementById('current-title').textContent = t('all_done', '🎉 أكملت أنشطة اليوم بنجاح!');
           document.getElementById('btn-arrived').classList.add('hidden');
         }
       });
     }
   </script>
+<script defer src="./utils/header.js"></script>
 </body>
 </html>

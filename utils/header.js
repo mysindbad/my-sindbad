@@ -1,54 +1,24 @@
 (function initSharedHeader() {
-  const logo = `
-    <span class="site-header__mark" aria-hidden="true">
-      <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
-        <path d="M4 20L8 16L12 20L16 16L20 20L24 16L28 20" stroke="#D4AF37" stroke-width="2" stroke-linecap="round"/>
-        <path d="M8 20V26H24V20" fill="#D4AF37"/>
-        <path d="M16 8V16" stroke="#D4AF37" stroke-width="2"/>
-        <path d="M16 8L22 12L16 16Z" fill="#D4AF37"/>
-      </svg>
-    </span>
-    <span class="site-header__wordmark">
-      <strong>My Sindbad</strong>
-      <small data-i18n="header_tagline">رفيق السفر</small>
-    </span>`;
-
-  function headerMarkup() {
-    return `
-      <header class="site-header" id="mainHeader">
-        <div class="site-header__inner">
-          <a class="site-header__brand" href="./index.html" aria-label="My Sindbad - الرئيسية">${logo}</a>
-          <a class="site-header__home" href="./index.html" data-i18n="nav_home">الرئيسية</a>
-          <select data-language-select aria-label="اللغة" style="margin-inline-start:8px;border:1px solid #d4af37;border-radius:8px;background:transparent;color:inherit;padding:4px;font:inherit"><option value="ar" data-i18n="language_ar">العربية</option><option value="en" data-i18n="language_en">English</option></select>
-        </div>
-      </header>`;
+  const logo = `<span class="site-header__mark" aria-hidden="true"><svg width="32" height="32" viewBox="0 0 32 32" fill="none"><path d="M4 20L8 16L12 20L16 16L20 20L24 16L28 20" stroke="#D4AF37" stroke-width="2" stroke-linecap="round"/><path d="M8 20V26H24V20" fill="#D4AF37"/><path d="M16 8V16" stroke="#D4AF37" stroke-width="2"/><path d="M16 8L22 12L16 16Z" fill="#D4AF37"/></svg></span><span class="site-header__wordmark"><strong>My Sindbad</strong><small data-i18n="header_tagline">رفيق السفر</small></span>`;
+  function headerMarkup() { return `<header class="site-header" id="mainHeader"><div class="site-header__inner"><a class="site-header__brand" href="./index.html" aria-label="My Sindbad - الرئيسية">${logo}</a><a class="site-header__home" href="./index.html" data-i18n="nav_home">الرئيسية</a><select data-language-select aria-label="اللغة" style="margin-inline-start:8px;border:1px solid #d4af37;border-radius:8px;background:transparent;color:inherit;padding:4px;font:inherit"><option value="ar" data-i18n="language_ar">العربية</option><option value="en" data-i18n="language_en">English</option><option value="fr" data-i18n="language_fr">Français</option></select></div></header>`; }
+  const style = `<style id="m6-shared-assistant-style">.m6-assistant-fab{position:fixed;right:max(18px,calc(50% - 222px));bottom:calc(84px + env(safe-area-inset-bottom));z-index:1200;width:44px;height:44px;padding:0;border:2px solid #fff;border-radius:50%;background:#D4AF37;color:#0A192F;font-size:1.1rem;box-shadow:0 10px 24px #06101f66;cursor:pointer}.m6-assistant-fab:focus-visible{outline:3px solid #fff;outline-offset:2px}.m6-assistant-backdrop{position:fixed;inset:0;z-index:1210;background:#06101f99;backdrop-filter:blur(3px)}.m6-assistant-sheet{position:fixed;right:50%;bottom:0;z-index:1220;display:flex;width:min(100%,480px);height:min(85vh,720px);max-height:85vh;transform:translateX(50%);flex-direction:column;overflow:hidden;border-radius:24px 24px 0 0;background:var(--surface-0,#fbf9f5);box-shadow:0 -18px 60px #0005}.m6-assistant-sheet[hidden],.m6-assistant-backdrop[hidden]{display:none}.m6-assistant-head{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-bottom:1px solid var(--border-soft,#e5e7eb)}.m6-assistant-head h2{margin:0;color:var(--text-strong,#0c1624);font-size:1rem}.m6-assistant-head button{width:34px;height:34px;border:0;border-radius:10px;background:#eef2f7;color:#0A192F;font-size:1.1rem}.m6-assistant-messages{flex:1;min-height:0;overflow-y:auto;padding:14px}.m6-assistant-message{max-width:88%;margin:0 0 9px;padding:9px 11px;border-radius:14px;font-size:.73rem;line-height:1.75;white-space:pre-wrap}.m6-assistant-message.user{margin-inline-start:auto;background:#0A192F;color:#fff}.m6-assistant-message.ai{margin-inline-end:auto;background:var(--surface-1,#fff);color:var(--text-strong,#0c1624);border:1px solid var(--border-soft,#e5e7eb)}.m6-assistant-quick{display:flex;gap:6px;overflow-x:auto;padding:8px 12px;border-top:1px solid var(--border-soft,#e5e7eb)}.m6-assistant-quick button{flex:none;padding:7px 9px;border:1px solid #d4af3780;border-radius:999px;background:#fffaf0;color:#0A192F;font-size:.64rem;font-weight:700}.m6-assistant-form{position:sticky;bottom:0;z-index:4;display:flex;gap:8px;padding:9px 12px calc(12px + env(safe-area-inset-bottom));border-top:1px solid var(--border-soft,#e5e7eb);background:var(--surface-1,#fff)}.m6-assistant-form input{min-width:0;flex:1;padding:10px;border:1px solid #dbe2ea;border-radius:12px;background:inherit;color:var(--text-strong,#0c1624);font-size:.72rem}.m6-assistant-form button{width:42px;border:0;border-radius:12px;background:#0A192F;color:#fff;font-size:1rem}.m6-assistant-error{padding:4px 12px;color:#b91c1c;font-size:.66rem}</style>`;
+  const assistantMarkup = `${style}<button class="m6-assistant-fab" id="m6-assistant-fab" type="button" aria-label="مساعد سندباد" title="مساعد سندباد">🤖</button><div class="m6-assistant-backdrop" id="m6-assistant-backdrop" hidden></div><section class="m6-assistant-sheet" id="m6-assistant-sheet" role="dialog" aria-modal="true" aria-labelledby="m6-assistant-title" hidden><header class="m6-assistant-head"><h2 id="m6-assistant-title" data-i18n="assistant_title">مساعد سندباد</h2><button id="m6-assistant-close" type="button" data-i18n="close">×</button></header><div class="m6-assistant-messages" id="m6-assistant-messages" aria-live="polite"></div><div class="m6-assistant-quick"><button type="button" data-i18n="assistant_salutation" data-assistant-prompt="السلام عليكم">السلام عليكم</button><button type="button" data-i18n="assistant_wellbeing" data-assistant-prompt="لاباس؟">لاباس؟</button><button type="button" data-i18n="assistant_today_prompt" data-assistant-prompt="شنو نقدر ندير اليوم؟">شنو نقدر ندير اليوم؟</button></div><form class="m6-assistant-form" id="m6-assistant-form" novalidate><input id="m6-assistant-input" type="text" autocomplete="off" data-i18n-placeholder="assistant_input" placeholder="قول ليا شنو بغيتي نبدلو..." aria-label="رسالة المساعد"><button type="submit" data-i18n="send" aria-label="إرسال">➤</button></form><div class="m6-assistant-error" id="m6-assistant-error" role="status"></div></section>`;
+  function setScrolledState() { const header = document.getElementById('mainHeader'); if (header) header.classList.toggle('is-scrolled', window.scrollY > 50); }
+  function mountAssistant() {
+    if (document.getElementById('m6-assistant-fab') || /itinerary(?:\.html)?$/.test(location.pathname)) return;
+    document.body.insertAdjacentHTML('beforeend', assistantMarkup);
+    const fab = document.getElementById('m6-assistant-fab'), sheet = document.getElementById('m6-assistant-sheet'), backdrop = document.getElementById('m6-assistant-backdrop'), close = document.getElementById('m6-assistant-close'), form = document.getElementById('m6-assistant-form'), input = document.getElementById('m6-assistant-input'), messages = document.getElementById('m6-assistant-messages'), error = document.getElementById('m6-assistant-error');
+    const history = [];
+    const trip = () => { try { return JSON.parse(localStorage.getItem('currentTrip') || 'null') || JSON.parse(localStorage.getItem('sb_trip') || 'null') || {}; } catch { return {}; } };
+    const lang = () => localStorage.getItem('userLang') || 'ar';
+    const text = (key, fallback) => window.MySindbadI18n?.getTranslation?.(lang(), key) || fallback;
+    const add = (role, value) => { const node = document.createElement('div'); node.className = `m6-assistant-message ${role}`; node.textContent = value; messages.appendChild(node); messages.scrollTop = messages.scrollHeight; };
+    const open = () => { sheet.hidden = false; backdrop.hidden = false; input.focus(); };
+    const shut = () => { sheet.hidden = true; backdrop.hidden = true; };
+    async function send(raw) { const message = String(raw || '').trim(); if (!message) { error.textContent = text('assistant_required', 'اكتب رسالتك أولاً.'); input.focus(); return; } error.textContent = ''; add('user', message); input.value = ''; add('ai', text('assistant_loading', 'سندباد كيخطط...')); const loading = messages.lastElementChild; try { const response = await fetch('/api/assistant', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({ message, trip:trip(), history:history.slice(-8), language:lang() }) }); if (!response.ok) throw new Error('assistant'); const result = await response.json(); loading.remove(); const reply = result.message || result.preview || text('assistant_error','تعذر فهم الطلب. حاول مرة أخرى.'); add('ai', reply); history.push({role:'user',content:message},{role:'assistant',content:reply}); } catch { loading.remove(); add('ai', text('assistant_error','تعذر فهم الطلب. حاول مرة أخرى.')); } }
+    fab.addEventListener('click', open); close.addEventListener('click', shut); backdrop.addEventListener('click', shut); form.addEventListener('submit', (event) => { event.preventDefault(); send(input.value); }); document.querySelectorAll('[data-assistant-prompt]').forEach((button) => button.addEventListener('click', () => { open(); input.value = button.dataset.assistantPrompt || ''; input.focus(); }));
   }
-
-  function setScrolledState() {
-    const header = document.getElementById('mainHeader');
-    if (header) header.classList.toggle('is-scrolled', window.scrollY > 50);
-  }
-
-  function mount() {
-    document.querySelectorAll('[data-site-header]').forEach((host) => {
-      if (host.dataset.mounted === 'true') return;
-      host.className = 'site-header-host';
-      host.innerHTML = headerMarkup();
-      host.dataset.mounted = 'true';
-      setTimeout(() => window.MySindbadI18n?.refresh?.(), 0);
-    });
-    setScrolledState();
-  }
-
-  function start() {
-    mount();
-    window.addEventListener('scroll', setScrolledState, { passive: true });
-    new MutationObserver(mount).observe(document.body, { childList: true, subtree: true });
-  }
-
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', start, { once: true });
-  } else {
-    start();
-  }
+  function mount() { document.querySelectorAll('[data-site-header]').forEach((host) => { if (host.dataset.mounted === 'true') return; host.className = 'site-header-host'; host.innerHTML = headerMarkup(); host.dataset.mounted = 'true'; setTimeout(() => window.MySindbadI18n?.refresh?.(), 0); }); mountAssistant(); setScrolledState(); }
+  function start() { mount(); window.addEventListener('scroll', setScrolledState, {passive:true}); new MutationObserver(mount).observe(document.body, {childList:true,subtree:true}); }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start, {once:true}); else start();
 })();

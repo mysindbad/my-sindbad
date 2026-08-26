@@ -22,18 +22,24 @@ export const translations = {
     travel_inspiration: 'Inspiration from real trips', assistant_title: 'Sindbad assistant', language_ar: 'Arabic', language_en: 'English', assistant_greeting: 'Welcome! What would you like to do with your trip?', assistant_loading: 'Sindbad is planning...', assistant_has_options: 'I found these cheaper alternatives. Choose one to replace it:', assistant_error: 'I could not understand that request. Please try again.', assistant_replace: 'Replace', assistant_no_cheaper: 'No cheaper alternative is available right now.', assistant_replaced: 'Activity replaced successfully', assistant_preview: 'The change preview is ready for review.', share_trip: 'Share trip', close: 'Close', assistant_subtitle: 'I can help adjust your trip', assistant_input: 'Tell me what you would like to change...', assistant_salutation: 'Hello', assistant_wellbeing: 'How are you?', assistant_today_prompt: 'What can I do today?', notifications: 'Notifications', theme: 'Theme', theme_auto: 'Automatic', theme_light: 'Light', theme_dark: 'Dark', community_intro: 'Discover new places through fellow travelers’ experiences and add them to your trip with one tap.', quick_view: 'Quick overview', settings: 'Settings', saved_trips: 'Saved trips', language: 'Language', home_empty_title: 'Start your next trip', home_empty_text: 'Create a custom travel plan and add the days and tasks that matter to you.', create_trip: 'Create trip', map_tools: 'Map & tools', current_weather: 'Current weather', currency_converter: 'Currency converter', approximate_rates: 'Approximate rates', privacy_back: 'Back to home', send: 'Send', submit_post: 'Publish post', share_experience: 'Share experience', edit_activity: 'Edit activity', my_places: 'My trip places', explore_kicker: 'MY SINDBAD · Explore around you', budget_used: 'used', estimated_hotel: 'Estimated hotel', estimated_food: 'Estimated food', estimated_activities: 'Estimated activities', estimated_transport: 'Estimated transport', hotel_singular: 'Hotel', restaurant_singular: 'Restaurant', around_destination: 'Around your destination', sunny: 'Clear and sunny', partly_cloudy: 'Partly cloudy', cloudy: 'Cloudy', rain: 'Rain', showers: 'Rain showers', variable_weather: 'Changeable weather'
   }
 };
+translations.fr = Object.assign({}, translations.en, { nav_home:'Accueil', nav_itinerary:'Mon voyage', nav_map:'Carte', nav_explore:'Explorer', nav_community:'Communauté', nav_profile:'Profil', header_tagline:'Votre compagnon de voyage', language_label:'Langue', home_heading:'Où votre voyage vous mènera-t-il ?', home_search_placeholder:'Rechercher une ville ou une destination...', view_plan:'Voir le programme', service_hotels:'Hôtels', service_restaurants:'Restaurants', service_places:'Lieux', service_trip:'Mon voyage', service_assistant:'Assistant voyage', create_title:'Créez un voyage qui vous ressemble', itinerary_heading:'Programme quotidien', explore_heading:'Lieux à visiter', explore_weather:'Météo actuelle', today_heading:"Mode aujourd'hui", community_heading:'Communauté des voyageurs', profile_heading:'Mon profil', privacy_heading:'Politique de confidentialité', map_heading:'Découvrez un lieu et commencez le voyage', destination:'Destination', travelers:'Voyageurs', estimated_budget:'Budget estimé', travel_style:'Style de voyage', preferences:'Préférences', create_ai:'Créer avec l’IA', cancel:'Annuler', search:'Rechercher', add_to_trip:'Ajouter à mon voyage ➕', directions:'Itinéraire', today_activity:'Activité actuelle', no_activity:"Aucune activité aujourd'hui", trip_days:'jours', budget:'Budget', destination_label:'Destination', hotels:'Hôtels', restaurants:'Restaurants', places:'Attractions', hotels_tab:'Hôtels 🏨', restaurants_tab:'Restaurants 🍽️', upcoming:'Mon prochain voyage', trip_plan:'Programme quotidien', packing:'Liste de préparation', add_activity:'Ajouter une activité', no_activities:'Aucune activité pour le moment', weather_loading:'Chargement de la météo', forecast_pending:'Prévisions disponibles après le chargement', budget_monitor:'Suivi du budget', total_budget:'Budget total', remaining:'Restant', estimated:'Estimé', places_loading:'Chargement des lieux réels autour de votre destination...', address_missing:'Adresse indisponible', current_activity:'Activité actuelle', no_today_activity:"Aucune activité aujourd'hui", travel_inspiration:'Inspiration de vrais voyages', assistant_title:'Assistant Sindbad', language_ar:'Arabe', language_en:'English', language_fr:'Français', assistant_greeting:'Bienvenue ! Que souhaitez-vous faire avec votre voyage ?', assistant_loading:'Sindbad réfléchit...', assistant_has_options:'Voici des alternatives moins chères. Choisissez-en une :', assistant_error:"Je n’ai pas compris. Réessayez.", assistant_replace:'Remplacer', assistant_no_cheaper:'Aucune alternative moins chère pour le moment.', assistant_replaced:'Activité remplacée avec succès', assistant_preview:'Aperçu de la modification prêt à être confirmé.', share_trip:'Partager le voyage', close:'Fermer', assistant_subtitle:'Je peux vous aider à modifier votre voyage', assistant_input:'Dites-moi ce que vous souhaitez changer...', assistant_salutation:'Bonjour', assistant_wellbeing:'Comment allez-vous ?', assistant_today_prompt:'Que puis-je faire aujourd’hui ?', notifications:'Notifications', theme:'Apparence', theme_auto:'Automatique', theme_light:'Clair', theme_dark:'Sombre', community_intro:'Découvrez de nouveaux lieux grâce aux expériences d’autres voyageurs.', quick_view:'Aperçu rapide', settings:'Paramètres', saved_trips:'Voyages enregistrés', create_trip:'Créer un voyage', map_tools:'Carte et outils', current_weather:'Météo actuelle', currency_converter:'Convertisseur de devises', approximate_rates:'Taux approximatifs', privacy_back:'Retour à l’accueil', send:'Envoyer', submit_post:'Publier', share_experience:'Partager une expérience', edit_activity:'Modifier l’activité', my_places:'Mes lieux', explore_kicker:'MY SINDBAD · Explorez autour de vous', budget_used:'utilisé', estimated_hotel:'Hôtel estimé', estimated_food:'Repas estimés', estimated_activities:'Activités estimées', estimated_transport:'Transport estimé', hotel_singular:'Hôtel', restaurant_singular:'Restaurant', around_destination:'Autour de votre destination', sunny:'Dégagé et ensoleillé', partly_cloudy:'Partiellement nuageux', cloudy:'Nuageux', rain:'Pluie', showers:'Averses', variable_weather:'Météo variable', assistant_required:'Écrivez votre message.', language:'Langue' });
+
+Object.assign(translations.ar, { language_fr:'Français', progress_today:'تقدم اليوم', arrived:'وصلت ✓', all_done:'🎉 أكملت أنشطة اليوم بنجاح!', activity_first:'النشاط الأول', proactive_alert:'تنبيه استباقي', weather_sunny:'صحو ومشمس', weather_partly:'غائم جزئياً', weather_cloudy:'أمطار أو غائم', weather_showers:'زخات مطرية', weather_unavailable:'الطقس غير متوفر', destination_default:'وجهتك', date_loading:'جاري التحميل...' });
+Object.assign(translations.en, { language_fr:'French', progress_today:'Today progress', arrived:'Arrived ✓', all_done:'🎉 You completed today’s activities!', activity_first:'First activity', proactive_alert:'Proactive alert', weather_sunny:'Clear and sunny', weather_partly:'Partly cloudy', weather_cloudy:'Cloudy or rainy', weather_showers:'Rain showers', weather_unavailable:'Weather unavailable', destination_default:'Your destination', date_loading:'Loading date...' });
+Object.assign(translations.fr, { progress_today:'Progression du jour', arrived:'Arrivé ✓', all_done:'🎉 Vous avez terminé les activités du jour !', activity_first:'Première activité', proactive_alert:'Alerte proactive', weather_sunny:'Dégagé et ensoleillé', weather_partly:'Partiellement nuageux', weather_cloudy:'Nuageux ou pluvieux', weather_showers:'Averses', weather_unavailable:'Météo indisponible', destination_default:'Votre destination', date_loading:'Chargement de la date...' });
 
 export function getTranslation(lang = 'ar', key = '') {
-  return translations[lang]?.[key] || translations.ar[key] || key;
+  return translations[lang]?.[key] || translations.en?.[key] || translations.ar[key] || key;
 }
 
 const dynamicRules = [
-  [/^برنامج رحلة\s+(.+)$/, (city, lang) => lang === 'en' ? `Trip to ${city}` : `برنامج رحلة ${city}`],
-  [/^رحلتك إلى\s+(.+)$/, (city, lang) => lang === 'en' ? `Your trip to ${city}` : `رحلتك إلى ${city}`],
-  [/^استكشف\s+(.+)$/, (city, lang) => lang === 'en' ? `Explore ${city}` : `استكشف ${city}`],
-  [/^اليوم\s+(\d+)$/, (day, lang) => lang === 'en' ? `Day ${day}` : `اليوم ${day}`],
+  [/^برنامج رحلة\s+(.+)$/, (city, lang) => lang === 'en' ? `Trip to ${city}` : lang === 'fr' ? `Voyage à ${city}` : `برنامج رحلة ${city}`],
+  [/^رحلتك إلى\s+(.+)$/, (city, lang) => lang === 'en' ? `Your trip to ${city}` : lang === 'fr' ? `Votre voyage à ${city}` : `رحلتك إلى ${city}`],
+  [/^استكشف\s+(.+)$/, (city, lang) => lang === 'en' ? `Explore ${city}` : lang === 'fr' ? `Explorer ${city}` : `استكشف ${city}`],
+  [/^اليوم\s+(\d+)$/, (day, lang) => lang === 'en' ? `Day ${day}` : lang === 'fr' ? `Jour ${day}` : `اليوم ${day}`],
   [/^(\d+)% مستخدم$/, (value, lang) => lang === 'en' ? `${value}% used` : `${value}% مستخدم`]
 ];
+const frenchExtraTranslations = { 'العربية':'Arabe', 'English':'English', 'مراكش':'Marrakech', 'العملة المدعومة حالياً: MAD.':'Devise prise en charge : MAD.', 'تسجيل الخروج':'Se déconnecter', 'تمت الإضافة إلى رحلتك بنجاح!':'Ajouté à votre voyage !', 'تعديل':'Modifier', 'مشاركة الرحلة':'Partager le voyage', 'وضع اليوم':'Mode aujourd’hui', 'إغلاق':'Fermer' };
 const extraTranslations = { 'العربية': 'Arabic', 'English': 'English', '⚠️ الميزانية قريبة من النفاد': '⚠️ Budget nearly depleted', 'تحسين بالذكاء الاصطناعي': 'Optimize with AI', 'تمت الإضافة إلى رحلتك بنجاح!': 'Added to your trip successfully!', 'موعد النشاط': 'Activity time', 'الخريطة': 'Map', 'تعديل': 'Edit', 'مشاركة الرحلة': 'Share trip', 'وضع اليوم': 'Today mode', 'تعديل البيانات': 'Edit details', 'برنامج يوم بيوم': 'Day-by-day plan', 'غير محددة': 'Not specified', 'تقديري': 'Estimated', 'أضف إلى رحلتي ➕': 'Add to my trip ➕', 'إلغاء': 'Cancel', 'حفظ التعديل': 'Save changes', 'إغلاق': 'Close', 'العملة المدعومة حالياً: MAD.': 'Currently supported currency: MAD.', 'تسجيل الخروج': 'Log out' };
 const exact = Object.fromEntries(Object.entries(translations.ar).map(([key, value]) => [value, key]));
 let current = 'ar';
@@ -47,6 +53,7 @@ function translateValue(original, lang = current) {
   if (key) return getTranslation(lang, key);
   for (const [pattern, render] of dynamicRules) { const match = original.trim().match(pattern); if (match) return render(match[1], lang); }
   if (current === 'en' && extraTranslations[original.trim()]) return extraTranslations[original.trim()];
+  if (current === 'fr' && frenchExtraTranslations[original.trim()]) return frenchExtraTranslations[original.trim()];
   return original;
 }
 function markAndApply(root = typeof document !== 'undefined' ? document : null) {
@@ -68,12 +75,12 @@ function markAndApply(root = typeof document !== 'undefined' ? document : null) 
 }
 
 export function applyLang(lang = 'ar') {
-  current = lang === 'en' ? 'en' : 'ar';
+  current = lang === 'en' ? 'en' : lang === 'fr' ? 'fr' : 'ar';
   setStorage(current);
   if (typeof document === 'undefined') return current;
   document.documentElement.lang = current;
-  document.documentElement.dir = current === 'en' ? 'ltr' : 'rtl';
-  document.body?.classList.toggle('lang-en', current === 'en');
+  document.documentElement.dir = current === 'ar' ? 'rtl' : 'ltr';
+  document.body?.classList.toggle('lang-en', current !== 'ar');
   markAndApply(document);
   bindLanguageControls();
   document.querySelectorAll('[data-language-select]').forEach((select) => { select.value = current; });
@@ -91,10 +98,10 @@ function bindLanguageControls() {
 }
 
 if (typeof window !== 'undefined' && typeof document !== 'undefined') {
-  current = storageValue() === 'en' ? 'en' : 'ar';
+  current = storageValue() === 'en' ? 'en' : storageValue() === 'fr' ? 'fr' : 'ar';
   window.MySindbadI18n = { translations, getTranslation, applyLang, getLang: () => current, refresh: () => markAndApply(document) };
   document.documentElement.lang = current;
-  document.documentElement.dir = current === 'en' ? 'ltr' : 'rtl';
+  document.documentElement.dir = current === 'ar' ? 'rtl' : 'ltr';
   const start = () => { bindLanguageControls(); markAndApply(document); applyLang(current); };
   const observer = new MutationObserver(() => { if (!applying) { markAndApply(document); bindLanguageControls(); } });
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start, { once: true }); else start();
