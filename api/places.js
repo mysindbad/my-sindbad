@@ -1,4 +1,26 @@
 import { fetchJson, handleOptions, sendUpstreamError, setCors } from '../lib/http.js';
+import { CITY_PLACES, nearestCityKey } from './places-data.js';
+
+function localFallback(lat, lon, kind) {
+  const cityKey = nearestCityKey({ lat, lon });
+  const source = CITY_PLACES[cityKey] || [];
+  return source
+    .filter((item) => kind === 'food'
+      ? item.category === 'food'
+      : kind === 'hotels'
+        ? item.category === 'hotel'
+        : !['food', 'hotel'].includes(item.category))
+    .map((item, index) => ({
+      id: `local/${cityKey}/${index}`,
+      name: item.title,
+      category: item.category,
+      address: '',
+      lat: item.lat,
+      lon: item.lng,
+      website: '',
+      phone: ''
+    }));
+}
 
 export default async function handler(req, res) {
   if (handleOptions(req, res)) return;
@@ -35,6 +57,11 @@ export default async function handler(req, res) {
     })).filter((item) => item.name && Number.isFinite(item.lat) && Number.isFinite(item.lon));
     return res.status(200).json(places);
   } catch (error) {
+    const fallback = localFallback(lat, lon, kind);
+    if (fallback.length) {
+      console.warn('Overpass unavailable; using verified local places fallback.');
+      return res.status(200).json(fallback);
+    }
     return sendUpstreamError(res, error);
   }
 }
