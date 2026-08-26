@@ -16,13 +16,9 @@
     if (hour >= 6 && hour < 12) return 'morning';
     if (hour >= 12 && hour < 16) return 'day';
     if (hour >= 16 && hour < 19) return 'sunset';
-    return 'night'; // 19 to 4
+    return 'night';
   }
 
-  /**
-   * دالة لإرجاع التحية المناسبة حسب فترة اليوم
-   * @returns {string} نص التحية
-   */
   function getGreeting() {
     const period = getTimePeriod();
     const greetings = {
@@ -35,10 +31,6 @@
     return greetings[period];
   }
 
-  /**
-   * دالة لإرجاع إعدادات الخلفية والألوان حسب فترة اليوم
-   * @returns {object} يحتوي على فئات Tailwind CSS المناسبة
-   */
   function getBackgroundConfig() {
     const period = getTimePeriod();
     const configs = {
@@ -54,6 +46,20 @@
   return { getTimePeriod, getGreeting, getBackgroundConfig };
 }));
 
+// The homepage renders before deferred cityImages.js executes. Keep the first render safe.
+if (typeof globalThis !== 'undefined' && !globalThis.CITY_IMAGES) {
+  globalThis.CITY_IMAGES = {
+    istanbul: './images/istanbul.jpg',
+    marrakech: './images/marrakech.jpg',
+    chefchaouen: './images/chefchaouen.jpg',
+    agadir: './images/marrakech.jpg',
+    fes: './images/chefchaouen.jpg',
+    tangier: './images/chefchaouen.jpg',
+    rabat: './images/chefchaouen.jpg',
+    casablanca: './images/marrakech.jpg',
+    paris: './images/istanbul.jpg'
+  };
+}
 
 // Prevent a stale shell or a boot-time JavaScript error from leaving the PWA spinning forever.
 (function installBootWatchdog(root) {
