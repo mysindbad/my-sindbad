@@ -74,5 +74,10 @@ if (typeof globalThis !== 'undefined' && !globalThis.CITY_IMAGES) {
   };
   root.addEventListener?.('error', reveal, { once: true });
   root.addEventListener?.('unhandledrejection', reveal, { once: true });
-  root.setTimeout(reveal, 2200);
+  if (typeof document !== 'undefined' && document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => root.setTimeout(reveal, 80), { once: true });
+  } else {
+    root.setTimeout(reveal, 80);
+  }
+  root.setTimeout(reveal, 1500);
 })(typeof globalThis !== 'undefined' ? globalThis : window);
