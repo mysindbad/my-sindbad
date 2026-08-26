@@ -1,25 +1,17 @@
-// <!-- QA34-SW -->
-const CACHE_NAME = 'my-sindbad-v34';
+// <!-- M7-PERFORMANCE-SW -->
+const CACHE_NAME = 'my-sindbad-v35';
 const APP_SHELL = [
   './',
   './index.html',
-  './map.html',
   './itinerary.html',
-  './create-trip.html',
-  './explore.html',
-  './community.html',
-  './profile.html',
-  './today.html',
-  './view.html',
-  './privacy.html',
-  './manifest.json',
-  './utils/i18n.js',
-  './utils/sync.js',
-  './utils/tripops.js',
-  './utils/health.js',
-  './utils/proactive.js',
-  './utils/share.js'
+  './map.html'
 ];
+
+function isShellRequest(request) {
+  const url = new URL(request.url);
+  if (url.origin !== self.location.origin) return false;
+  return APP_SHELL.some((entry) => new URL(entry, self.location.href).pathname === url.pathname);
+}
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
@@ -38,25 +30,16 @@ self.addEventListener('activate', (event) => {
 });
 
 self.addEventListener('fetch', (event) => {
-  if (event.request.method !== 'GET') return;
-  const isHtml = event.request.mode === 'navigate' || event.request.destination === 'document' || event.request.url.endsWith('.html');
-  if (isHtml) {
-    event.respondWith(
-      fetch(event.request)
-        .then((response) => {
-          const copy = response.clone();
-          caches.open(CACHE_NAME).then((cache) => cache.put(event.request, copy));
-          return response;
-        })
-        .catch(() => caches.match(event.request).then((cached) => cached || caches.match('./index.html')))
-    );
-    return;
-  }
+  if (event.request.method !== 'GET' || !isShellRequest(event.request)) return;
   event.respondWith(
-    caches.match(event.request).then((cached) => cached || fetch(event.request).then((response) => {
-      const copy = response.clone();
-      caches.open(CACHE_NAME).then((cache) => cache.put(event.request, copy));
-      return response;
-    }))
+    fetch(event.request)
+      .then((response) => {
+        if (response.ok) {
+          const copy = response.clone();
+          caches.open(CACHE_NAME).then((cache) => cache.put(event.request, copy)).catch(() => {});
+        }
+        return response;
+      })
+      .catch(() => caches.match(event.request).then((cached) => cached || caches.match('./index.html')))
   );
 });

@@ -427,6 +427,7 @@
 
     function addAssistantMessage(role, text, extra = {}) {
       assistantMessages.push({ role, text, ...extra });
+      if (assistantMessages.length > 40) assistantMessages.splice(0, assistantMessages.length - 40);
       renderAssistantMessages();
     }
 
@@ -498,6 +499,7 @@
     }
 
     function assistantHistory() { return assistantMessages.filter((item) => !item.loading && item.text).slice(0, -1).slice(-5).map((item) => ({ role: item.role === 'ai' ? 'assistant' : 'user', content: item.text })); }
+    async function fetchWithTimeout(input, init = {}, timeoutMs = 5000) { const controller = new AbortController(); const timer = setTimeout(() => controller.abort(), timeoutMs); try { return await fetch(input, { ...init, signal: controller.signal }); } finally { clearTimeout(timer); } }
 
     async function sendAssistantMessage(text) {
       const message = String(text || '').trim();
@@ -507,7 +509,7 @@
       addAssistantMessage('ai', assistantText('assistant_loading', 'سندباد كيخطط...'), { loading: true });
       const loadingMessageIndex = assistantMessages.length - 1;
       try {
-        const response = await fetch('/api/assistant', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ message, trip: assistantTripPayload(), history: assistantHistory(), language: window.MySindbadI18n?.getLang?.() || localStorage.getItem('userLang') || 'ar' }) });
+        const response = await fetchWithTimeout('/api/assistant', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ message, trip: assistantTripPayload(), history: assistantHistory(), language: window.MySindbadI18n?.getLang?.() || localStorage.getItem('userLang') || 'ar' }) });
         if (!response.ok) throw new Error('assistant');
         const result = await response.json();
         assistantMessages.splice(loadingMessageIndex, 1);

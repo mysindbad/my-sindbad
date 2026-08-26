@@ -207,11 +207,12 @@
     maxDate.setFullYear(maxDate.getFullYear() + 2);
     const maxDateValue = maxDate.toISOString().split('T')[0];
     const CITY_COORDS = {'مراكش': { lat: 31.63, lng: -7.99 }, 'شفشاون': { lat: 35.17, lng: -5.27 }, 'أغادير': { lat: 30.42, lng: -9.60 }, 'الرباط': { lat: 34.02, lng: -6.84 }, 'الدار البيضاء': { lat: 33.57, lng: -7.59 }, 'فاس': { lat: 34.03, lng: -5.00 }, 'مكناس': { lat: 33.89, lng: -5.55 }, 'طنجة': { lat: 35.76, lng: -5.83 }};
+    async function fetchWithTimeout(input, init = {}, timeoutMs = 5000) { const controller = new AbortController(); const timer = setTimeout(() => controller.abort(), timeoutMs); try { return await fetch(input, { ...init, signal: controller.signal }); } finally { clearTimeout(timer); } }
     async function cityCoordsFor(name) {
       const known = Object.entries(CITY_COORDS).find(([city]) => String(name || '').includes(city));
       if (known) return known[1];
       try {
-        const response = await fetch(`https://nominatim.openstreetmap.org/search?format=jsonv2&limit=1&accept-language=ar&q=${encodeURIComponent(name)}`, { headers: { Accept: 'application/json' } });
+        const response = await fetchWithTimeout(`https://nominatim.openstreetmap.org/search?format=jsonv2&limit=1&accept-language=ar&q=${encodeURIComponent(name)}`, { headers: { Accept: 'application/json' } });
         const [first] = await response.json();
         const lat = Number(first?.lat), lng = Number(first?.lon);
         if (Number.isFinite(lat) && Number.isFinite(lng) && !(lat === 0 && lng === 0)) return { lat, lng };
@@ -300,7 +301,7 @@
           check: ['جواز السفر', 'تذاكر السفر', 'حجز الفندق', 'تأمين السفر', 'شاحن الهاتف'].map((t) => ({ t, done: false }))
         }));
         try {
-          const response = await fetch('/api/plan', {
+          const response = await fetchWithTimeout('/api/plan', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(planRequest)

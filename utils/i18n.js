@@ -111,7 +111,15 @@ if (typeof window !== 'undefined' && typeof document !== 'undefined') {
   document.documentElement.lang = current;
   document.documentElement.dir = current === 'ar' ? 'rtl' : 'ltr';
   const start = () => { bindLanguageControls(); markAndApply(document); applyLang(current); };
-  const observer = new MutationObserver(() => { if (!applying) { markAndApply(document); bindLanguageControls(); } });
+  let observerQueued = false;
+  const observer = new MutationObserver(() => {
+    if (applying || observerQueued) return;
+    observerQueued = true;
+    queueMicrotask(() => {
+      observerQueued = false;
+      if (!applying) { markAndApply(document); bindLanguageControls(); }
+    });
+  });
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start, { once: true }); else start();
   observer.observe(document.documentElement, { childList: true, subtree: true });
 }

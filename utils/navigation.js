@@ -26,7 +26,6 @@
 
   function start() {
     mount();
-    new MutationObserver(mount).observe(document.body, { childList: true, subtree: true });
   }
 
   if (document.body) start();

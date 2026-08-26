@@ -9,6 +9,16 @@ function jsonResponse(res, status, body) {
   return res.status(status).json(body);
 }
 
+async function fetchWithTimeout(input, init = {}, timeoutMs = 5000) {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    return await fetch(input, { ...init, signal: controller.signal });
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
 function parseJson(text) {
   const cleaned = String(text || '').replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/i, '').trim();
   return JSON.parse(cleaned);
@@ -55,7 +65,7 @@ function findActivity(trip, day, activityIndex) {
 async function geocodeDestination(destination) {
   if (!destination) return null;
   try {
-    const response = await fetch(`https://nominatim.openstreetmap.org/search?format=jsonv2&limit=1&accept-language=ar,en&q=${encodeURIComponent(destination)}`, {
+    const response = await fetchWithTimeout(`https://nominatim.openstreetmap.org/search?format=jsonv2&limit=1&accept-language=ar,en&q=${encodeURIComponent(destination)}`, {
       headers: { Accept: 'application/json', 'User-Agent': 'MySindbad/22 (travel assistant)' }
     });
     if (!response.ok) throw new Error(`Nominatim HTTP ${response.status}`);
@@ -101,7 +111,7 @@ async function weatherResponse(trip, language = 'ar') {
     const start = trip?.dates?.start || trip?.start_date;
     const end = trip?.dates?.end || trip?.end_date || start;
     const url = `https://api.open-meteo.com/v1/forecast?latitude=${encodeURIComponent(coords.lat)}&longitude=${encodeURIComponent(coords.lng)}&current=temperature_2m,relative_humidity_2m,precipitation,weather_code,wind_speed_10m&daily=temperature_2m_max,temperature_2m_min,precipitation_probability_max,weather_code&timezone=auto`;
-    const response = await fetch(url, { headers: { Accept: 'application/json' } });
+    const response = await fetchWithTimeout(url, { headers: { Accept: 'application/json' } });
     if (!response.ok) throw new Error(`Open-Meteo HTTP ${response.status}`);
     const data = await response.json();
     const current = data.current;
@@ -142,7 +152,7 @@ async function searchOverpassAlternatives(destination, category, currentCost) {
   if (!location) return [];
   const query = `[out:json][timeout:15];${overpassFilter(category)}(around:6000,${location.lat},${location.lng});out center tags 30;`;
   try {
-    const response = await fetch(`https://overpass-api.de/api/interpreter?data=${encodeURIComponent(query)}`, {
+    const response = await fetchWithTimeout(`https://overpass-api.de/api/interpreter?data=${encodeURIComponent(query)}`, {
       headers: { Accept: 'application/json', 'User-Agent': 'MySindbad/22 (travel assistant)' }
     });
     if (!response.ok) throw new Error(`Overpass HTTP ${response.status}`);
@@ -233,7 +243,7 @@ async function askGemini(message, trip, history = [], language = 'ar', weatherCo
   const contents = (Array.isArray(history) ? history.slice(-5) : []).map((item) => ({ role: item.role === 'assistant' || item.role === 'model' ? 'model' : 'user', parts: [{ text: String(item.content || item.text || '') }] })).filter((item) => item.parts[0].text);
   const tripContext = { destination: tripDestination(trip, language), days: Array.isArray(trip?.days) ? trip.days : [], activities: flattenActivities(trip).slice(0, 40) };
   contents.push({ role: 'user', parts: [{ text: `لغة الرد المطلوبة: ${normaliseLanguage(language)}\nسياق الرحلة: ${JSON.stringify(tripContext)}\nسياق الطقس الواقعي (إن وجد): ${JSON.stringify(weatherContext || null)}\nرسالة المستخدم: ${message}` }] });
-  const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${encodeURIComponent(apiKey)}`, {
+  const response = await fetchWithTimeout(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${encodeURIComponent(apiKey)}`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ systemInstruction: { parts: [{ text: ASSISTANT_SYSTEM_PROMPT }] }, contents, generationConfig: { temperature: 0.3, responseMimeType: 'application/json' } })

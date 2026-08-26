@@ -61,8 +61,9 @@
     document.getElementById('today-date').textContent = new Date().toLocaleDateString(lang() === 'fr' ? 'fr-FR' : lang() === 'en' ? 'en-US' : 'ar-MA', { weekday: 'long', month: 'short', day: 'numeric' });
     const cityCoords = trip.cityCoords || { lat: 31.6295, lng: -7.9811 };
     const weatherText = (code) => code === 0 ? t('weather_sunny', 'صحو ومشمس') : code < 3 ? t('weather_partly', 'غائم جزئياً') : code < 70 ? t('weather_cloudy', 'أمطار أو غائم') : t('weather_showers', 'زخات مطرية');
+    async function fetchWithTimeout(input, init = {}, timeoutMs = 5000) { const controller = new AbortController(); const timer = setTimeout(() => controller.abort(), timeoutMs); try { return await fetch(input, { ...init, signal: controller.signal }); } finally { clearTimeout(timer); } }
     try {
-      const res = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${encodeURIComponent(cityCoords.lat)}&longitude=${encodeURIComponent(cityCoords.lng)}&current=temperature_2m,weather_code&timezone=auto`);
+      const res = await fetchWithTimeout(`https://api.open-meteo.com/v1/forecast?latitude=${encodeURIComponent(cityCoords.lat)}&longitude=${encodeURIComponent(cityCoords.lng)}&current=temperature_2m,weather_code&timezone=auto`);
       const data = await res.json();
       if (data.current) {
         document.getElementById('weather-temp').textContent = `${Math.round(data.current.temperature_2m)}°C`;
