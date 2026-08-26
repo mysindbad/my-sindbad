@@ -65,58 +65,49 @@ if (typeof globalThis !== 'undefined' && !globalThis.CITY_IMAGES) {
 (function installBootWatchdog(root) {
   if (typeof document === 'undefined' || typeof root.setTimeout !== 'function') return;
 
-  // reveal() hides/removes the splash and ensures the app has a chance to render.
-  const reveal = () => {
-    try {
-      const shell = document.getElementById('shell');
-      const splash = document.getElementById('splashScreen');
+  let finished = false;
+  let failed = false;
+  const getSplash = () => document.getElementById('splashScreen');
 
-      // If shell exists but is empty, provide a minimal placeholder so users aren't left with a blank screen.
-      if (shell && !shell.children.length) {
-        shell.innerHTML = '<div style="min-height:100vh;display:grid;place-items:center;padding:24px;background:#0A192F;color:#fff;text-align:center;font-family:Arial,sans-serif"><div><h1 style="color:#D4AF37;margin-bottom:8px">My Sindbad</h1><p style="opacity:.9">جاري إتمام التحميل — إن لم ينتهي، حاول تحديث الصفحة.</p></div></div>';
-      }
-
-      // Always try to hide/remove the splash element if present.
-      if (splash) {
-        try { splash.style.display = 'none'; } catch (e) {}
-        try { splash.setAttribute('aria-hidden', 'true'); } catch (e) {}
-        if (typeof splash.remove === 'function') {
-          try { splash.remove(); } catch (e) {}
-        } else if (splash.parentNode) {
-          try { splash.parentNode.removeChild(splash); } catch (e) {}
-        }
-      }
-
-      // Give the application a short moment then call render() if it's available (the main script defines render()).
-      root.setTimeout(() => {
-        try {
-          if (typeof root.render === 'function') root.render();
-        } catch (e) {
-          // swallow errors here — reveal should not throw.
-          console.warn('Boot watchdog render call failed', e);
-        }
-      }, 40);
-    } catch (err) {
-      // Don't allow the watchdog to crash the page.
-      console.warn('Boot watchdog failed', err);
-    }
+  const hideSplash = () => {
+    if (finished || failed) return;
+    finished = true;
+    const splash = getSplash();
+    if (!splash) return;
+    splash.style.opacity = '0';
+    splash.style.transition = 'opacity .18s ease';
+    root.setTimeout(() => splash.remove(), 200);
   };
 
-  // If a runtime error or unhandled rejection occurs we should reveal a fallback UI promptly.
-  if (typeof root.addEventListener === 'function') {
-    root.addEventListener('error', reveal, { once: true });
-    root.addEventListener('unhandledrejection', reveal, { once: true });
-  }
+  const showStartupError = (error) => {
+    if (finished || failed) return;
+    failed = true;
+    console.error('[My Sindbad] startup failed', error);
+    const splash = getSplash();
+    if (!splash) return;
+    splash.innerHTML = '<div style="max-width:22rem;padding:1.5rem;text-align:center;color:#fff;font-family:system-ui,sans-serif;direction:rtl"><strong style="display:block;color:#D4AF37;font-size:1.25rem;margin-bottom:.6rem">تعذر تشغيل My Sindbad</strong><p style="line-height:1.7;margin:0 0 1rem;color:#fff">حدث خطأ أثناء تحميل الصفحة. أعد المحاولة من فضلك.</p><button type="button" id="startupRetry" style="border:0;border-radius:.6rem;padding:.7rem 1.1rem;background:#D4AF37;color:#0A192F;font-weight:700;cursor:pointer">إعادة المحاولة</button></div>';
+    splash.querySelector('#startupRetry')?.addEventListener('click', () => root.location.reload());
+  };
 
-  // Run shortly after DOMContentLoaded, and again as a longer timeout.
-  if (typeof document !== 'undefined' && document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', function () { root.setTimeout(reveal, 80); }, { once: true });
-  } else {
-    root.setTimeout(reveal, 80);
-  }
+  root.__hideMySindbadSplash = hideSplash;
+  root.__mySindbadStartupFailed = showStartupError;
 
-  // Additional, later fallbacks to ensure splash is removed even if other scripts are slow or hung.
-  root.setTimeout(reveal, 1500);
-  root.setTimeout(reveal, 3500);
-  root.setTimeout(reveal, 7000);
+  root.setTimeout(() => {
+    if (!finished && !failed) showStartupError(new Error('Startup timeout'));
+  }, 3000);
+
+  const revealAfterLoad = () => {
+    root.setTimeout(() => {
+      if (!finished && !failed) hideSplash();
+    }, 250);
+  };
+  root.addEventListener('load', revealAfterLoad, { once: true });
+  root.addEventListener('error', (event) => {
+    if (!finished && (!event.filename || /\.(?:m?js)(?:\?|$)/i.test(event.filename))) {
+      showStartupError(event.error || new Error('Script load error'));
+    }
+  }, true);
+  root.addEventListener('unhandledrejection', (event) => {
+    if (!finished) showStartupError(event.reason || new Error('Unhandled startup rejection'));
+  }, true);
 })(typeof globalThis !== 'undefined' ? globalThis : window);
