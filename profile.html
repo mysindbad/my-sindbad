@@ -75,13 +75,13 @@
 <section class="content">
 <section aria-labelledby="profile-title" class="profile-card">
 <div aria-hidden="true" class="avatar">👤</div>
-<div><h1 id="profile-title">زائر My Sindbad</h1><p id="profile-email"></p></div>
+<div><h1 data-i18n="guest_profile" id="profile-title">زائر My Sindbad</h1><p id="profile-email"></p></div>
 </section>
 <h2 class="section-title" data-i18n="quick_view">نظرة سريعة</h2>
 <section aria-label="إحصائيات الحساب" class="stats">
 <div class="stat"><strong id="saved-count">0</strong><span data-i18n="saved_trips">الرحلات المحفوظة</span></div>
-<div class="stat"><strong id="favorite-count">0</strong><span>المفضلة</span></div>
-<div class="stat"><strong id="points-count">0</strong><span>النقاط</span></div>
+<div class="stat"><strong id="favorite-count">0</strong><span data-i18n="favorite">المفضلة</span></div>
+<div class="stat"><strong id="points-count">0</strong><span data-i18n="points">النقاط</span></div>
 </section>
 <h2 class="section-title" data-i18n="settings">الإعدادات</h2>
 <section aria-label="إعدادات الحساب" class="settings">
@@ -92,7 +92,7 @@
 </section>
 <h2 class="section-title" data-i18n="saved_trips">الرحلات المحفوظة</h2>
 <section aria-live="polite" class="trips" id="saved-trips"></section>
-<button class="logout" id="logout" type="button">تسجيل الخروج</button>
+<button class="logout" data-i18n="logout" id="logout" type="button">تسجيل الخروج</button>
 </section>
 <nav data-active="profile" data-site-nav=""></nav>
 </main>
@@ -102,7 +102,8 @@
     const writeLocal = (key, value) => { try { localStorage.setItem(key, JSON.stringify(value)); return true; } catch (error) { return false; } };
     const toast = document.getElementById('toast');
     let toastTimer;
-    function showToast(message = 'تم حفظ الإعدادات بنجاح') { toast.textContent = message; toast.classList.add('show'); clearTimeout(toastTimer); toastTimer = setTimeout(() => toast.classList.remove('show'), 2200); }
+    function t(key, fallback) { return window.MySindbadI18n?.getTranslation?.(window.MySindbadI18n?.getLang?.() || readLocal('userLang', 'ar'), key) || fallback; }
+    function showToast(message = t('toast_saved', 'تم حفظ الإعدادات بنجاح')) { toast.textContent = message; toast.classList.add('show'); clearTimeout(toastTimer); toastTimer = setTimeout(() => toast.classList.remove('show'), 2200); }
     let remoteTrips = [];
     function normaliseTrips() {
       const saved = readLocal('savedTrips', []);
@@ -114,16 +115,16 @@
       return remoteTrips.concat(trips).filter((trip) => trip && typeof trip === 'object').filter((trip, index, all) => all.findIndex((item) => (item.id && trip.id && item.id === trip.id) || JSON.stringify(item) === JSON.stringify(trip)) === index);
     }
     function tripName(trip) { return trip.destination || trip.destinationName || trip.city || trip.title || 'رحلة محفوظة'; }
-    function tripDate(trip) { const start = trip.startDate || trip.start || trip.date || trip.dates?.start; return start ? `تاريخ البدء: ${start}` : 'بيانات الرحلة جاهزة للمراجعة'; }
+    function tripDate(trip) { const start = trip.startDate || trip.start || trip.date || trip.dates?.start; const lang = window.MySindbadI18n?.getLang?.() || readLocal('userLang', 'ar'); return start ? (lang === 'fr' ? `Début : ${start}` : lang === 'en' ? `Start date: ${start}` : `تاريخ البدء: ${start}`) : t('saved_trip_empty', 'بيانات الرحلة جاهزة للمراجعة'); }
     function renderTrips() {
       const trips = normaliseTrips();
       const activities = readLocal('myTripActivities', []);
       const savedActivities = Array.isArray(activities) ? activities.filter((activity) => activity && typeof activity === 'object') : [];
       document.getElementById('saved-count').textContent = trips.length;
       const container = document.getElementById('saved-trips');
-      if (!trips.length) { container.innerHTML = '<div class="empty">لا توجد رحلات محفوظة بعد.<br>ابدأ بإنشاء رحلة جديدة لتظهر هنا.</div>'; return; }
-      const tripCards = trips.map((trip) => `<article class="trip"><div><h3>${escapeHtml(tripName(trip))}</h3><p>${escapeHtml(tripDate(trip))}</p></div><a class="trip-link" href="./itinerary.html">عرض التفاصيل</a></article>`);
-      const activityCards = savedActivities.map((activity) => `<article class="trip"><div><h3>${escapeHtml(activity.title || activity.place || 'نشاط محفوظ')}</h3><p>لديك نشاط محفوظ في رحلتك</p></div><a class="trip-link" href="./itinerary.html">عرض التفاصيل</a></article>`);
+      if (!trips.length) { container.innerHTML = `<div class="empty"><span data-i18n="saved_trip_empty">لا توجد رحلات محفوظة بعد.</span><br><span data-i18n="create_trip_empty">ابدأ بإنشاء رحلة جديدة لتظهر هنا.</span></div>`; window.MySindbadI18n?.refresh?.(); return; }
+      const tripCards = trips.map((trip) => `<article class="trip"><div><h3>${escapeHtml(tripName(trip))}</h3><p>${escapeHtml(tripDate(trip))}</p></div><a class="trip-link" data-i18n="view_details" href="./itinerary.html">عرض التفاصيل</a></article>`);
+      const activityCards = savedActivities.map((activity) => `<article class="trip"><div><h3>${escapeHtml(activity.title || activity.place || 'نشاط محفوظ')}</h3><p data-i18n="saved_activity">لديك نشاط محفوظ في رحلتك</p></div><a class="trip-link" data-i18n="view_details" href="./itinerary.html">عرض التفاصيل</a></article>`);
       container.innerHTML = tripCards.join('');
     }
     function escapeHtml(value) { return String(value ?? '').replace(/[&<>"']/g, (char) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[char])); }
@@ -135,9 +136,9 @@
     notifications.classList.toggle('on', notificationsEnabled); notifications.setAttribute('aria-checked', String(notificationsEnabled));
     theme.value = window.MySindbadTheme?.get?.() || readLocal('themePreference', 'auto');
     language.addEventListener('change', () => { writeLocal('userLang', language.value); window.MySindbadI18n?.applyLang?.(language.value); showToast(); });
-    notifications.addEventListener('click', () => { const enabled = !notifications.classList.contains('on'); notifications.classList.toggle('on', enabled); notifications.setAttribute('aria-checked', String(enabled)); writeLocal('notificationsEnabled', enabled); showToast(enabled ? 'سيظهر تذكير checklist عند وجود رحلة.' : 'تم إيقاف تذكير checklist.'); });
-    theme.addEventListener('change', () => { writeLocal('themePreference', theme.value); window.MySindbadTheme?.set?.(theme.value); showToast('تم حفظ المظهر.'); });
-    if (notificationsEnabled && readLocal('currentTrip', null)) setTimeout(() => showToast('تذكير checklist: راجع قائمة التجهيزات في رحلتك.'), 700);
+    notifications.addEventListener('click', () => { const enabled = !notifications.classList.contains('on'); notifications.classList.toggle('on', enabled); notifications.setAttribute('aria-checked', String(enabled)); writeLocal('notificationsEnabled', enabled); showToast(enabled ? t('notifications_enabled', 'سيظهر تذكير checklist عند وجود رحلة.') : t('notifications_disabled', 'تم إيقاف تذكير checklist.')); });
+    theme.addEventListener('change', () => { writeLocal('themePreference', theme.value); window.MySindbadTheme?.set?.(theme.value); showToast(t('theme_saved', 'تم حفظ المظهر.')); });
+    if (notificationsEnabled && readLocal('currentTrip', null)) setTimeout(() => showToast(t('checklist_reminder', 'تذكير checklist: راجع قائمة التجهيزات في رحلتك.')), 700);
     document.getElementById('favorite-count').textContent = Array.isArray(readLocal('favorites', [])) ? readLocal('favorites', []).length : 0;
     document.getElementById('points-count').textContent = Number(readLocal('points', readLocal('sb_points', 0))) || 0;
     // <!-- QA14-DEMO -->
