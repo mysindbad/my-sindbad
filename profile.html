@@ -82,7 +82,7 @@
       <h2 class="section-title" data-i18n="settings">الإعدادات</h2>
       <section class="settings" aria-label="إعدادات الحساب">
         <label class="setting"><span class="setting-info"><span class="setting-icon" aria-hidden="true">文</span>اللغة</span><select id="language" data-language-select aria-label="اختيار اللغة"><option value="ar">العربية</option><option value="en">English</option><option value="fr">Français</option><option value="es">Español</option><option value="de">Deutsch</option><option value="tr">Türkçe</option></select></label>
-        <label class="setting"><span class="setting-info"><span class="setting-icon" aria-hidden="true">¤</span>العملة</span><select id="currency" aria-label="اختيار العملة"><option value="MAD">MAD</option><option value="USD">USD</option><option value="EUR">EUR</option><option value="SAR">SAR</option></select></label>
+        <label class="setting"><span class="setting-info"><span class="setting-icon" aria-hidden="true">¤</span>العملة</span><select id="currency" aria-label="اختيار العملة"><option value="MAD">MAD</option></select><small id="currency-note" style="display:block;color:#64748b;font-size:.68rem;margin-top:.25rem">العملة المدعومة حالياً: MAD.</small></label>
         <div class="setting"><span class="setting-info"><span class="setting-icon" aria-hidden="true">♧</span>الإشعارات</span><button id="notifications" class="toggle" type="button" role="switch" aria-checked="false" aria-label="تفعيل الإشعارات"></button></div>
       </section>
       <h2 class="section-title" data-i18n="saved_trips">الرحلات المحفوظة</h2>
@@ -131,7 +131,8 @@
     notifications.classList.toggle('on', notificationsEnabled); notifications.setAttribute('aria-checked', String(notificationsEnabled));
     language.addEventListener('change', () => { writeLocal('userLang', language.value); showToast(); });
     currency.addEventListener('change', () => { writeLocal('userCurrency', currency.value); showToast(); });
-    notifications.addEventListener('click', () => { const enabled = !notifications.classList.contains('on'); notifications.classList.toggle('on', enabled); notifications.setAttribute('aria-checked', String(enabled)); writeLocal('notificationsEnabled', enabled); showToast(); });
+    notifications.addEventListener('click', () => { const enabled = !notifications.classList.contains('on'); notifications.classList.toggle('on', enabled); notifications.setAttribute('aria-checked', String(enabled)); writeLocal('notificationsEnabled', enabled); showToast(enabled ? 'سيظهر تذكير checklist عند وجود رحلة.' : 'تم إيقاف تذكير checklist.'); });
+    if (notificationsEnabled && readLocal('currentTrip', null)) setTimeout(() => showToast('تذكير checklist: راجع قائمة التجهيزات في رحلتك.'), 700);
     document.getElementById('favorite-count').textContent = Array.isArray(readLocal('favorites', [])) ? readLocal('favorites', []).length : 0;
     document.getElementById('points-count').textContent = Number(readLocal('points', readLocal('sb_points', 0))) || 0;
     // <!-- QA14-DEMO -->

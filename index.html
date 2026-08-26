@@ -946,7 +946,7 @@ function pgHome(P){const t=lg('sb_trip',null);
   <div class="sec" data-i18n="home_upcoming">رحلتي القادمة</div>
   ${t?`
   <div class="trip-summary">
-   <div><h2>رحلتك إلى ${CITIES[t.city]?CITIES[t.city].n:esc(t.city)}</h2><p>${esc(t.from)} ← ${esc(t.to)}</p></div>
+   <div><h2>رحلتك إلى ${CITIES[t.city]?CITIES[t.city].n:esc(t.city)}</h2><p>${esc(t.from || t.dates?.start || '')} ← ${esc(t.to || t.dates?.end || '')}</p></div>
    <button class="btn sm ghost" onclick="go('trip')" data-i18n="view_plan">عرض الخطة</button>
   </div>`:`
   <div class="empty-state">
@@ -1155,7 +1155,7 @@ function ask(q){const txt=q||$('bIn').value.trim();if(!txt)return;
    (pages[page] || pgHome)(P);
  }
  function pgHome(P) {
-   const t = lg('sb_trip', null);
+   const t = lg('sb_trip', null) || lg('currentTrip', null) || lg('mysindbad_app_data_v1', {})?.currentTrip || null;
    P.innerHTML = `
     <div class="home-hero">
       <span class="greeting" id="greeting-text">MY SINDBAD · مرحباً بك</span>
@@ -1167,6 +1167,7 @@ function ask(q){const txt=q||$('bIn').value.trim();if(!txt)return;
       <div id="hero-carousel-dots" class="hero-carousel-dots" aria-label="صور الوجهات"></div>
     </div>
     <div id="searchResults"></div>
+    <div class="card" style="margin:0 0 1rem;padding:.85rem 1rem;background:#fffaf0;border:1px solid #D4AF37"><b style="color:var(--navy-900)">كيف يعمل؟</b><div style="display:flex;justify-content:space-between;gap:.35rem;margin-top:.55rem;font-size:.72rem;color:var(--text-muted)"><span>١ خطط</span><span>٢ استكشف</span><span>٣ سافر برفقة</span></div></div>
     <div class="cats">
       <button class="cat" onclick="tab='hotels';go('explore')"><span class="ci">${ic('hotel',18)}</span>الفنادق</button>
       <button class="cat" onclick="tab='rest';go('explore')"><span class="ci">${ic('food',18)}</span>المطاعم</button>
@@ -1174,8 +1175,9 @@ function ask(q){const txt=q||$('bIn').value.trim();if(!txt)return;
       <button class="cat" onclick="go('trip')"><span class="ci">${ic('cal',18)}</span>رحلتي</button>
     </div>
     <div class="sec">رحلتي الحالية</div>
-      ${t ? `<div class="trip-summary" style="background-image:linear-gradient(180deg,rgba(4,17,28,.08),rgba(4,17,28,.82)),url('${imageForCity(tripDestinationText(t))}')"><img src="${imageForCity(tripDestinationText(t))}" alt="${esc(tripDestinationText(t) || 'وجهتك')}" style="display:none" onerror="this.parentElement.style.backgroundImage='linear-gradient(135deg,#0A192F,#D4AF37)';this.parentElement.dataset.city='${esc(tripDestinationText(t) || 'وجهتك')}'"><div><h2>${esc(tripDestinationText(t) || 'وجهتك')}</h2><p>${esc(t.from)} ← ${esc(t.to)}</p></div><button class="btn sm ghost" onclick="go('trip')">عرض الخطة</button></div>` : `<div class="empty-state"><div class="es-icon">${ic('plane',22)}</div><h3>لم تنشئ رحلة بعد</h3><a class="btn navy sm" href="./create-trip.html">إنشاء رحلة</a></div>`}
+      ${t ? `<div class="trip-summary" style="background-image:linear-gradient(180deg,rgba(4,17,28,.08),rgba(4,17,28,.82)),url('${imageForCity(tripDestinationText(t))}')"><img src="${imageForCity(tripDestinationText(t))}" alt="${esc(tripDestinationText(t) || 'وجهتك')}" style="display:none" onerror="this.parentElement.style.backgroundImage='linear-gradient(135deg,#0A192F,#D4AF37)';this.parentElement.dataset.city='${esc(tripDestinationText(t) || 'وجهتك')}'"><div><h2>${esc(tripDestinationText(t) || 'وجهتك')}</h2><p>${esc(t.from || t.dates?.start || '')} ← ${esc(t.to || t.dates?.end || '')}</p></div><button class="btn sm ghost" onclick="go('trip')">عرض الخطة</button></div>` : `<div class="empty-state"><div class="es-icon">${ic('plane',22)}</div><h3>لم تنشئ رحلة بعد</h3><a class="btn navy sm" href="./create-trip.html">إنشاء رحلة</a></div>`}
       <!-- QA14-SERVICES -->
+      ${t ? `<a href="./today.html" class="card" style="display:block;margin:0 0 1rem;background:linear-gradient(135deg,#D4AF37,#b8941f);color:#0A192F;text-decoration:none"><b style="font-size:1rem">وضع اليوم — شنو ندير الآن؟</b><small style="display:block;margin-top:.25rem">افتح نشاطك الحالي وتقدم اليوم والطقس.</small></a>` : ''}
       <div class="card" style="margin-top:1rem"><b style="color:var(--navy-900)">خدمات مباشرة</b><div class="tools" style="margin-top:.7rem"><a class="btn ghost" href="./explore.html">الطقس</a><a class="btn ghost" href="./map.html">خريطتي</a><a class="btn ghost" href="./community.html">المجتمع</a></div></div>`;
     startHeroCarousel();
  }

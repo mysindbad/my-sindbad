@@ -69,6 +69,11 @@
     } catch {}
 
     const savedActs = JSON.parse(localStorage.getItem('myTripActivities') || '[]');
+    const daysActivities = Array.isArray(trip.itinerary) ? trip.itinerary : (savedActs.length ? [{ activities: savedActs, totalHours: savedActs.length * 2 }] : []);
+    const tripBudget = Number(trip?.budget?.amount ?? trip?.budget ?? 0);
+    const currentSpent = savedActs.reduce((sum, activity) => sum + Number(activity?.cost || activity?.price || 0), 0);
+    const alerts = evaluateAlerts({ weatherDaily: Array.isArray(trip.weatherDaily) ? trip.weatherDaily : [], daysActivities, budget: tripBudget, currentSpent });
+    document.getElementById('alerts-container').innerHTML = alerts.map((alert) => `<aside class="rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-950 shadow-sm"><strong class="block mb-1">تنبيه استباقي</strong><span>${alert.message}</span></aside>`).join('');
     if (!savedActs.length) {
       document.getElementById('progress-bar').style.width = '0%';
       document.getElementById('progress-percent').textContent = '0%';
