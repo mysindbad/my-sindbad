@@ -1,5 +1,5 @@
 // <!-- M7-PERFORMANCE-SW -->
-const CACHE_NAME = 'my-sindbad-v37';
+const CACHE_NAME = 'my-sindbad-v38';
 const APP_SHELL = [
   './',
   './index.html',
@@ -32,7 +32,7 @@ self.addEventListener('activate', (event) => {
 self.addEventListener('fetch', (event) => {
   if (event.request.method !== 'GET' || !isShellRequest(event.request)) return;
   event.respondWith(
-    fetch(event.request)
+    fetch(event.request, { cache: 'no-store' })
       .then((response) => {
         if (response.ok) {
           const copy = response.clone();
