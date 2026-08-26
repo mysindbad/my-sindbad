@@ -78,7 +78,7 @@ function isGreetingMessage(message) {
 }
 
 function greetingResponse(message, trip, language = 'ar') {
-  const destination = tripDestination(trip);
+  const destination = tripDestination(trip, language);
   const wellbeing = /لاباس|كيف حالك|كيف داير|how are you|comment allez[- ]vous|ça va/i.test(message);
   if (wellbeing) return { type: 'TEXT', message: localize(language, `لاباس الحمد لله، شكراً على السؤال. نقدر نعاونك ترتب رحلتك فـ${destination} أو نجاوبك على الطقس والأنشطة.`, `I’m well, thank you. I can help plan your trip to ${destination || 'your destination'} or answer questions about weather and activities.`, `Je vais bien, merci. Je peux vous aider à organiser votre voyage à ${destination || 'votre destination'} ou répondre sur la météo et les activités.`) };
   return { type: 'TEXT', message: localize(language, `وعليكم السلام! مرحبا بك. أنا سندباد، رفيقك فالسفر. شنو بغيتي نديرو فـ${destination}؟`, `Hello! I’m Sindbad, your travel companion. What shall we do with your trip to ${destination || 'your destination'}?`, `Bonjour ! Je suis Sindbad, votre compagnon de voyage. Que souhaitez-vous faire pour votre voyage à ${destination || 'votre destination'} ?`) };
@@ -88,12 +88,12 @@ function isTravelMessage(message) {
   return /سفر|رحل|وجه|نشاط|طقس|جو|مطر|شتا|برد|حرارة|خريطة|فندق|مطعم|مقهى|مطار|قطار|ميزاني|شنطة|تجهيز|بدل|استبدل|أرخص|حيد|احذف|نقل|رتب|خطة|يوم|اليوم|غدا|غداً|travel|trip|weather|hotel|restaurant|map|airport|replace|remove|move|replan|voyage|hôtel|restaurant|carte|aéroport|remplacer|supprimer|déplacer/i.test(message);
 }
 
-function tripDestination(trip) {
-  return trip?.destinationDisplay || trip?.destination || trip?.destinationName || trip?.city || 'وجهتك';
+function tripDestination(trip, language = 'ar') {
+  return trip?.destinationDisplay || trip?.destination || trip?.destinationName || trip?.city || localize(language, 'وجهتك', 'your destination', 'votre destination');
 }
 
 async function weatherResponse(trip, language = 'ar') {
-  const destination = tripDestination(trip);
+  const destination = tripDestination(trip, language);
   let coords = trip?.cityCoords || (Number.isFinite(Number(trip?.lat)) && Number.isFinite(Number(trip?.lng)) ? { lat: Number(trip.lat), lng: Number(trip.lng) } : null);
   if (!coords) coords = await geocodeDestination(destination);
   if (!coords) return { type: 'TEXT', message: localize(language, `ما قدرتش نحدد موقع ${destination} باش نعطيك أرقام طقس حقيقية دابا.`, `I could not locate ${destination} to provide real weather numbers right now.`, `Je n’ai pas pu localiser ${destination} pour fournir les chiffres météo réels.`) };
