@@ -53,3 +53,20 @@
 
   return { getTimePeriod, getGreeting, getBackgroundConfig };
 }));
+
+
+// Prevent a stale shell or a boot-time JavaScript error from leaving the PWA spinning forever.
+(function installBootWatchdog(root) {
+  if (typeof document === 'undefined' || typeof root.setTimeout !== 'function') return;
+  const reveal = () => {
+    const shell = document.getElementById('shell');
+    const splash = document.getElementById('splashScreen');
+    if (shell && !shell.children.length) {
+      shell.innerHTML = '<div style="min-height:100vh;display:grid;place-items:center;padding:24px;background:#0A192F;color:#fff;text-align:center;font-family:Arial,sans-serif"><div><h1 style="color:#D4AF37;margin:0 0 12px">My Sindbad</h1><p style="line-height:1.8">تعذر تشغيل الواجهة. أعد تحميل الصفحة للمحاولة من جديد.</p><button type="button" onclick="location.reload()" style="padding:12px 22px;border:0;border-radius:8px;background:#D4AF37;color:#0A192F;font-weight:700;cursor:pointer">إعادة المحاولة</button></div></div>';
+    }
+    splash?.remove();
+  };
+  root.addEventListener?.('error', reveal, { once: true });
+  root.addEventListener?.('unhandledrejection', reveal, { once: true });
+  root.setTimeout(reveal, 4500);
+})(typeof globalThis !== 'undefined' ? globalThis : window);
