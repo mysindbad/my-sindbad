@@ -61,6 +61,18 @@ if (typeof globalThis !== 'undefined' && !globalThis.CITY_IMAGES) {
   };
 }
 
+// Make the first render safe while the deferred cityImages.js helper is still loading.
+if (typeof globalThis !== 'undefined' && !globalThis.MySindbadCity) {
+  const cityKeys = { 'مراكش': 'marrakech', 'شفشاون': 'chefchaouen', 'إسطنبول': 'istanbul', marrakech: 'marrakech', chefchaouen: 'chefchaouen', istanbul: 'istanbul' };
+  const cityDisplay = { marrakech: 'مراكش', chefchaouen: 'شفشاون', istanbul: 'إسطنبول' };
+  const cityKey = (value) => cityKeys[String(value || '').trim().toLowerCase()] || null;
+  globalThis.MySindbadCity = {
+    normalizeCityImage: (value) => { const key = cityKey(value); return key ? globalThis.CITY_IMAGES?.[key] || '' : ''; },
+    normalizeCityName: (value) => { const key = cityKey(value); return { key, display: key ? cityDisplay[key] : String(value || '').trim() }; },
+    placeholderForCategory: () => ''
+  };
+}
+
 // Prevent a stale shell or a boot-time JavaScript error from leaving the PWA spinning forever.
 (function installBootWatchdog(root) {
   if (typeof document === 'undefined' || typeof root.setTimeout !== 'function') return;
