@@ -4,6 +4,7 @@
   "description": "رفيقك الذكي لتخطيط وتنسيق رحلاتك في المغرب بكل يسر وسهولة.",
   "start_url": "./",
   "scope": "./",
+  "id": "./",
   "display": "standalone",
   "orientation": "portrait",
   "background_color": "#0A192F",
