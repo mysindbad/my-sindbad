@@ -54,23 +54,44 @@ const STATIC_ASSETS = [
 
 const PRECACHE = [...APP_SHELL, ...STATIC_ASSETS];
 
+const CLEAN_URLS = {
+  '/': './index.html',
+  '/explore': './explore.html',
+  '/map': './map.html',
+  '/itinerary': './itinerary.html',
+  '/create-trip': './create-trip.html',
+  '/profile': './profile.html',
+  '/today': './today.html',
+  '/community': './community.html',
+  '/view': './view.html',
+  '/privacy': './privacy.html',
+  '/login': './login.html'
+};
+
 function sameOrigin(request) {
   return new URL(request.url).origin === self.location.origin;
 }
 
+function cacheKeyFor(request) {
+  const url = new URL(request.url);
+  return CLEAN_URLS[url.pathname] ? new URL(CLEAN_URLS[url.pathname], self.location.href).href : request;
+}
+
 function isPrecacheRequest(request) {
   if (!sameOrigin(request)) return false;
-  const pathname = new URL(request.url).pathname;
+  const cacheKey = cacheKeyFor(request);
+  const pathname = new URL(typeof cacheKey === 'string' ? cacheKey : cacheKey.url).pathname;
   return PRECACHE.some((entry) => new URL(entry, self.location.href).pathname === pathname);
 }
 
 async function networkFirst(request) {
-  const cached = await caches.match(request, { ignoreSearch: true });
+  const cacheKey = cacheKeyFor(request);
+  const cached = await caches.match(cacheKey, { ignoreSearch: true });
   try {
     const response = await fetch(request, { cache: 'no-store' });
     if (response.ok) {
       const copy = response.clone();
-      caches.open(CACHE_NAME).then((cache) => cache.put(request, copy)).catch(() => {});
+      caches.open(CACHE_NAME).then((cache) => cache.put(cacheKey, copy)).catch(() => {});
     }
     return response;
   } catch (error) {
