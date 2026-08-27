@@ -1,20 +1,33 @@
 :root {
+  --bg-primary: #fbf9f5;
+  --bg-secondary: #f4f7fb;
+  --bg-elevated: #ffffff;
+  --text-primary: #0A192F;
+  --text-secondary: #475569;
+  --text-muted-token: #475569;
+  --border-color: #cbd5e1;
+  --accent-gold: #D4AF37;
+  --success: #166534;
+  --warning: #92400e;
+  --error: #b91c1c;
+  --text-on-accent: #0A192F;
+  --text-on-dark: #f1f5f9;
   --navy-950: #060e1a;
   --navy-900: #0A192F;
   --navy-800: #243b53;
   --navy-700: #334e68;
   --navy-50: #f4f7fb;
-  --gold: #D4AF37;
+  --gold: var(--accent-gold);
   --gold-dark: #b8941f;
   --gold-light: rgba(212, 175, 55, 0.12);
-  --bg: #fbf9f5;
-  --surface: #ffffff;
-  --border: #e8ecf2;
-  --border-subtle: #f1f4f8;
-  --text-main: #0c1624;
-  --text-muted: #5e6d82;
-  --text-light: #94a3b8;
-  --danger: #dc2626;
+  --bg: var(--bg-primary);
+  --surface: var(--bg-elevated);
+  --border: var(--border-color);
+  --border-subtle: #e2e8f0;
+  --text-main: var(--text-primary);
+  --text-muted: var(--text-secondary);
+  --text-light: var(--text-secondary);
+  --danger: var(--error);
   --danger-light: #fee2e2;
   --radius-sm: 8px;
   --radius-md: 14px;
@@ -28,7 +41,7 @@
 html { scroll-behavior: auto; }
 *, *::before, *::after { transition: color .18s ease, background-color .18s ease, border-color .18s ease, transform .18s ease; }
 body {
-  background: #060d1a;
+  background: var(--bg-primary);
   color: var(--text-main);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -723,3 +736,84 @@ body{background:#060e1a}.shell{max-width:480px;background:#fbf9f5;padding-bottom
          .hdr .brand-logo { width: 42px; height: 42px; }
          .hdr .user-name { display: none; }
        }
+
+
+/* Contrast pass: shared semantic colors for both theme modes. */
+html[data-theme] .btn.navy,
+html[data-theme] .msg.me,
+html[data-theme] .bnav button.on {
+  background-color: var(--navy-brand, #0A192F) !important;
+  color: var(--text-on-dark, #f8fafc) !important;
+}
+html[data-theme] .btn.ghost,
+html[data-theme] .chip,
+html[data-theme] .inp,
+html[data-theme] .card,
+html[data-theme] .empty-state,
+html[data-theme] .trip-summary,
+html[data-theme] .cat {
+  border-color: var(--border-color, #cbd5e1) !important;
+}
+html[data-theme] label,
+html[data-theme] .empty-state p,
+html[data-theme] .trip-summary p,
+html[data-theme] .post .pm,
+html[data-theme] .msg.bot,
+html[data-theme] .bnav button {
+  color: var(--text-secondary, #475569) !important;
+}
+html[data-theme='dark'] label,
+html[data-theme='dark'] .empty-state p,
+html[data-theme='dark'] .trip-summary p,
+html[data-theme='dark'] .post .pm,
+html[data-theme='dark'] .msg.bot,
+html[data-theme='dark'] .bnav button {
+  color: var(--text-secondary, #cbd5e1) !important;
+}
+html[data-theme] .bnav button.on {
+  color: var(--accent-gold, #D4AF37) !important;
+}
+html[data-theme] .home-search .inp {
+  background: rgba(255, 255, 255, .26) !important;
+  border-color: rgba(255, 255, 255, .6) !important;
+  color: var(--text-on-dark, #f8fafc) !important;
+}
+html[data-theme] .home-search .inp::placeholder {
+  color: var(--text-on-dark, #f8fafc) !important;
+  opacity: .92 !important;
+}
+html[data-theme] .home-search .btn {
+  background-color: var(--accent-gold, #D4AF37) !important;
+  color: var(--text-on-accent, #0A192F) !important;
+}
+html[data-theme] .hdr,
+html[data-theme] .site-header {
+  color: var(--text-on-dark, #f8fafc) !important;
+  background-color: var(--navy-brand, #0A192F) !important;
+  border-bottom-color: var(--accent-gold, #D4AF37) !important;
+}
+html[data-theme] .hdr .brand b,
+html[data-theme] .site-header__wordmark strong {
+  color: var(--accent-gold, #D4AF37) !important;
+}
+html[data-theme] .hdr .brand small,
+html[data-theme] .site-header__wordmark small,
+html[data-theme] .hdr .user-name {
+  color: var(--text-on-dark, #f8fafc) !important;
+}
+html[data-theme] .hdr button,
+html[data-theme] .site-header__home {
+  color: var(--text-on-dark, #f8fafc) !important;
+}
+html[data-theme] .site-header__home {
+  background-color: var(--accent-gold, #D4AF37) !important;
+  color: var(--text-on-accent, #0A192F) !important;
+}
+html[data-theme] .assistant-error,
+html[data-theme] .m6-assistant-error {
+  color: var(--error, #b91c1c) !important;
+}
+html[data-theme='dark'] .assistant-error,
+html[data-theme='dark'] .m6-assistant-error {
+  color: var(--error, #fca5a5) !important;
+}
