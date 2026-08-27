@@ -68,7 +68,48 @@
     html[data-theme='dark'] .logout { color: var(--error, #fca5a5); background: #3b1f2a; border-color: #7f1d1d; }
     html[data-theme='dark'] .nav a { color: var(--text-secondary, #cbd5e1); }
     html[data-theme='dark'] .nav a.active { color: var(--accent-gold, #D4AF37); }
-  </style>
+
+    /* Mobile usability pass: presentation only; behavior remains unchanged. */
+    .profile-card{min-height:112px;padding:20px}
+    .profile-card h1{font-size:1.16rem;line-height:1.45}
+    .profile-card p{font-size:.76rem;line-height:1.6}
+    .avatar{flex-basis:72px;width:72px;height:72px}
+    .stats{gap:10px}
+    .stat{min-height:78px;padding:14px 6px;display:flex;flex-direction:column;justify-content:center}
+    .stat strong{font-size:1.16rem;line-height:1.35}
+    .stat span{font-size:.7rem;line-height:1.5}
+    .settings{box-shadow:0 8px 20px #0b1b5108}
+    .setting{min-height:70px;padding:12px 14px}
+    .setting-info{min-height:44px;font-size:.8rem}
+    .setting-icon{width:40px;height:40px;font-size:1.1rem}
+    .setting:nth-child(1) .setting-icon::before{content:'🌐'}
+    .setting:nth-child(2) .setting-icon::before{content:'¤'}
+    .setting:nth-child(3) .setting-icon::before{content:'🔔'}
+    .setting:nth-child(4) .setting-icon::before{content:'🌙'}
+    .setting:nth-child(1) .setting-icon,.setting:nth-child(2) .setting-icon,.setting:nth-child(3) .setting-icon,.setting:nth-child(4) .setting-icon{font-size:0}
+    select{min-height:44px;font-size:.74rem}
+    .toggle{width:56px;min-width:56px;height:44px;min-height:44px}
+    .toggle::after{top:10px}
+    .trips{gap:12px}
+    .trip{min-height:82px;padding:14px;align-items:center}
+    .trip h3{font-size:.84rem;line-height:1.5}
+    .trip p{font-size:.7rem;line-height:1.6}
+    .trip-link{min-width:72px;min-height:44px;padding-inline:12px;font-size:.7rem}
+    .empty{min-height:100px;display:flex;flex-direction:column;justify-content:center;font-size:.76rem}
+    .logout{min-height:52px;margin-top:24px;font-size:.8rem}
+    @media(max-width:699px){
+      .content{padding:14px}
+      .section-title{margin-top:20px;margin-bottom:10px}
+      .profile-card{gap:12px;padding:16px}
+      .stats{grid-template-columns:repeat(3,minmax(0,1fr))}
+      .stat{padding-inline:4px}
+      .setting{gap:8px}
+      .setting-info{gap:8px}
+      .setting-info span:last-child{white-space:nowrap}
+      .trip{gap:8px}
+      .trip-link{min-width:68px}
+    }
+</style>
 <script src="./utils/i18n.js?m6=final1" type="module"></script>
 <script>(function(){try{var p=localStorage.getItem('themePreference')||'auto',h=new Date().getHours(),d=window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches,night=h>=19||h<6;document.documentElement.dataset.themePreference=p;document.documentElement.dataset.theme=(p==='dark'||(p==='auto'&&(night||d)))?'dark':'light';}catch(e){document.documentElement.dataset.theme='light';}})();</script>
 <link href="./theme.css" rel="stylesheet"/>

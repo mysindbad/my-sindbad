@@ -42,6 +42,38 @@
     .meta small{color:var(--text-on-dark,#f8fafc)}
     .nav a{color:var(--text-secondary,#cbd5e1)}
     .nav a.active{color:var(--accent-gold,#D4AF37)}
+
+    /* Mobile usability pass: presentation only; behavior remains unchanged. */
+    .map-wrap{width:100%;isolation:isolate}
+    #map{width:100%;min-height:clamp(420px,68vh,680px)}
+    .search{min-height:56px;align-items:center}
+    .search input{min-height:44px;padding-inline:0.8rem}
+    .search button,.locate,.map-close,.drawer-toggle,.mapboxgl-ctrl-group button{min-width:44px;min-height:44px}
+    .trip-panel{padding:14px;gap:12px}
+    .trip-toolbar{gap:12px}
+    .trip-toolbar select,.trip-search{min-height:44px;padding-block:10px}
+    .trip-activities{gap:8px}
+    .trip-activity{min-height:52px;padding:10px 12px}
+    .trip-activity strong{font-size:.78rem}
+    .trip-activity small{font-size:.7rem;line-height:1.55}
+    .saved-places{gap:12px;margin-top:16px}
+    .saved-place{align-items:stretch;min-height:76px;padding:12px;gap:12px}
+    .saved-place strong{font-size:.8rem;line-height:1.5}
+    .saved-place small{font-size:.7rem;line-height:1.5}
+    .saved-place div:last-child{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+    .saved-place button{min-height:44px;padding-inline:10px;font-size:.7rem}
+    .saved-place button[data-show]::before{content:'👁️';margin-inline-end:4px}
+    .saved-place button[data-route]::before{content:'📍';margin-inline-end:4px}
+    .place{padding:16px}
+    .place .add{min-height:48px;font-size:.82rem}
+    @media(max-width:699px){
+      .content{padding:14px}
+      .map-wrap.expanded{min-height:100dvh}
+      .map-wrap.expanded #map{min-height:100dvh}
+      .map-wrap.expanded .search{min-height:56px}
+      .trip-panel{border-radius:18px}
+      body.map-open .trip-panel{padding:12px 14px calc(12px + env(safe-area-inset-bottom))}
+    }
 </style>
 <script src="./utils/i18n.js?m6=final1" type="module"></script>
 <script>(function(){try{var p=localStorage.getItem('themePreference')||'auto',h=new Date().getHours(),d=window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches,night=h>=19||h<6;document.documentElement.dataset.themePreference=p;document.documentElement.dataset.theme=(p==='dark'||(p==='auto'&&(night||d)))?'dark':'light';}catch(e){document.documentElement.dataset.theme='light';}})();</script>
