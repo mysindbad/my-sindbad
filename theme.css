@@ -35,7 +35,7 @@ html[data-theme='light'] {
   --success: #166534;
   --warning: #92400e;
   --error: #b91c1c;
-  --text-on-accent: #0A192F;
+  --text-on-accent: var(--accent-gold-text);
   --text-on-dark: #f1f5f9;
   --text-on-dark-soft: #d9e2ef;
   --text-on-dark-muted: #e4eaf2;
@@ -87,7 +87,7 @@ html[data-theme='dark'] {
   --success: #86efac;
   --warning: #fbbf24;
   --error: #fca5a5;
-  --text-on-accent: #0A192F;
+  --text-on-accent: var(--accent-gold-text);
   --text-on-dark: #f8fafc;
   --text-on-dark-soft: #d9e2ef;
   --text-on-dark-muted: #e4eaf2;
