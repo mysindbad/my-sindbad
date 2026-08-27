@@ -2,9 +2,8 @@
   const pages = [
     { id: 'home', href: './index.html', key: 'nav_home', label: 'الرئيسية', icon: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m3 11 9-8 9 8M5 10v10h14V10M9 20v-6h6v6"/></svg>' },
     { id: 'trip', href: './itinerary.html', key: 'nav_itinerary', label: 'رحلتي', icon: '<svg class="w-6 h-6" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M21 16v-2l-8-5V3.5a1.5 1.5 0 0 0-3 0V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5z"/></svg>' },
-    { id: 'map', href: './map.html', key: 'nav_map', label: 'الخريطة', icon: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 20-5.4-2.7A1 1 0 0 1 3 16.4V5.6a1 1 0 0 1 1.4-.9L9 7m0 13 6-3m-6 3V7m6 10 4.6 2.3a1 1 0 0 0 1.4-.9V7.6a1 1 0 0 0-.6-.9L15 4m0 13V4M15 4 9 7"/></svg>' },
     { id: 'explore', href: './explore.html', key: 'nav_explore', label: 'استكشف', icon: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m21 21-4.3-4.3M10.5 18a7.5 7.5 0 1 1 0-15 7.5 7.5 0 0 1 0 15Zm0-11v7m-3.5-3.5h7"/></svg>' },
-    { id: 'community', href: './community.html', key: 'nav_community', label: 'المجتمع', icon: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M16 20H8m8 0v-2a4 4 0 0 0-8 0v2m8 0h5v-2a3 3 0 0 0-5.4-1.8M8 20H3v-2a3 3 0 0 1 5.4-1.8M15 7a3 3 0 1 1-6 0 3 3 0 0 1 6 0Zm6 3a2 2 0 1 1-4 0 2 2 0 0 1 4 0ZM7 10a2 2 0 1 1-4 0 2 2 0 0 1 4 0Z"/></svg>' },
+    { id: 'map', href: './map.html', key: 'nav_map', label: 'الخريطة', icon: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 20-5.4-2.7A1 1 0 0 1 3 16.4V5.6a1 1 0 0 1 1.4-.9L9 7m0 13 6-3m-6 3V7m6 10 4.6 2.3a1 1 0 0 0 1.4-.9V7.6a1 1 0 0 0-.6-.9L15 4m0 13V4M15 4 9 7"/></svg>' },
     { id: 'profile', href: './profile.html', key: 'nav_profile', label: 'حسابي', icon: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="7" r="4"/><path d="M5 21a7 7 0 0 1 14 0"/></svg>' }
   ];
 

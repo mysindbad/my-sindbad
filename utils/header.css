@@ -7,8 +7,8 @@
 .site-header {
   position: fixed;
   top: 0;
-  right: 0;
-  left: 0;
+  inset-inline-end: 0;
+  inset-inline-start: 0;
   z-index: 1000;
   height: calc(72px + env(safe-area-inset-top));
   padding: env(safe-area-inset-top) 18px 0;
@@ -71,12 +71,12 @@
 .site-header__wordmark small {
   margin-top: 3px;
   color: #fff;
-  font-size: .62rem;
+  font-size: 0.75rem;
 }
 
 .site-header__home {
   display: inline-flex;
-  min-height: 40px;
+  min-height: 44px;
   align-items: center;
   padding: 0 14px;
   border: 1px solid rgba(212, 175, 55, 0.72);
@@ -84,7 +84,7 @@
   color: #0a192f;
   background: #d4af37;
   text-decoration: none;
-  font-size: 0.72rem;
+  font-size: 0.75rem;
   font-weight: 800;
   transition: background-color 0.18s ease, transform 0.18s ease;
 }
@@ -101,8 +101,8 @@
 
 @media (min-width: 700px) {
   .site-header {
-    right: auto;
-    left: 50%;
+    inset-inline-end: auto;
+    inset-inline-start: 50%;
     width: min(100%, 520px);
     transform: translateX(-50%);
     border-radius: 0 0 18px 18px;
@@ -119,9 +119,9 @@
   }
 
   .site-header__home {
-    min-height: 38px;
+    min-height: 44px;
     padding-inline: 11px;
-    font-size: 0.66rem;
+    font-size: 0.75rem;
   }
 }
 
