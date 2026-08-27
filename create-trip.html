@@ -197,6 +197,7 @@
 
 <script src="./utils/appState.js"></script>
 <script>
+    const t = (key, fallback = '') => window.MySindbadI18n?.getTranslation?.(window.MySindbadI18n?.getLang?.() || 'ar', key) || fallback;
     const form = document.getElementById('trip-form');
     const startDate = document.getElementById('start-date');
     const endDate = document.getElementById('end-date');
@@ -233,7 +234,7 @@
       event.preventDefault();
       formError.classList.add('hidden');
       if (endDate.value < startDate.value) {
-        formError.textContent = 'يرجى اختيار تاريخ عودة يساوي أو يتجاوز تاريخ الذهاب.';
+        formError.textContent = t('return_date_invalid');
         formError.classList.remove('hidden');
         return;
       }
@@ -274,7 +275,7 @@
       };
       const submitButton = form.querySelector('button[type="submit"]');
       submitButton.disabled = true;
-      submitButton.textContent = 'جارٍ حفظ الرحلة...';
+      submitButton.textContent = t('saving_trip');
       try {
         const user = window.supabaseClient
           ? (await window.supabaseClient.auth.getUser()).data.user
@@ -297,7 +298,7 @@
           from: trip.dates.start,
           to: trip.dates.end,
           days: [[]],
-          check: ['جواز السفر', 'تذاكر السفر', 'حجز الفندق', 'تأمين السفر', 'شاحن الهاتف'].map((t) => ({ t, done: false })),
+          check: [t('passport'), t('travel_tickets'), t('hotel_booking'), t('travel_insurance'), t('phone_charger')].map((t) => ({ t, done: false })),
           cityCoords: trip.cityCoords
         };
         window.AppState?.saveTrip?.(unifiedTrip);
@@ -319,7 +320,7 @@
                 activities: (day.activities || []).map((activity, index) => ({
                   id: `ai-${day.day}-${index}`,
                   time: activity.time || '',
-                  place: activity.title || 'نشاط',
+                  place: activity.title || t('activity_label'),
                   activity: activity.desc || '',
                   distance: activity.distance || '',
                   duration: activity.duration || '',
@@ -327,7 +328,7 @@
                   cost: Number.isFinite(Number(activity.cost)) ? Number(activity.cost) : null,
                   category: activity.category || 'activities',
                   costEstimated: activity.costEstimated !== false,
-                  costLabel: activity.costLabel || 'تقديري',
+                  costLabel: activity.costLabel || t('estimated_label'),
                   currency: activity.currency || trip.budget.currency,
                   added: false
                 }))
@@ -340,10 +341,10 @@
         }
       } catch (error) {
         submitButton.disabled = false;
-        submitButton.textContent = 'إنشاء الرحلة بالذكاء الاصطناعي';
+        submitButton.textContent = t('create_ai');
         formError.textContent = error.message?.includes('relation') || error.message?.includes('trips')
-          ? 'لم يتم إنشاء جدول الرحلات في Supabase بعد. أنشئ جدول trips ثم حاول مرة أخرى.'
-          : 'حدث خطأ أثناء حفظ الرحلة. تحقق من الاتصال وحاول مرة أخرى.';
+          ? t('supabase_table_missing')
+          : t('save_trip_error');
         formError.classList.remove('hidden');
         return;
       }

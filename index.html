@@ -834,6 +834,7 @@ function applyDynamicTheme() {
 /* ===== بيانات Home والمصادقة ===== */
 const $=id=>document.getElementById(id);
 const ls=(k,v)=>localStorage.setItem(k,JSON.stringify(v));
+const t=(key,fallback='')=>window.MySindbadI18n?.getTranslation?.(window.MySindbadI18n?.getLang?.()||'ar',key)||fallback;
 const lg=(k,d)=>{try{const v=JSON.parse(localStorage.getItem(k));return v??d;}catch(e){return d;}};
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 let session=lg('sb_session',null), city='istanbul', page='home', tab='hotels', authTab='login';
@@ -847,31 +848,31 @@ function authHTML(){return `
  <div class="auth">
   <div class="logo">${LOGO}</div>
   <h1 class="en">My Sindbad</h1>
-   <div class="tag">رفيقك لاكتشاف العالم</div>
+   <div class="tag">${t('welcome_tagline')}</div>
   <div class="auth-card">
    <div class="tabs">
-    <button class="${authTab==='login'?'on':''}" onclick="authTab='login';render()">تسجيل الدخول</button>
-    <button class="${authTab==='reg'?'on':''}" onclick="authTab='reg';render()">حساب جديد</button>
+    <button class="${authTab==='login'?'on':''}" onclick="authTab='login';render()">${t('login')}</button>
+    <button class="${authTab==='reg'?'on':''}" onclick="authTab='reg';render()">${t('register')}</button>
    </div>
-   ${authTab==='reg'?'<label>الاسم الكامل<input class="inp" id="rName" placeholder="الاسم الكريم"></label>':''}
-   <label>البريد الإلكتروني<input class="inp" id="aEmail" type="email" placeholder="name@example.com"></label>
-   <label>كلمة المرور<input class="inp" id="aPass" type="password" placeholder="••••••••"></label>
+   ${authTab==='reg'?`<label>${t('full_name')}<input class="inp" id="rName" placeholder="${t('name_placeholder')}"></label>`:''}
+   <label>${t('email')}<input class="inp" id="aEmail" type="email" placeholder="name@example.com"></label>
+   <label>${t('password')}<input class="inp" id="aPass" type="password" placeholder="••••••••"></label>
    <div class="err" id="aErr"></div>
-   <button class="btn navy w" onclick="${authTab==='reg'?'doReg()':'doLogin()'}">${authTab==='reg'?'إنشاء حساب':'تسجيل الدخول'}</button>
-   <button class="btn ghost w" style="margin-top:.6rem" onclick="session={name:'مسافر',guest:1};ls('sb_session',session);render()">المتابعة دون حساب</button>
+   <button class="btn navy w" onclick="${authTab==='reg'?'doReg()':'doLogin()'}">${authTab==='reg'?t('register'):t('login')}</button>
+   <button class="btn ghost w" style="margin-top:.6rem" onclick="session={name:t('guest_name'),guest:1};ls('sb_session',session);render()">${t('continue_guest')}</button>
   </div>
-  <div class="feat"><span>تخطيط رحلات متكامل</span><span>خرائط وإرشادات</span><span>تجارب المسافرين</span></div>
+  <div class="feat"><span>${t('feature_planning')}</span><span>${t('feature_maps')}</span><span>${t('feature_experiences')}</span></div>
  </div>`;}
  async function doLogin(){const email=$('aEmail').value.trim(),pass=$('aPass').value;
-  if(!email||!pass){$('aErr').textContent='أدخل البريد الإلكتروني وكلمة المرور.';return;}
+  if(!email||!pass){$('aErr').textContent=t('enter_credentials');return;}
   try{if(window.supabaseConfigured){const user=await Auth.signIn(email,pass);session={name:user.user_metadata?.full_name||user.email,email:user.email};ls('sb_session',session);render();return;}
-   const u=lg('sb_users',[]).find(x=>x.email===email&&x.pass===pass);if(u){session={name:u.name,email:u.email};ls('sb_session',session);render();}else $('aErr').textContent='البريد أو كلمة المرور غير صحيحة.';
-  }catch(error){$('aErr').textContent='تعذر تسجيل الدخول: '+(error.message||'تحقق من بياناتك.');}}
+   const u=lg('sb_users',[]).find(x=>x.email===email&&x.pass===pass);if(u){session={name:u.name,email:u.email};ls('sb_session',session);render();}else $('aErr').textContent=t('invalid_credentials');
+  }catch(error){$('aErr').textContent=t('login_error')+': '+(error.message||t('verify_data'));}}
  async function doReg(){const name=$('rName').value.trim(),email=$('aEmail').value.trim(),pass=$('aPass').value;
- if(!name||!email||pass.length<4){$('aErr').textContent='المرجو ملء جميع الخانات (كلمة المرور 4 أحرف فأكثر).';return;}
-  try{if(window.supabaseConfigured){const user=await Auth.signUp(email,pass,name);if(!user){$('aErr').textContent='تحقق من بريدك الإلكتروني لتفعيل الحساب.';return;}session={name:user.user_metadata?.full_name||name,email:user.email};ls('sb_session',session);render();return;}
-   const u=lg('sb_users',[]);if(u.find(x=>x.email===email)){$('aErr').textContent='هذا البريد مسجل من قبل.';return;}u.push({name,email,pass});ls('sb_users',u);session={name,email};ls('sb_session',session);render();
-  }catch(error){$('aErr').textContent='تعذر إنشاء الحساب: '+(error.message||'تحقق من البيانات.');}}
+ if(!name||!email||pass.length<4){$('aErr').textContent=t('register_required');return;}
+  try{if(window.supabaseConfigured){const user=await Auth.signUp(email,pass,name);if(!user){$('aErr').textContent=t('verify_email');return;}session={name:user.user_metadata?.full_name||name,email:user.email};ls('sb_session',session);render();return;}
+   const u=lg('sb_users',[]);if(u.find(x=>x.email===email)){$('aErr').textContent=t('email_registered');return;}u.push({name,email,pass});ls('sb_users',u);session={name,email};ls('sb_session',session);render();
+  }catch(error){$('aErr').textContent=t('register_error')+': '+(error.message||t('verify_data'));}}
 function doOut(){session=null;ls('sb_session',null);render();}
 
 /* ===== Home-only shell ===== */
@@ -880,15 +881,15 @@ function render(){ $('shell').innerHTML = session ? appHTML() : authHTML(); bind
 function bind(){const P=$('pg');if(P)pgHome(P);}
 const getCityImage=(cityName)=>window.MySindbadCity?.normalizeCityImage(cityName)||window.MySindbadCity?.placeholderForCategory('attraction');
 const imageForCity=getCityImage;
-const tripDestinationText=(trip)=>window.MySindbadCity?.normalizeCityName(getCity(trip)||'وجهتك')?.display||getCity(trip)||'وجهتك';
+const tripDestinationText=(trip)=>window.MySindbadCity?.normalizeCityName(getCity(trip)||t('destination_default'))?.display||getCity(trip)||t('destination_default');
 let heroCarouselTimer;
-function startHeroCarousel(){const hero=document.querySelector('.home-hero'),dots=document.getElementById('hero-carousel-dots');if(!hero||!dots)return;const cities=[['مراكش','marrakech'],['شفشاون','chefchaouen'],['إسطنبول','istanbul']];let active=0;const paint=()=>{const [name]=cities[active];hero.style.backgroundImage=`linear-gradient(180deg,rgba(4,17,28,.18),rgba(4,17,28,.84)),url('${getCityImage(name)}')`;dots.innerHTML=cities.map((item,index)=>`<button type="button" aria-label="صورة ${item[0]}" aria-pressed="${index===active}" class="hero-dot${index===active?' active':''}" data-hero-index="${index}"></button>`).join('');dots.querySelectorAll('[data-hero-index]').forEach((button)=>button.addEventListener('click',()=>{active=Number(button.dataset.heroIndex);paint()}))};paint();clearInterval(heroCarouselTimer);heroCarouselTimer=setInterval(()=>{active=(active+1)%cities.length;paint()},5000)}
-function pgHome(P){const t=stateTrip();P.innerHTML=`
-  <div class="home-hero"><span class="greeting" id="greeting-text">MY SINDBAD · مرحباً بك</span><h2>إلى أين تأخذك الرحلة؟</h2><div class="home-search"><input class="inp" id="q" placeholder="اكتب اسم مدينة أو دولة..." autocomplete="off" onkeydown="if(event.key==='Enter')doSearch()"><button class="btn navy sm" onclick="doSearch()">${ic('nav',14)} بحث</button></div><div id="hero-carousel-dots" class="hero-carousel-dots" aria-label="صور الوجهات"></div></div>
-  <div id="searchResults"></div><div class="card" style="margin:0 0 1rem;padding:.85rem 1rem;background:#fffaf0;border:1px solid #D4AF37"><b style="color:var(--navy-900)">كيف يعمل؟</b><div style="display:flex;justify-content:space-between;gap:.35rem;margin-top:.55rem;font-size:.72rem;color:var(--text-muted)"><span>١ خطط</span><span>٢ استكشف</span><span>٣ سافر برفقة</span></div></div>
-  <div class="cats"><button class="cat" onclick="tab='hotels';window.location.href='./explore.html?dest='+encodeURIComponent(city)+'&tab='+encodeURIComponent(tab)"><span class="ci">${ic('hotel',18)}</span>الفنادق</button><button class="cat" onclick="tab='rest';window.location.href='./explore.html?dest='+encodeURIComponent(city)+'&tab='+encodeURIComponent(tab)"><span class="ci">${ic('food',18)}</span>المطاعم</button><button class="cat" onclick="tab='spots';window.location.href='./explore.html?dest='+encodeURIComponent(city)+'&tab='+encodeURIComponent(tab)"><span class="ci">${ic('pin',18)}</span>الأماكن</button><button class="cat" onclick="window.location.href='./itinerary.html'"><span class="ci">${ic('cal',18)}</span>رحلتي</button></div>
-  <div class="sec">رحلتي الحالية</div>${t?`<div class="trip-summary" style="background-image:linear-gradient(180deg,rgba(4,17,28,.08),rgba(4,17,28,.82)),url('${imageForCity(tripDestinationText(t))}')"><div><h2>${esc(tripDestinationText(t))}</h2><p>${esc(getStartDate(t))} ← ${esc(getEndDate(t))}</p></div><button class="btn sm ghost" onclick="window.location.href='./itinerary.html'">عرض الخطة</button></div>`:`<div class="empty-state"><div class="es-icon">${ic('plane',22)}</div><h3>لم تنشئ رحلة بعد</h3><a class="btn navy sm" href="./create-trip.html">إنشاء رحلة</a></div>`}
-  <div class="card" style="margin-top:1rem"><b style="color:var(--navy-900)">خدمات مباشرة</b><div class="tools" style="margin-top:.7rem"><a class="btn ghost" href="./explore.html">استكشف</a><a class="btn ghost" href="./map.html">خريطتي</a><a class="btn ghost" href="./community.html">المجتمع</a></div></div>`;startHeroCarousel();}
+function startHeroCarousel(){const hero=document.querySelector('.home-hero'),dots=document.getElementById('hero-carousel-dots');if(!hero||!dots)return;const cities=[[t('city_marrakech'),'marrakech'],[t('city_chefchaouen'),'chefchaouen'],[t('city_istanbul'),'istanbul']];let active=0;const paint=()=>{const [name]=cities[active];hero.style.backgroundImage=`linear-gradient(180deg,rgba(4,17,28,.18),rgba(4,17,28,.84)),url('${getCityImage(name)}')`;dots.innerHTML=cities.map((item,index)=>`<button type="button" aria-label="${t('destination_image')} ${item[0]}" aria-pressed="${index===active}" class="hero-dot${index===active?' active':''}" data-hero-index="${index}"></button>`).join('');dots.querySelectorAll('[data-hero-index]').forEach((button)=>button.addEventListener('click',()=>{active=Number(button.dataset.heroIndex);paint()}))};paint();clearInterval(heroCarouselTimer);heroCarouselTimer=setInterval(()=>{active=(active+1)%cities.length;paint()},5000)}
+function pgHome(P){const trip=stateTrip();P.innerHTML=`
+  <div class="home-hero"><span class="greeting" id="greeting-text">MY SINDBAD · ${t('welcome')}</span><h2>${t('home_question')}</h2><div class="home-search"><input class="inp" id="q" placeholder="${t('home_search')}" autocomplete="off" onkeydown="if(event.key==='Enter')doSearch()"><button class="btn navy sm" onclick="doSearch()">${ic('nav',14)} ${t('search')}</button></div><div id="hero-carousel-dots" class="hero-carousel-dots" aria-label="${t('image_alt_destinations')}"></div></div>
+  <div id="searchResults"></div><div class="card" style="margin:0 0 1rem;padding:.85rem 1rem;background:#fffaf0;border:1px solid #D4AF37"><b style="color:var(--navy-900)">${t('how_it_works')}</b><div style="display:flex;justify-content:space-between;gap:.35rem;margin-top:.55rem;font-size:.72rem;color:var(--text-muted)"><span>١ ${t('step_plan')}</span><span>٢ ${t('step_explore')}</span><span>٣ ${t('step_travel')}</span></div></div>
+  <div class="cats"><button class="cat" onclick="tab='hotels';window.location.href='./explore.html?dest='+encodeURIComponent(city)+'&tab='+encodeURIComponent(tab)"><span class="ci">${ic('hotel',18)}</span>${t('hotels')}</button><button class="cat" onclick="tab='rest';window.location.href='./explore.html?dest='+encodeURIComponent(city)+'&tab='+encodeURIComponent(tab)"><span class="ci">${ic('food',18)}</span>${t('restaurants')}</button><button class="cat" onclick="tab='spots';window.location.href='./explore.html?dest='+encodeURIComponent(city)+'&tab='+encodeURIComponent(tab)"><span class="ci">${ic('pin',18)}</span>${t('places')}</button><button class="cat" onclick="window.location.href='./itinerary.html'"><span class="ci">${ic('cal',18)}</span>${t('trip_plan')}</button></div>
+  <div class="sec">${t('current_trip')}</div>${trip?`<div class="trip-summary" style="background-image:linear-gradient(180deg,rgba(4,17,28,.08),rgba(4,17,28,.82)),url('${imageForCity(tripDestinationText(trip))}')"><div><h2>${esc(tripDestinationText(trip))}</h2><p>${esc(getStartDate(trip))} ← ${esc(getEndDate(trip))}</p></div><button class="btn sm ghost" onclick="window.location.href='./itinerary.html'">${t('view_plan')}</button></div>`:`<div class="empty-state"><div class="es-icon">${ic('plane',22)}</div><h3>${t('no_trip_created')}</h3><a class="btn navy sm" href="./create-trip.html">${t('create_trip')}</a></div>`}
+  <div class="card" style="margin-top:1rem"><b style="color:var(--navy-900)">${t('direct_services')}</b><div class="tools" style="margin-top:.7rem"><a class="btn ghost" href="./explore.html">${t('nav_explore')}</a><a class="btn ghost" href="./map.html">${t('my_map')}</a><a class="btn ghost" href="./community.html">${t('nav_community')}</a></div></div>`;startHeroCarousel();}
 function doSearch(){const q=$('q')?.value.trim();if(!q)return;sessionStorage.setItem('sb_destination_query',q);ls('sb_destination_query',q);window.location.href=`./create-trip.html?dest=${encodeURIComponent(q)}`;}
 render();
 window.setTimeout(()=>document.getElementById('splashScreen')?.remove(),650);

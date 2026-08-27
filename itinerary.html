@@ -120,13 +120,13 @@
         '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
       }[character]));
     }
-    function tripLabel() { return tripData?.destinationDisplay || tripData?.destination || 'وجهتك'; }
+    function tripLabel() { return tripData?.destinationDisplay || tripData?.destination || assistantText('destination_default'); }
     function renderHealthCard() {
       const activities = itinerary.flatMap((day) => day.activities || []);
       const budget = Number(tripData?.budget?.amount ?? tripData?.budget ?? 0);
       const health = evaluateHealth({ trip: { ...tripData, budget, days: itinerary.length || 1 }, activities, weatherDaily: [] });
       const messages = health.checks.map((check) => `${check.type === 'green' ? '✓' : '•'} ${escapeHtml(check.message)}`).join('<br>');
-      return `<section class="mt-4 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm"><div class="flex items-center justify-between"><strong class="text-sm font-extrabold text-navy-900">صحة الرحلة</strong><b class="text-sm text-gold-600">${health.badge} ${health.score}/100</b></div><p class="mt-2 text-xs leading-6 text-slate-500">${messages}</p></section>`;
+      return `<section class="mt-4 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm"><div class="flex items-center justify-between"><strong class="text-sm font-extrabold text-navy-900">${assistantText('trip_health')}</strong><b class="text-sm text-gold-600">${health.badge} ${health.score}/100</b></div><p class="mt-2 text-xs leading-6 text-slate-500">${messages}</p></section>`;
     }
     function getCityImage(cityName) { return window.MySindbadCity?.normalizeCityImage(cityName) || window.MySindbadCity?.placeholderForCategory('attraction'); }
     const placeImageCache = new Map();
@@ -365,7 +365,7 @@
           <div class="flex gap-3">
             <div class="min-w-[4.1rem] border-l border-gold-500/30 pl-3 text-center">
               <span class="block text-sm font-extrabold text-gold-600">${escapeHtml(activity.time)}</span>
-              <span class="mt-2 block text-[.68rem] font-semibold text-slate-400">موعد النشاط</span>
+              <span class="mt-2 block text-[.68rem] font-semibold text-slate-400">${assistantText('activity_time')}</span>
             </div>
             <div class="min-w-0 flex-1">
               <h3 class="text-base font-extrabold text-navy-900">${escapeHtml(activity.place)}</h3>
@@ -374,14 +374,14 @@
                 ${activity.distance ? `<span>⌖ ${escapeHtml(activity.distance)}</span>` : ''}
                 ${activity.duration ? `<span>◷ ${escapeHtml(activity.duration)}</span>` : ''}
                 ${Number.isFinite(Number(activity.cost)) ? `<span>≈ ${escapeHtml(activity.cost)} ${escapeHtml(activity.currency || tripData.budget?.currency || 'MAD')}</span>` : ''}
-                ${activity.costEstimated && Number.isFinite(Number(activity.cost)) ? '<span class="text-gold-600">(تقديري)</span>' : ''}
+                ${activity.costEstimated && Number.isFinite(Number(activity.cost)) ? `<span class="text-gold-600">${assistantText('estimated_parentheses')}</span>` : ''}
               </div>
             </div>
           </div>
           <div class="mt-4 flex gap-2 border-t border-slate-100 pt-3">
-            <button type="button" data-add="${dayIndex}:${activityIndex}" class="flex-1 rounded-xl px-3 py-2 text-xs font-bold transition ${activity.added ? 'bg-emerald-50 text-emerald-700' : 'bg-gold-500 text-white hover:bg-gold-600'}">${activity.added ? '✓ تمت الإضافة' : 'أضف إلى رحلتي ➕'}</button>
-            <a href="./map.html?day=${dayIndex + 1}&activity=${activityIndex}" class="rounded-xl bg-navy-900 px-3 py-2 text-center text-xs font-bold text-white transition hover:bg-navy-800" title="عرض النشاط على الخريطة">الخريطة</a>
-            <button type="button" data-edit="${dayIndex}:${activityIndex}" class="rounded-xl bg-slate-100 px-4 py-2 text-xs font-bold text-slate-700 transition hover:bg-slate-200">تعديل ✏️</button>
+            <button type="button" data-add="${dayIndex}:${activityIndex}" class="flex-1 rounded-xl px-3 py-2 text-xs font-bold transition ${activity.added ? 'bg-emerald-50 text-emerald-700' : 'bg-gold-500 text-white hover:bg-gold-600'}">${activity.added ? '✓ '+assistantText('added') : assistantText('add_to_trip')}</button>
+            <a href="./map.html?day=${dayIndex + 1}&activity=${activityIndex}" class="rounded-xl bg-navy-900 px-3 py-2 text-center text-xs font-bold text-white transition hover:bg-navy-800" title="${assistantText('open_map')}">${assistantText('map')}</a>
+            <button type="button" data-edit="${dayIndex}:${activityIndex}" class="rounded-xl bg-slate-100 px-4 py-2 text-xs font-bold text-slate-700 transition hover:bg-slate-200">${assistantText('edit')} ✏️</button>
           </div>
         </article>`;
     }
@@ -402,8 +402,8 @@
     }
 
     function assistantContextText() {
-      const budget = tripData.budget?.amount ? `${tripData.budget.amount} ${tripData.budget.currency || 'MAD'}` : 'غير محددة';
-      return `الوجهة: ${tripLabel()} · ${itinerary.length} أيام · الميزانية: ${budget} · النمط: ${tripData.travelStyle || 'متنوع'}`;
+      const budget = tripData.budget?.amount ? `${tripData.budget.amount} ${tripData.budget.currency || 'MAD'}` : assistantText('not_specified');
+      return `${assistantText('destination')}: ${tripLabel()} · ${itinerary.length} ${assistantText('days')} · ${assistantText('budget')}: ${budget} · ${assistantText('travel_style')}: ${tripData.travelStyle || assistantText('varied_style')}`;
     }
 
     function assistantText(key, fallback) { return window.MySindbadI18n?.getTranslation?.(window.MySindbadI18n?.getLang?.() || 'ar', key) || fallback; }
@@ -412,7 +412,7 @@
       const container = document.getElementById('assistant-messages');
       if (!container) return;
       container.innerHTML = assistantMessages.map((message, messageIndex) => `
-        <div class="assistant-message ${message.role}"><div class="assistant-bubble">${message.loading ? `<span class="assistant-loading"><span class="assistant-spinner"></span>${escapeHtml(message.text)}</span>` : escapeHtml(message.text)}${Array.isArray(message.options) && message.options.length ? `<div class="assistant-options">${message.options.map((option, optionIndex) => `<article class="assistant-option"><strong>${escapeHtml(option.title)}</strong><small>≈ ${escapeHtml(option.cost)} ${escapeHtml(option.currency || tripData.budget?.currency || 'MAD')} · ${escapeHtml(option.reason || 'بديل مناسب في نفس المدينة')}</small><button type="button" data-assistant-option="${messageIndex}:${optionIndex}">${escapeHtml(assistantText('assistant_replace', 'استبدال'))}</button></article>`).join('')}</div>` : ''}${message.preview ? `<div class="mt-2 rounded-lg bg-slate-100 px-2 py-1 text-[.65rem] text-slate-600">${escapeHtml(message.preview)}</div>` : ''}${message.action ? `<button type="button" class="assistant-confirm" data-assistant-action="${messageIndex}:${escapeHtml(message.action.type)}">${escapeHtml(message.action.label || assistantText('confirm', 'تأكيد الاقتراح'))}</button>` : ''}</div></div>`).join('');
+        <div class="assistant-message ${message.role}"><div class="assistant-bubble">${message.loading ? `<span class="assistant-loading"><span class="assistant-spinner"></span>${escapeHtml(message.text)}</span>` : escapeHtml(message.text)}${Array.isArray(message.options) && message.options.length ? `<div class="assistant-options">${message.options.map((option, optionIndex) => `<article class="assistant-option"><strong>${escapeHtml(option.title)}</strong><small>≈ ${escapeHtml(option.cost)} ${escapeHtml(option.currency || tripData.budget?.currency || 'MAD')} · ${escapeHtml(option.reason || assistantText('same_city_alternative'))}</small><button type="button" data-assistant-option="${messageIndex}:${optionIndex}">${escapeHtml(assistantText('assistant_replace'))}</button></article>`).join('')}</div>` : ''}${message.preview ? `<div class="mt-2 rounded-lg bg-slate-100 px-2 py-1 text-[.65rem] text-slate-600">${escapeHtml(message.preview)}</div>` : ''}${message.action ? `<button type="button" class="assistant-confirm" data-assistant-action="${messageIndex}:${escapeHtml(message.action.type)}">${escapeHtml(message.action.label || assistantText('confirm'))}</button>` : ''}</div></div>`).join('');
       container.scrollTop = container.scrollHeight;
       container.querySelectorAll('[data-assistant-option]').forEach((button) => button.addEventListener('click', () => {
         const [messageIndex, optionIndex] = button.dataset.assistantOption.split(':').map(Number);
@@ -422,8 +422,8 @@
       }));
       container.querySelectorAll('[data-assistant-action]').forEach((button) => button.addEventListener('click', () => {
         const [messageIndex, actionType] = button.dataset.assistantAction.split(':'); const message = assistantMessages[Number(messageIndex)];
-        if (actionType === 'CONFIRM_REPLACE_OUTDOOR') sendAssistantMessage('بدل النشاط الخارجي بنشاط داخلي');
-        else if (message && applyAssistantAction(message)) { button.disabled = true; button.textContent = assistantText('added_success', 'تم التنفيذ'); addAssistantMessage('ai', assistantText('added_success', 'تم تطبيق التعديل بنجاح.')); }
+        if (actionType === 'CONFIRM_REPLACE_OUTDOOR') sendAssistantMessage(assistantText('assistant_outdoor'));
+        else if (message && applyAssistantAction(message)) { button.disabled = true; button.textContent = assistantText('added_success'); addAssistantMessage('ai', assistantText('added_success')); }
       }));
     }
 
@@ -441,7 +441,7 @@
       backdrop.hidden = !open;
       if (open) {
         document.getElementById('assistant-context').textContent = assistantContextText();
-        if (!assistantMessages.length) addAssistantMessage('ai', assistantText('assistant_greeting', 'مرحبا! قول ليا شنو بغيتي نعاونك فيه.'));
+        if (!assistantMessages.length) addAssistantMessage('ai', assistantText('assistant_greeting'));
         document.getElementById('assistant-input')?.focus();
       }
     }
@@ -477,9 +477,9 @@
       syncAssistantReplacement(replacement, day.day, current.id);
       saveItinerary();
       assistantMessages = assistantMessages.map((message) => ({ ...message, options: [] }));
-      assistantMessages.push({ role: 'ai', text: assistantText('assistant_replaced', 'تم استبدال النشاط بنجاح') });
+      assistantMessages.push({ role: 'ai', text: assistantText('assistant_replaced') });
       render();
-      window.requestAnimationFrame(() => { setAssistantOpen(true); showAssistantToast('تم استبدال النشاط بنجاح'); });
+      window.requestAnimationFrame(() => { setAssistantOpen(true); showAssistantToast(assistantText('assistant_replaced')); });
     }
 
     function applyAssistantAction(message) {
@@ -501,7 +501,7 @@
       if (!message || assistantSending) return;
       assistantSending = true;
       addAssistantMessage('user', message);
-      addAssistantMessage('ai', assistantText('assistant_loading', 'سندباد كيخطط...'), { loading: true });
+      addAssistantMessage('ai', assistantText('assistant_loading'), { loading: true });
       const loadingMessageIndex = assistantMessages.length - 1;
       try {
         const response = await fetchWithTimeout('/api/assistant', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ message, trip: assistantTripPayload(), history: assistantHistory(), language: window.MySindbadI18n?.getLang?.() || localStorage.getItem('userLang') || 'ar' }) });
@@ -510,15 +510,15 @@
         assistantMessages.splice(loadingMessageIndex, 1);
         if (result.type === 'REPLACE_ACTIVITY') {
           const options = Array.isArray(result.options) ? result.options.filter((option) => Number(option.cost) < Number((itinerary.find((day) => Number(day.day) === Number(result.day))?.activities?.[result.activityIndex])?.cost ?? Infinity)) : [];
-          addAssistantMessage('ai', options.length ? assistantText('assistant_has_options', 'لقيت ليك هاد البدائل الأرخص. اختار واحد باش نبدلو:') : assistantText('assistant_no_cheaper', 'ما لقيتش بديل أرخص متاح دابا.'), { day: result.day, activityIndex: result.activityIndex, options, preview: result.preview || '' });
+          addAssistantMessage('ai', options.length ? assistantText('assistant_has_options') : assistantText('assistant_no_cheaper'), { day: result.day, activityIndex: result.activityIndex, options, preview: result.preview || '' });
         } else if (['REMOVE', 'REMOVE_ACTIVITY', 'MOVE', 'MOVE_ACTIVITY', 'REPLAN'].includes(result.type)) {
-          addAssistantMessage('ai', result.message || 'حضّرت لك معاينة التعديل قبل التأكيد.', { day: result.day, activityIndex: result.activityIndex, preview: result.preview || result.message || 'معاينة التعديل جاهزة للمراجعة.', action: { ...(result.action || {}), type: result.type, toDay: result.toDay || result.targetDay } });
+          addAssistantMessage('ai', result.message || assistantText('preview_ready'), { day: result.day, activityIndex: result.activityIndex, preview: result.preview || result.message || assistantText('preview_ready'), action: { ...(result.action || {}), type: result.type, toDay: result.toDay || result.targetDay } });
         } else {
-          addAssistantMessage('ai', result.message || 'نقدر نعاونك فتنظيم الرحلة.', { action: result.action || null, preview: result.preview || '' });
+          addAssistantMessage('ai', result.message || assistantText('assistant_general_help'), { action: result.action || null, preview: result.preview || '' });
         }
       } catch (error) {
         assistantMessages.splice(loadingMessageIndex, 1);
-        addAssistantMessage('ai', assistantText('assistant_error', 'تعذر فهم الطلب. حاول مرة أخرى.'));
+        addAssistantMessage('ai', assistantText('assistant_error'));
       } finally {
         assistantSending = false;
       }
@@ -535,7 +535,7 @@
       fab.addEventListener('click', () => setAssistantOpen(true));
       close.addEventListener('click', () => setAssistantOpen(false));
       backdrop.addEventListener('click', () => setAssistantOpen(false));
-      form.addEventListener('submit', (event) => { event.preventDefault(); const value = input.value; if (!value.trim()) { showAssistantToast(assistantText('assistant_required', 'اكتب رسالتك أولاً.')); input.focus(); return; } input.value = ''; sendAssistantMessage(value); });
+      form.addEventListener('submit', (event) => { event.preventDefault(); const value = input.value; if (!value.trim()) { showAssistantToast(assistantText('assistant_required')); input.focus(); return; } input.value = ''; sendAssistantMessage(value); });
       document.querySelectorAll('[data-assistant-prompt]').forEach((button) => button.addEventListener('click', () => { input.value = button.dataset.assistantPrompt; input.focus(); }));
       const sheet = document.getElementById('assistant-sheet');
       const grabber = sheet.querySelector('.assistant-grabber');
@@ -555,36 +555,36 @@
         <div data-site-header></div>
         <section class="px-4 pb-6 pt-6 sm:px-5">
            <div class="mb-5">
-          <p class="mb-1 text-xs font-bold tracking-wide text-gold-600">MY SINDBAD · مولد الخطط الذكي</p>
+          <p class="mb-1 text-xs font-bold tracking-wide text-gold-600">MY SINDBAD · ${assistantText('smart_planner')}</p>
             <div class="mb-4 overflow-hidden rounded-2xl bg-gradient-to-br from-navy-900 to-gold-500 text-white"><img id="tripHeaderImg" src="" alt="${escapeHtml(tripLabel())}" class="h-36 w-full object-cover" onerror="this.style.display='none'; this.parentElement.style.background='linear-gradient(135deg, #0A192F, #D4AF37)'"><div class="p-3 text-center text-sm font-extrabold image-fallback-label">${escapeHtml(tripLabel())}</div></div>
-            <h1 id="tripDestination" class="text-2xl font-extrabold leading-relaxed text-navy-900">برنامج رحلة ${escapeHtml(tripLabel())}</h1>
-            <p class="mt-1 text-sm leading-7 text-slate-500">خطة يومية مقترحة بأسلوب ${escapeHtml(tripData.travelStyle || 'متنوع')}، ويمكنك تعديلها كما تحب.</p>
+            <h1 id="tripDestination" class="text-2xl font-extrabold leading-relaxed text-navy-900">${assistantText('trip_program')} ${escapeHtml(tripLabel())}</h1>
+            <p class="mt-1 text-sm leading-7 text-slate-500">${assistantText('suggested_daily_plan')} ${escapeHtml(tripData.travelStyle || assistantText('varied_style'))}، ${assistantText('editable_plan')}</p>
           </div>
            <div class="mb-6 grid grid-cols-3 gap-2 rounded-2xl bg-navy-900 p-3 text-white shadow-lg">
-             <div class="border-l border-white/15 px-2 text-center"><span class="block text-[.66rem] text-white/60">الوجهة</span><strong id="tripDestination" class="mt-1 block truncate text-sm text-gold-400">${escapeHtml(tripLabel())}</strong></div>
-             <div class="border-l border-white/15 px-2 text-center"><span class="block text-[.66rem] text-white/60">عدد الأيام</span><strong id="tripDays" class="mt-1 block text-sm">${itinerary.length} أيام</strong></div>
-             <div class="px-2 text-center"><span class="block text-[.66rem] text-white/60">الميزانية</span><strong id="tripBudget" class="mt-1 block truncate text-sm text-gold-400">${totalBudget ? `${totalBudget} ${escapeHtml(tripData.budget.currency || '')}` : 'غير محددة'}</strong></div>
+             <div class="border-l border-white/15 px-2 text-center"><span class="block text-[.66rem] text-white/60">${assistantText('destination')}</span><strong id="tripDestination" class="mt-1 block truncate text-sm text-gold-400">${escapeHtml(tripLabel())}</strong></div>
+             <div class="border-l border-white/15 px-2 text-center"><span class="block text-[.66rem] text-white/60">${assistantText('days_count')}</span><strong id="tripDays" class="mt-1 block text-sm">${itinerary.length} ${assistantText('days')}</strong></div>
+             <div class="px-2 text-center"><span class="block text-[.66rem] text-white/60">${assistantText('budget')}</span><strong id="tripBudget" class="mt-1 block truncate text-sm text-gold-400">${totalBudget ? `${totalBudget} ${escapeHtml(tripData.budget.currency || '')}` : assistantText('not_specified')}</strong></div>
           </div>
           ${renderHealthCard()}
-           <div class="mb-3 mt-5 flex items-center justify-between"><h2 class="text-lg font-extrabold text-navy-900">برنامج يوم بيوم</h2></div>
+           <div class="mb-3 mt-5 flex items-center justify-between"><h2 class="text-lg font-extrabold text-navy-900">${assistantText('day_by_day')}</h2></div>
           <div id="activitiesContainer" class="space-y-6"></div>
-          <div class="mt-7 grid grid-cols-3 gap-2"><button id="share-trip" type="button" data-i18n="share_trip" class="min-h-12 rounded-xl bg-gold-500 px-3 py-3 text-xs font-bold text-navy-900 transition hover:bg-gold-600">مشاركة الرحلة</button><a href="./today.html" data-i18n="today_heading" class="flex min-h-12 items-center justify-center rounded-xl bg-navy-900 px-3 py-3 text-xs font-bold text-white transition hover:bg-navy-800">وضع اليوم</a><a href="./create-trip.html" class="flex min-h-12 items-center justify-center rounded-xl border-2 border-navy-900 px-3 py-3 text-xs font-bold text-navy-900 transition hover:bg-navy-900 hover:text-white">تعديل البيانات</a></div><p id="share-status" class="mt-2 min-h-5 text-center text-xs text-slate-500"></p>
+          <div class="mt-7 grid grid-cols-3 gap-2"><button id="share-trip" type="button" data-i18n="share_trip" class="min-h-12 rounded-xl bg-gold-500 px-3 py-3 text-xs font-bold text-navy-900 transition hover:bg-gold-600">${assistantText('share_trip')}</button><a href="./today.html" data-i18n="today_heading" class="flex min-h-12 items-center justify-center rounded-xl bg-navy-900 px-3 py-3 text-xs font-bold text-white transition hover:bg-navy-800">${assistantText('today_mode')}</a><a href="./create-trip.html" class="flex min-h-12 items-center justify-center rounded-xl border-2 border-navy-900 px-3 py-3 text-xs font-bold text-navy-900 transition hover:bg-navy-900 hover:text-white">${assistantText('edit_data')}</a></div><p id="share-status" class="mt-2 min-h-5 text-center text-xs text-slate-500"></p>
         </section>
         <nav data-site-nav data-active="trip"></nav>
         <div id="assistant-backdrop" class="assistant-backdrop" hidden></div>
-        <button id="assistant-fab" class="assistant-fab" type="button" aria-label="مساعد سندباد" title="مساعد سندباد"><span class="assistant-fab-icon">🤖</span><span class="assistant-fab-label">مساعد سندباد</span></button>
+        <button id="assistant-fab" class="assistant-fab" type="button" aria-label="${assistantText('assistant_title')}" title="${assistantText('assistant_title')}"><span class="assistant-fab-icon">🤖</span><span class="assistant-fab-label">${assistantText('assistant_title')}</span></button>
         <section id="assistant-sheet" class="assistant-sheet" role="dialog" aria-modal="true" aria-labelledby="assistant-title" hidden>
           <div class="assistant-grabber" aria-hidden="true"></div>
-          <header class="assistant-head"><div><h2 id="assistant-title" data-i18n="assistant_title">مساعد سندباد</h2><p data-i18n="assistant_subtitle">نعاونك تعدل الرحلة ديالك</p></div><button id="assistant-close" class="assistant-close" type="button" aria-label="إغلاق" data-i18n="close">×</button></header>
+          <header class="assistant-head"><div><h2 id="assistant-title" data-i18n="assistant_title">${assistantText('assistant_title')}</h2><p data-i18n="assistant_subtitle">${assistantText('assistant_subtitle')}</p></div><button id="assistant-close" class="assistant-close" type="button" aria-label="${assistantText('close')}" data-i18n="close">×</button></header>
           <div id="assistant-context" class="assistant-context"></div>
           <div id="assistant-messages" class="assistant-messages" aria-live="polite"></div>
-          <div class="assistant-quick" aria-label="إجراءات سريعة"><button type="button" data-assistant-prompt="السلام عليكم" data-i18n="assistant_salutation">السلام عليكم</button><button type="button" data-assistant-prompt="لاباس؟" data-i18n="assistant_wellbeing">لاباس؟</button><button type="button" data-assistant-prompt="شنو نقدر ندير اليوم؟" data-i18n="assistant_today_prompt">شنو نقدر ندير اليوم؟</button><button type="button" data-assistant-prompt="بدل نشاط" data-i18n="assistant_replace_request">بدل نشاط</button><button type="button" data-assistant-prompt="حيد نشاط" data-i18n="assistant_remove_request">حيد نشاط</button><button type="button" data-assistant-prompt="رتب اليوم" data-i18n="assistant_replan_request">رتب اليوم</button><button type="button" data-assistant-prompt="شنو ندير إلا شتات" data-i18n="assistant_rain_request">شنو ندير إلا شتات</button></div>
-          <form id="assistant-form" class="assistant-form" novalidate><input id="assistant-input" type="text" autocomplete="off" placeholder="قول ليا شنو بغيتي نبدلو..." data-i18n-placeholder="assistant_input" aria-label="رسالة المساعد" required><button type="submit" aria-label="إرسال" data-i18n="assistant_send">➤</button></form>
+          <div class="assistant-quick" aria-label="${assistantText('quick_actions')}"><button type="button" data-assistant-prompt="${assistantText('assistant_salutation')}" data-i18n="assistant_salutation">${assistantText('assistant_salutation')}</button><button type="button" data-assistant-prompt="${assistantText('assistant_wellbeing')}" data-i18n="assistant_wellbeing">${assistantText('assistant_wellbeing')}</button><button type="button" data-assistant-prompt="${assistantText('assistant_today_prompt')}" data-i18n="assistant_today_prompt">${assistantText('assistant_today_prompt')}</button><button type="button" data-assistant-prompt="${assistantText('assistant_replace_request')}" data-i18n="assistant_replace_request">${assistantText('assistant_replace_request')}</button><button type="button" data-assistant-prompt="${assistantText('assistant_remove_request')}" data-i18n="assistant_remove_request">${assistantText('assistant_remove_request')}</button><button type="button" data-assistant-prompt="${assistantText('assistant_replan_request')}" data-i18n="assistant_replan_request">${assistantText('assistant_replan_request')}</button><button type="button" data-assistant-prompt="${assistantText('assistant_rain_request')}" data-i18n="assistant_rain_request">${assistantText('assistant_rain_request')}</button></div>
+          <form id="assistant-form" class="assistant-form" novalidate><input id="assistant-input" type="text" autocomplete="off" placeholder="${assistantText('assistant_input')}" data-i18n-placeholder="assistant_input" aria-label="${assistantText('assistant_message')}" required><button type="submit" aria-label="${assistantText('assistant_send')}" data-i18n="assistant_send">➤</button></form>
         </section>
         <div id="assistant-toast" class="assistant-toast" role="status"></div>`;
       document.getElementById('tripHeaderImg').src = getCityImage(tripLabel());
       renderDayPlan(readLiveActivities());
-      document.getElementById('share-trip')?.addEventListener('click', async () => { const status = document.getElementById('share-status'); const sharedTrip = { ...tripData, days: itinerary.length, activities: itinerary.flatMap((day) => day.activities || []) }; let ok = false; try { ok = await shareTrip(sharedTrip); } catch { ok = false; } if (ok) { status.textContent = 'تم تجهيز رابط المشاركة.'; return; } const link = document.createElement('a'); link.href = buildTripLink(sharedTrip); link.target = '_blank'; link.rel = 'noopener'; link.textContent = 'فتح رابط المشاركة'; status.replaceChildren(link); });
+      document.getElementById('share-trip')?.addEventListener('click', async () => { const status = document.getElementById('share-status'); const sharedTrip = { ...tripData, days: itinerary.length, activities: itinerary.flatMap((day) => day.activities || []) }; let ok = false; try { ok = await shareTrip(sharedTrip); } catch { ok = false; } if (ok) { status.textContent = assistantText('share_ready'); return; } const link = document.createElement('a'); link.href = buildTripLink(sharedTrip); link.target = '_blank'; link.rel = 'noopener'; link.textContent = assistantText('open_share_link'); status.replaceChildren(link); });
       wireAssistant();
     }
 
@@ -607,7 +607,7 @@
       }
       const container = document.getElementById('activitiesContainer');
       if (!container) return;
-      container.innerHTML = itinerary.map((day) => `<section><div class="mb-3 flex items-center gap-2"><span class="flex h-8 w-8 items-center justify-center rounded-xl bg-gold-500 text-sm font-extrabold text-white">${day.day}</span><h3 class="text-sm font-extrabold text-navy-900">اليوم ${['الأول','الثاني','الثالث','الرابع','الخامس','السادس','السابع'][day.day - 1] || day.day}: <span class="font-semibold text-slate-500">${formatDate(day.date)}</span></h3></div><div class="space-y-3">${day.activities.map((activity, index) => renderActivity(activity, day.day - 1, index)).join('')}</div></section>`).join('');
+      container.innerHTML = itinerary.map((day) => `<section><div class="mb-3 flex items-center gap-2"><span class="flex h-8 w-8 items-center justify-center rounded-xl bg-gold-500 text-sm font-extrabold text-white">${day.day}</span><h3 class="text-sm font-extrabold text-navy-900">${assistantText('day_label')} ${day.day}: <span class="font-semibold text-slate-500">${formatDate(day.date)}</span></h3></div><div class="space-y-3">${day.activities.map((activity, index) => renderActivity(activity, day.day - 1, index)).join('')}</div></section>`).join('');
       container.querySelectorAll('[data-add]').forEach((button) => button.addEventListener('click', () => {
         const [dayIndex, activityIndex] = button.dataset.add.split(':').map(Number);
         const activity = itinerary[dayIndex].activities[activityIndex];
@@ -618,7 +618,7 @@
           name: activity.place,
           place: activity.place,
           description: activity.activity,
-          type: 'معلم سياحي',
+          type: assistantText('trip_activity_type'),
           distance: activity.distance,
           duration: activity.duration,
           cost: activity.cost,
