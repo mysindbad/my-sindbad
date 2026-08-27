@@ -883,13 +883,26 @@ const getCityImage=(cityName)=>window.MySindbadCity?.normalizeCityImage(cityName
 const imageForCity=getCityImage;
 const tripDestinationText=(trip)=>window.MySindbadCity?.normalizeCityName(getCity(trip)||t('destination_default'))?.display||getCity(trip)||t('destination_default');
 let heroCarouselTimer;
+const ensureCityImagesLoaded = (callback) => {
+  if (window.MySindbadCity && window.MySindbadCity.normalizeCityImage) {
+    callback();
+    return;
+  }
+  const checkInterval = setInterval(() => {
+    if (window.MySindbadCity && window.MySindbadCity.normalizeCityImage) {
+      clearInterval(checkInterval);
+      callback();
+    }
+  }, 50);
+  setTimeout(() => clearInterval(checkInterval), 5000);
+};
 function startHeroCarousel(){const hero=document.querySelector('.home-hero'),dots=document.getElementById('hero-carousel-dots');if(!hero||!dots)return;const cities=[[t('city_marrakech'),'marrakech'],[t('city_chefchaouen'),'chefchaouen'],[t('city_istanbul'),'istanbul']];let active=0;const paint=()=>{const [name]=cities[active];hero.style.backgroundImage=`linear-gradient(180deg,rgba(4,17,28,.18),rgba(4,17,28,.84)),url('${getCityImage(name)}')`;dots.innerHTML=cities.map((item,index)=>`<button type="button" aria-label="${t('destination_image')} ${item[0]}" aria-pressed="${index===active}" class="hero-dot${index===active?' active':''}" data-hero-index="${index}"></button>`).join('');dots.querySelectorAll('[data-hero-index]').forEach((button)=>button.addEventListener('click',()=>{active=Number(button.dataset.heroIndex);paint()}))};paint();clearInterval(heroCarouselTimer);heroCarouselTimer=setInterval(()=>{active=(active+1)%cities.length;paint()},5000)}
 function pgHome(P){const trip=stateTrip();P.innerHTML=`
   <div class="home-hero"><span class="greeting" id="greeting-text">MY SINDBAD · ${t('welcome')}</span><h2>${t('home_question')}</h2><div class="home-search"><input class="inp" id="q" placeholder="${t('home_search')}" autocomplete="off" onkeydown="if(event.key==='Enter')doSearch()"><button class="btn navy sm" onclick="doSearch()">${ic('nav',14)} ${t('search')}</button></div><div id="hero-carousel-dots" class="hero-carousel-dots" aria-label="${t('image_alt_destinations')}"></div></div>
   <div id="searchResults"></div><div class="card" style="margin:0 0 1rem;padding:.85rem 1rem;background:#fffaf0;border:1px solid #D4AF37"><b style="color:var(--navy-900)">${t('how_it_works')}</b><div style="display:flex;justify-content:space-between;gap:.35rem;margin-top:.55rem;font-size:.72rem;color:var(--text-muted)"><span>١ ${t('step_plan')}</span><span>٢ ${t('step_explore')}</span><span>٣ ${t('step_travel')}</span></div></div>
   <div class="cats"><button class="cat" onclick="tab='hotels';window.location.href='./explore.html?dest='+encodeURIComponent(city)+'&tab='+encodeURIComponent(tab)"><span class="ci">${ic('hotel',18)}</span>${t('hotels')}</button><button class="cat" onclick="tab='rest';window.location.href='./explore.html?dest='+encodeURIComponent(city)+'&tab='+encodeURIComponent(tab)"><span class="ci">${ic('food',18)}</span>${t('restaurants')}</button><button class="cat" onclick="tab='spots';window.location.href='./explore.html?dest='+encodeURIComponent(city)+'&tab='+encodeURIComponent(tab)"><span class="ci">${ic('pin',18)}</span>${t('places')}</button><button class="cat" onclick="window.location.href='./itinerary.html'"><span class="ci">${ic('cal',18)}</span>${t('trip_plan')}</button></div>
   <div class="sec">${t('current_trip')}</div>${trip?`<div class="trip-summary" style="background-image:linear-gradient(180deg,rgba(4,17,28,.08),rgba(4,17,28,.82)),url('${imageForCity(tripDestinationText(trip))}')"><div><h2>${esc(tripDestinationText(trip))}</h2><p>${esc(getStartDate(trip))} ← ${esc(getEndDate(trip))}</p></div><button class="btn sm ghost" onclick="window.location.href='./itinerary.html'">${t('view_plan')}</button></div>`:`<div class="empty-state"><div class="es-icon">${ic('plane',22)}</div><h3>${t('no_trip_created')}</h3><a class="btn navy sm" href="./create-trip.html">${t('create_trip')}</a></div>`}
-  <div class="card" style="margin-top:1rem"><b style="color:var(--navy-900)">${t('direct_services')}</b><div class="tools" style="margin-top:.7rem"><a class="btn ghost" href="./explore.html">${t('nav_explore')}</a><a class="btn ghost" href="./map.html">${t('my_map')}</a><a class="btn ghost" href="./community.html">${t('nav_community')}</a></div></div>`;startHeroCarousel();}
+  <div class="card" style="margin-top:1rem"><b style="color:var(--navy-900)">${t('direct_services')}</b><div class="tools" style="margin-top:.7rem"><a class="btn ghost" href="./explore.html">${t('nav_explore')}</a><a class="btn ghost" href="./map.html">${t('my_map')}</a><a class="btn ghost" href="./community.html">${t('nav_community')}</a></div></div>`;ensureCityImagesLoaded(() => startHeroCarousel());}
 function doSearch(){const q=$('q')?.value.trim();if(!q)return;sessionStorage.setItem('sb_destination_query',q);ls('sb_destination_query',q);window.location.href=`./create-trip.html?dest=${encodeURIComponent(q)}`;}
 render();
 window.setTimeout(()=>document.getElementById('splashScreen')?.remove(),650);
