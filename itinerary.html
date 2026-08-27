@@ -56,6 +56,125 @@
       .image-fallback-label { display: none; }
       .image-fallback .image-fallback-label { display: block; }
     @media (min-width: 700px) { .shell { margin: 22px auto; min-height: calc(100vh - 44px); border-radius: 28px; overflow: hidden; } }
+    /* Itinerary UX pass: layout/readability only; behavior and markup remain unchanged. */
+    #app:not(.hidden) { color: var(--text-primary, #0A192F); }
+    #app > section { padding: clamp(1rem, 4vw, 1.5rem) clamp(1rem, 4vw, 1.35rem) 1.5rem; }
+    #app > section > div:first-of-type { margin-bottom: 1.25rem; }
+    #app > section > div:first-of-type > div {
+      position: relative;
+      min-height: 170px;
+      border: 1px solid rgba(212,175,55,.32);
+      box-shadow: 0 14px 30px rgba(10,25,47,.16);
+    }
+    #app > section > div:first-of-type > div::after {
+      content: '📍';
+      position: absolute;
+      inset-inline-end: .9rem;
+      top: .9rem;
+      z-index: 2;
+      display: grid;
+      place-items: center;
+      width: 2.25rem;
+      height: 2.25rem;
+      border: 1px solid rgba(255,255,255,.55);
+      border-radius: 50%;
+      background: rgba(10,25,47,.68);
+      font-size: 1.05rem;
+    }
+    #tripDestination {
+      margin-top: .9rem;
+      font-size: clamp(1.55rem, 6vw, 2rem);
+      line-height: 1.35;
+      letter-spacing: -.01em;
+    }
+    #app > section > div:nth-of-type(2) {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: .65rem;
+      padding: 1rem;
+      border: 1px solid rgba(212,175,55,.42);
+      border-radius: 1.25rem;
+      background: var(--nav-bg, #0A192F);
+      box-shadow: 0 14px 28px rgba(10,25,47,.18);
+    }
+    #app > section > div:nth-of-type(2) > div {
+      min-width: 0;
+      padding: .45rem .55rem;
+      border-inline-end: 1px solid rgba(255,255,255,.16);
+    }
+    #app > section > div:nth-of-type(2) > div:last-child { border-inline-end: 0; }
+    #app > section > div:nth-of-type(2) span { color: var(--text-on-dark-muted, #e4eaf2) !important; font-size: .75rem; }
+    #app > section > div:nth-of-type(2) strong { font-size: .95rem; line-height: 1.45; }
+    #app > section > section {
+      display: grid;
+      gap: .65rem;
+      margin-top: 1rem;
+      padding: 1rem;
+      border: 1px solid var(--border-color, #cbd5e1);
+      border-radius: 1.15rem;
+      background: var(--card-bg, #fff);
+      box-shadow: 0 8px 20px rgba(10,25,47,.08);
+    }
+    #app > section > section > div { gap: .75rem; }
+    #app > section > section strong { font-size: .95rem; }
+    #app > section > section b { font-size: 1rem; color: var(--accent-gold-text, #0A192F) !important; }
+    #activitiesContainer { display: grid; gap: 1rem; }
+    #activitiesContainer > section {
+      padding: .9rem;
+      border: 1px solid var(--border-color, #cbd5e1);
+      border-radius: 1.15rem;
+      background: var(--bg-secondary, #f4f7fb);
+    }
+    #activitiesContainer > section > div:first-child {
+      margin: 0 0 .85rem;
+      padding: .15rem .15rem .75rem;
+      border-bottom: 1px solid var(--border-color, #cbd5e1);
+    }
+    #activitiesContainer > section > div:first-child > span {
+      flex: 0 0 2.25rem;
+      width: 2.25rem;
+      height: 2.25rem;
+      background: var(--accent-gold, #D4AF37) !important;
+      color: var(--accent-gold-text, #0A192F) !important;
+      box-shadow: 0 4px 10px rgba(212,175,55,.24);
+    }
+    #activitiesContainer > section > div:first-child h3 { font-size: .95rem; line-height: 1.55; }
+    #activitiesContainer > section > div:first-child h3 span { color: var(--text-secondary, #475569) !important; }
+    .activity-card {
+      border-color: var(--border-color, #cbd5e1) !important;
+      border-radius: 1rem !important;
+      background: var(--bg-elevated, #fff) !important;
+      box-shadow: 0 8px 18px rgba(10,25,47,.08) !important;
+    }
+    .activity-card > img { height: 9.5rem; border-radius: .85rem !important; }
+    .activity-card h3 { font-size: 1rem; line-height: 1.5; }
+    .activity-card p { color: var(--text-primary, #0A192F) !important; line-height: 1.75; }
+    .activity-card .text-slate-500,
+    .activity-card .text-slate-400 { color: var(--text-secondary, #475569) !important; }
+    .activity-card > div:last-child { align-items: stretch; }
+    .activity-card button,
+    .activity-card a,
+    #app > section > div:nth-of-type(5) button,
+    #app > section > div:nth-of-type(5) a {
+      min-height: 44px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .activity-card button,
+    .activity-card a { padding-block: .65rem !important; }
+    .assistant-fab { bottom: calc(94px + env(safe-area-inset-bottom)); box-shadow: 0 12px 28px rgba(6,14,26,.34); }
+    .assistant-close { width: 44px; height: 44px; min-width: 44px; min-height: 44px; }
+    .assistant-quick button,
+    .assistant-option button,
+    .assistant-confirm { min-height: 44px; }
+    .assistant-form button { width: 44px; min-width: 44px; min-height: 44px; }
+    @media (max-width: 430px) {
+      #app > section > div:nth-of-type(2) { gap: .35rem; padding: .7rem; }
+      #app > section > div:nth-of-type(2) > div { padding-inline: .25rem; }
+      #app > section > div:nth-of-type(2) span { font-size: .7rem; }
+      #app > section > div:nth-of-type(2) strong { font-size: .82rem; }
+    }
   </style>
 <script src="./utils/i18n.js?m6=final1" type="module"></script>
 <script>(function(){try{var p=localStorage.getItem('themePreference')||'auto',h=new Date().getHours(),d=window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches,night=h>=19||h<6;document.documentElement.dataset.themePreference=p;document.documentElement.dataset.theme=(p==='dark'||(p==='auto'&&(night||d)))?'dark':'light';}catch(e){document.documentElement.dataset.theme='light';}})();</script>
