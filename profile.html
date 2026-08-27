@@ -116,8 +116,9 @@
       if (appTrip && typeof appTrip === 'object' && !trips.some((trip) => JSON.stringify(trip) === JSON.stringify(appTrip))) trips.unshift(appTrip);
       return remoteTrips.concat(trips).filter((trip) => trip && typeof trip === 'object').filter((trip, index, all) => all.findIndex((item) => (item.id && trip.id && item.id === trip.id) || JSON.stringify(item) === JSON.stringify(trip)) === index);
     }
-    function tripName(trip) { return trip.destination || trip.destinationName || trip.city || trip.title || t('saved_trip_label'); }
-    function tripDate(trip) { const start = trip.startDate || trip.start || trip.date || trip.dates?.start; const lang = window.MySindbadI18n?.getLang?.() || readLocal('userLang', 'ar'); return start ? (lang === 'fr' ? `Début : ${start}` : lang === 'en' ? `Start date: ${start}` : `${t('start_date_label')}: ${start}`) : t('trip_ready_review'); }
+    const safe = (value, fallback = '—') => { if (value === null || value === undefined) return fallback; const text = String(value).trim(); return !text || text === 'undefined' || text === 'null' ? fallback : text; };
+    function tripName(trip) { return safe(trip.destination || trip.destinationName || trip.city || trip.title, t('saved_trip_label')); }
+    function tripDate(trip) { const start = safe(trip.startDate || trip.start || trip.date || trip.dates?.start, ''); const lang = window.MySindbadI18n?.getLang?.() || readLocal('userLang', 'ar'); return start ? (lang === 'fr' ? `Début : ${start}` : lang === 'en' ? `Start date: ${start}` : `${t('start_date_label')}: ${start}`) : t('trip_ready_review'); }
     function renderTrips() {
       const trips = normaliseTrips();
       const activities = window.AppState?.getActivities?.() || [];
@@ -126,7 +127,7 @@
       const container = document.getElementById('saved-trips');
       if (!trips.length) { container.innerHTML = `<div class="empty"><span data-i18n="saved_trip_empty">لا توجد رحلات محفوظة بعد.</span><br><span data-i18n="create_trip_empty">ابدأ بإنشاء رحلة جديدة لتظهر هنا.</span></div>`; window.MySindbadI18n?.refresh?.(); return; }
       const tripCards = trips.map((trip) => `<article class="trip"><div><h3>${escapeHtml(tripName(trip))}</h3><p>${escapeHtml(tripDate(trip))}</p></div><a class="trip-link" data-i18n="view_details" href="./itinerary.html">${t('view_details')}</a></article>`);
-      const activityCards = savedActivities.map((activity) => `<article class="trip"><div><h3>${escapeHtml(activity.title || activity.place || t('saved_activity_label'))}</h3><p data-i18n="saved_activity">لديك نشاط محفوظ في رحلتك</p></div><a class="trip-link" data-i18n="view_details" href="./itinerary.html">${t('view_details')}</a></article>`);
+      const activityCards = savedActivities.map((activity) => `<article class="trip"><div><h3>${escapeHtml(safe(activity.title || activity.place, t('saved_activity_label')))}</h3><p data-i18n="saved_activity">لديك نشاط محفوظ في رحلتك</p></div><a class="trip-link" data-i18n="view_details" href="./itinerary.html">${t('view_details')}</a></article>`);
       container.innerHTML = tripCards.join('');
     }
     function escapeHtml(value) { return String(value ?? '').replace(/[&<>"']/g, (char) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[char])); }
