@@ -8,6 +8,24 @@ html[data-theme='light'] {
   --text-muted: #475569;
   --border-color: #cbd5e1;
   --accent-gold: #D4AF37;
+  --accent-gold-text: #0A192F;
+  --header-bg: #0A192F;
+  --nav-bg: rgba(10, 25, 47, 0.96);
+  --nav-text: rgba(255, 255, 255, 0.72);
+  --nav-border: rgba(255, 255, 255, 0.12);
+  --nav-active-text: #ffcc33;
+  --nav-active-bg: rgba(212, 175, 55, 0.18);
+  --navy-brand: #0A192F;
+  --gold-brand: #D4AF37;
+  --navy-950: #060e1a;
+  --navy-900: #0A192F;
+  --navy-800: #243b53;
+  --navy-700: #334e68;
+  --navy-50: #f4f7fb;
+  --gold-dark: #b8941f;
+  --gold-light: rgba(212, 175, 55, 0.12);
+  --border-subtle: #e2e8f0;
+  --danger-light: #fee2e2;
   --success: #166534;
   --warning: #92400e;
   --error: #b91c1c;
@@ -22,8 +40,6 @@ html[data-theme='light'] {
   --surface-2: #fffaf0;
   --text-strong: var(--text-primary);
   --border-soft: #e2e8f0;
-  --navy-brand: #0A192F;
-  --gold-brand: #D4AF37;
   color-scheme: light;
 }
 
@@ -36,6 +52,24 @@ html[data-theme='dark'] {
   --text-muted: #94a3b8;
   --border-color: #475569;
   --accent-gold: #D4AF37;
+  --accent-gold-text: #0A192F;
+  --header-bg: #0A192F;
+  --nav-bg: rgba(10, 25, 47, 0.96);
+  --nav-text: rgba(255, 255, 255, 0.72);
+  --nav-border: rgba(255, 255, 255, 0.12);
+  --nav-active-text: #ffcc33;
+  --nav-active-bg: rgba(212, 175, 55, 0.18);
+  --navy-brand: #0A192F;
+  --gold-brand: #D4AF37;
+  --navy-950: #060e1a;
+  --navy-900: #0A192F;
+  --navy-800: #243b53;
+  --navy-700: #334e68;
+  --navy-50: #f4f7fb;
+  --gold-dark: #b8941f;
+  --gold-light: rgba(212, 175, 55, 0.12);
+  --border-subtle: #475569;
+  --danger-light: #3b1f2a;
   --success: #86efac;
   --warning: #fbbf24;
   --error: #fca5a5;
@@ -50,11 +84,10 @@ html[data-theme='dark'] {
   --surface-2: #27364d;
   --text-strong: var(--text-primary);
   --border-soft: #475569;
-  --navy-brand: #0A192F;
-  --gold-brand: #D4AF37;
   color-scheme: dark;
 }
 
+/* !important is limited to theme overrides so page-local inline CSS cannot defeat the active theme. */
 html[data-theme] body {
   background: var(--background) !important;
   color: var(--color) !important;
