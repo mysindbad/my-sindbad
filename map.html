@@ -47,17 +47,17 @@
 <main class="shell">
 <div data-site-header=""></div>
 <section class="content">
-<div class="intro"><p>MY SINDBAD · ملاحتك الذكية</p><h1 data-i18n="map_heading">اكتشف المكان، وابدأ الرحلة</h1></div>
-<section aria-label="أنشطة الرحلة على الخريطة" data-i18n-aria-label="my_places" class="trip-panel" id="trip-panel">
-<div class="trip-toolbar"><label for="trip-day" data-i18n="map_choose_day">عرض اليوم<select aria-label="اختر يوم الرحلة" data-i18n-aria-label="map_choose_day" id="trip-day"></select></label><div class="trip-summary" data-i18n="map_no_trip" id="trip-summary">لا توجد رحلة محددة</div></div>
+<div class="intro"><p data-i18n="map_intro">MY SINDBAD · ملاحتك الذكية</p><h1 data-i18n="map_heading">اكتشف المكان، وابدأ الرحلة</h1></div>
+<section aria-label="أنشطة الرحلة على الخريطة" data-i18n-aria-label="map_trip_activities" class="trip-panel" id="trip-panel">
+<div class="trip-toolbar"><label for="trip-day"><span data-i18n="map_choose_day">عرض اليوم</span><select aria-label="اختر يوم الرحلة" data-i18n-aria-label="map_choose_day" id="trip-day"></select></label><div class="trip-summary" data-i18n="map_no_trip" id="trip-summary">لا توجد رحلة محددة</div></div>
 <input aria-label="ابحث في أماكن رحلتي" data-i18n-aria-label="trip_search_placeholder" class="trip-search" data-i18n-ph="trip_search_placeholder" id="trip-search" placeholder="ابحث في أماكن رحلتي..." type="search"/>
 <div class="trip-activities" id="trip-activities"></div>
-<p class="trip-empty" id="trip-empty">أنشئ رحلة أو أضف أنشطة ذات إحداثيات لعرضها على الخريطة.</p>
+<p class="trip-empty" id="trip-empty" data-i18n="trip_empty_coords">أنشئ رحلة أو أضف أنشطة ذات إحداثيات لعرضها على الخريطة.</p>
 </section>
-<div class="map-wrap" id="map-wrap"><button class="map-close" id="map-close" type="button" data-i18n="close" aria-label="إغلاق الخريطة" data-i18n-aria-label="close">×</button><button class="drawer-toggle" id="drawer-toggle" type="button" data-i18n="my_places" aria-label="فتح أماكن الرحلة">☰</button><div aria-label="خريطة تفاعلية" data-i18n-aria-label="map_heading" id="map"></div><form class="search" id="search"><input aria-label="البحث عن مكان" data-i18n-aria-label="map_search_placeholder" data-i18n-ph="map_search_placeholder" id="query" placeholder="ابحث عن مكان أو مدينة..." type="search"/><button aria-label="بحث" data-i18n-aria-label="search">⌕</button></form><button aria-label="موقعي الحالي" data-i18n-aria-label="map_location" class="locate" id="locate" type="button">⌖</button></div>
+<div class="map-wrap" id="map-wrap"><button class="map-close" id="map-close" type="button" data-i18n="close" aria-label="إغلاق الخريطة" data-i18n-aria-label="close">×</button><button class="drawer-toggle" id="drawer-toggle" type="button" data-i18n="my_places" aria-label="فتح أماكن الرحلة" data-i18n-aria-label="open_saved_places">☰</button><div aria-label="خريطة تفاعلية" data-i18n-aria-label="interactive_map" id="map"></div><form class="search" id="search"><input aria-label="البحث عن مكان" data-i18n-aria-label="search_place" data-i18n-ph="map_search_placeholder" id="query" placeholder="ابحث عن مكان أو مدينة..." type="search"/><button aria-label="بحث" data-i18n-aria-label="search">⌕</button></form><button aria-label="موقعي الحالي" data-i18n-aria-label="map_location" class="locate" id="locate" type="button">⌖</button></div>
 <div class="modes" id="modes" style="display:none"><button class="active" data-mode="driving" data-i18n="map_driving" type="button">قيادة 🚗</button><button data-mode="walking" data-i18n="map_walking" type="button">مشي 🚶</button></div>
-<p class="status" id="status" role="status">اختر مكاناً من أماكن رحلتك لفتح الخريطة.</p><div aria-live="polite" class="status" hidden="" id="map-toast" role="status"></div>
-<article class="place" id="place"><h2 id="name">المكان المختار</h2><div class="meta"><div><small>المسافة</small><b id="distance">—</b></div><div><small>الوقت المتوقع</small><b id="duration">—</b></div></div><button class="add" data-i18n="add_to_trip" id="add" type="button">أضف إلى رحلتي ➕</button></article>
+<p class="status" id="status" role="status" data-i18n="choose_trip_place">اختر مكاناً من أماكن رحلتك لفتح الخريطة.</p><div aria-live="polite" class="status" hidden="" id="map-toast" role="status"></div>
+<article class="place" id="place"><h2 id="name" data-i18n="selected_place">المكان المختار</h2><div class="meta"><div><small data-i18n="distance_label">المسافة</small><b id="distance">—</b></div><div><small data-i18n="expected_time">الوقت المتوقع</small><b id="duration">—</b></div></div><button class="add" data-i18n="add_to_trip" id="add" type="button">أضف إلى رحلتي ➕</button></article>
 <section><h2 data-i18n="my_places" style="margin:18px 0 8px;color:var(--navy);font-size:.9rem">أماكن رحلتي</h2><div class="saved-places" id="saved-places"></div></section>
 </section>
 <nav data-active="map" data-site-nav=""></nav>

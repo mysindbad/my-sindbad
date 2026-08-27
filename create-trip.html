@@ -95,7 +95,7 @@
 <div data-site-header=""></div>
 <section class="px-4 pb-6 pt-6 sm:px-5">
 <div class="mb-5">
-<p class="mb-1 text-xs font-bold tracking-wide text-gold-600">MY SINDBAD · خطوتك الأولى</p>
+<p class="mb-1 text-xs font-bold tracking-wide text-gold-600" data-i18n="first_step">MY SINDBAD · خطوتك الأولى</p>
 <h1 class="text-2xl font-extrabold leading-relaxed text-navy-900" data-i18n="create_title">أنشئ رحلة تناسبك</h1>
 <p class="mt-1 text-sm leading-7 text-slate-500" data-i18n="create_subtitle">أخبرنا بما تحلم به، وسنساعدك على بناء برنامج سفر مميز.</p>
 </div>
@@ -104,16 +104,16 @@
 <label class="mb-2 block text-sm font-bold text-navy-900" data-i18n="destination_label" for="destination">الوجهة</label>
 <div class="relative">
 <span aria-hidden="true" class="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-lg">📍</span>
-<input autocomplete="off" class="field w-full rounded-lg border-2 border-gray-200 px-4 py-3 pr-11 focus:border-gold-500 focus:outline-none" id="destination" name="destination" placeholder="إلى أين تريد السفر؟" required=""/>
+<input autocomplete="off" class="field w-full rounded-lg border-2 border-gray-200 px-4 py-3 pr-11 focus:border-gold-500 focus:outline-none" id="destination" name="destination" placeholder="إلى أين تريد السفر؟" data-i18n-ph="destination_placeholder" required=""/>
 </div>
 </div>
 <fieldset>
-<legend class="mb-2 block text-sm font-bold text-navy-900">التواريخ</legend>
+<legend class="mb-2 block text-sm font-bold text-navy-900" data-i18n="dates">التواريخ</legend>
 <div class="grid grid-cols-2 gap-3">
-<label class="text-xs font-semibold text-slate-500">من
+<label class="text-xs font-semibold text-slate-500"><span data-i18n="date_from">من</span>
               <input class="field mt-2 w-full rounded-lg border-2 border-gray-200 px-4 py-3 text-sm focus:border-gold-500 focus:outline-none" id="start-date" min="2026-08-21" name="startDate" required="" type="date"/>
 </label>
-<label class="text-xs font-semibold text-slate-500">إلى
+<label class="text-xs font-semibold text-slate-500"><span data-i18n="date_to">إلى</span>
               <input class="field mt-2 w-full rounded-lg border-2 border-gray-200 px-4 py-3 text-sm focus:border-gold-500 focus:outline-none" id="end-date" min="2026-08-21" name="endDate" required="" type="date"/>
 </label>
 </div>
@@ -128,7 +128,7 @@
 <div>
 <label class="mb-2 block text-sm font-bold text-navy-900" data-i18n="estimated_budget">الميزانية التقريبية</label>
 <div class="grid grid-cols-[1fr_7.5rem] gap-3">
-<input class="field w-full rounded-lg border-2 border-gray-200 px-4 py-3 focus:border-gold-500 focus:outline-none" id="budget" min="0" name="budget" placeholder="مثال: 1500" step="1" type="number"/>
+<input class="field w-full rounded-lg border-2 border-gray-200 px-4 py-3 focus:border-gold-500 focus:outline-none" id="budget" min="0" name="budget" placeholder="مثال: 1500" data-i18n-ph="budget_placeholder" step="1" type="number"/>
 <select class="field w-full rounded-lg border-2 border-gray-200 px-3 py-3 focus:border-gold-500 focus:outline-none" id="currency" name="currency">
 <option value="USD">USD</option>
 <option value="EUR">EUR</option>
@@ -141,46 +141,46 @@
 </div>
 </div>
 <fieldset>
-<legend class="mb-3 block text-sm font-bold text-navy-900">نمط السفر</legend>
+<legend class="mb-3 block text-sm font-bold text-navy-900" data-i18n="travel_style">نمط السفر</legend>
 <div class="grid grid-cols-2 gap-2 sm:grid-cols-3">
 <label class="choice-card cursor-pointer rounded-2xl border-2 border-gray-200 bg-white p-3 text-center peer-checked:border-gold-500 peer-checked:bg-gold-50">
 <input class="peer sr-only" name="travelStyle" required="" type="radio" value="مغامرة"/>
-<span aria-hidden="true" class="block text-2xl">🏔️</span><span class="mt-1 block text-xs font-bold text-slate-700">مغامرة</span>
+<span aria-hidden="true" class="block text-2xl">🏔️</span><span class="mt-1 block text-xs font-bold text-slate-700" data-i18n="style_adventure">مغامرة</span>
 </label>
 <label class="choice-card cursor-pointer rounded-2xl border-2 border-gray-200 bg-white p-3 text-center peer-checked:border-gold-500 peer-checked:bg-gold-50">
 <input class="peer sr-only" name="travelStyle" type="radio" value="استرخاء"/>
-<span aria-hidden="true" class="block text-2xl">🏖️</span><span class="mt-1 block text-xs font-bold text-slate-700">استرخاء</span>
+<span aria-hidden="true" class="block text-2xl">🏖️</span><span class="mt-1 block text-xs font-bold text-slate-700" data-i18n="style_relaxation">استرخاء</span>
 </label>
 <label class="choice-card cursor-pointer rounded-2xl border-2 border-gray-200 bg-white p-3 text-center peer-checked:border-gold-500 peer-checked:bg-gold-50">
 <input class="peer sr-only" name="travelStyle" type="radio" value="ثقافي"/>
-<span aria-hidden="true" class="block text-2xl">🏛️</span><span class="mt-1 block text-xs font-bold text-slate-700">ثقافي</span>
+<span aria-hidden="true" class="block text-2xl">🏛️</span><span class="mt-1 block text-xs font-bold text-slate-700" data-i18n="style_cultural">ثقافي</span>
 </label>
 <label class="choice-card cursor-pointer rounded-2xl border-2 border-gray-200 bg-white p-3 text-center peer-checked:border-gold-500 peer-checked:bg-gold-50">
 <input class="peer sr-only" name="travelStyle" type="radio" value="عائلي"/>
-<span aria-hidden="true" class="block text-2xl">👩‍👧</span><span class="mt-1 block text-xs font-bold text-slate-700">عائلي</span>
+<span aria-hidden="true" class="block text-2xl">👩‍👧</span><span class="mt-1 block text-xs font-bold text-slate-700" data-i18n="style_family">عائلي</span>
 </label>
 <label class="choice-card cursor-pointer rounded-2xl border-2 border-gray-200 bg-white p-3 text-center peer-checked:border-gold-500 peer-checked:bg-gold-50">
 <input class="peer sr-only" name="travelStyle" type="radio" value="رومانسي"/>
-<span aria-hidden="true" class="block text-2xl">💑</span><span class="mt-1 block text-xs font-bold text-slate-700">رومانسي</span>
+<span aria-hidden="true" class="block text-2xl">💑</span><span class="mt-1 block text-xs font-bold text-slate-700" data-i18n="style_romantic">رومانسي</span>
 </label>
 <label class="choice-card cursor-pointer rounded-2xl border-2 border-gray-200 bg-white p-3 text-center peer-checked:border-gold-500 peer-checked:bg-gold-50">
 <input class="peer sr-only" name="travelStyle" type="radio" value="اقتصادي"/>
-<span aria-hidden="true" class="block text-2xl">💰</span><span class="mt-1 block text-xs font-bold text-slate-700">اقتصادي</span>
+<span aria-hidden="true" class="block text-2xl">💰</span><span class="mt-1 block text-xs font-bold text-slate-700" data-i18n="style_budget">اقتصادي</span>
 </label>
 </div>
 </fieldset>
 <fieldset>
-<legend class="mb-3 block text-sm font-bold text-navy-900">التفضيلات</legend>
+<legend class="mb-3 block text-sm font-bold text-navy-900" data-i18n="preferences">التفضيلات</legend>
 <div class="flex flex-wrap gap-2">
-<label class="pref-chip cursor-pointer rounded-full border-2 border-gray-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 peer-checked:border-gold-500 peer-checked:bg-gold-50"><input class="peer sr-only" name="preferences" type="checkbox" value="فنادق فاخرة"/>فنادق فاخرة</label>
-<label class="pref-chip cursor-pointer rounded-full border-2 border-gray-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 peer-checked:border-gold-500 peer-checked:bg-gold-50"><input class="peer sr-only" name="preferences" type="checkbox" value="مطاعم محلية"/>مطاعم محلية</label>
-<label class="pref-chip cursor-pointer rounded-full border-2 border-gray-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 peer-checked:border-gold-500 peer-checked:bg-gold-50"><input class="peer sr-only" name="preferences" type="checkbox" value="أنشطة خارجية"/>أنشطة خارجية</label>
-<label class="pref-chip cursor-pointer rounded-full border-2 border-gray-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 peer-checked:border-gold-500 peer-checked:bg-gold-50"><input class="peer sr-only" name="preferences" type="checkbox" value="تسوق"/>تسوق</label>
-<label class="pref-chip cursor-pointer rounded-full border-2 border-gray-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 peer-checked:border-gold-500 peer-checked:bg-gold-50"><input class="peer sr-only" name="preferences" type="checkbox" value="متاحف ومعالم"/>متاحف ومعالم</label>
-<label class="pref-chip cursor-pointer rounded-full border-2 border-gray-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 peer-checked:border-gold-500 peer-checked:bg-gold-50"><input class="peer sr-only" name="preferences" type="checkbox" value="حياة ليلية"/>حياة ليلية</label>
+<label class="pref-chip cursor-pointer rounded-full border-2 border-gray-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 peer-checked:border-gold-500 peer-checked:bg-gold-50"><input class="peer sr-only" name="preferences" type="checkbox" value="فنادق فاخرة"/><span data-i18n="pref_luxury_hotels">فنادق فاخرة</span></label>
+<label class="pref-chip cursor-pointer rounded-full border-2 border-gray-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 peer-checked:border-gold-500 peer-checked:bg-gold-50"><input class="peer sr-only" name="preferences" type="checkbox" value="مطاعم محلية"/><span data-i18n="pref_local_restaurants">مطاعم محلية</span></label>
+<label class="pref-chip cursor-pointer rounded-full border-2 border-gray-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 peer-checked:border-gold-500 peer-checked:bg-gold-50"><input class="peer sr-only" name="preferences" type="checkbox" value="أنشطة خارجية"/><span data-i18n="pref_outdoor_activities">أنشطة خارجية</span></label>
+<label class="pref-chip cursor-pointer rounded-full border-2 border-gray-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 peer-checked:border-gold-500 peer-checked:bg-gold-50"><input class="peer sr-only" name="preferences" type="checkbox" value="تسوق"/><span data-i18n="pref_shopping">تسوق</span></label>
+<label class="pref-chip cursor-pointer rounded-full border-2 border-gray-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 peer-checked:border-gold-500 peer-checked:bg-gold-50"><input class="peer sr-only" name="preferences" type="checkbox" value="متاحف ومعالم"/><span data-i18n="pref_museums_landmarks">متاحف ومعالم</span></label>
+<label class="pref-chip cursor-pointer rounded-full border-2 border-gray-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 peer-checked:border-gold-500 peer-checked:bg-gold-50"><input class="peer sr-only" name="preferences" type="checkbox" value="حياة ليلية"/><span data-i18n="pref_nightlife">حياة ليلية</span></label>
 </div>
 </fieldset>
-<div aria-live="polite" class="success-message rounded-2xl border border-emerald-200 bg-emerald-50 p-3 text-center text-sm font-bold text-emerald-700" id="success-message" role="status">
+<div aria-live="polite" class="success-message rounded-2xl border border-emerald-200 bg-emerald-50 p-3 text-center text-sm font-bold text-emerald-700" id="success-message" role="status" data-i18n="trip_created_success">
           تم إنشاء رحلتك بنجاح! جاري بناء البرنامج...
         </div>
 <div class="hidden rounded-2xl border border-red-200 bg-red-50 p-3 text-center text-sm font-semibold text-red-700" id="form-error" role="alert"></div>

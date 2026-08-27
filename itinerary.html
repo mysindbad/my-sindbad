@@ -65,7 +65,7 @@
 <body>
 <div class="fixed inset-0 bg-navy-900/95 z-50 flex flex-col items-center justify-center hidden" id="aiLoadingScreen">
 <div class="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-gold-500 mb-4"></div>
-<p class="text-gold-500 text-lg font-bold animate-pulse">مولد الخطط الذكي يحلل تفضيلاتك...</p>
+<p class="text-gold-500 text-lg font-bold animate-pulse" data-i18n="itinerary_loading_initial">مولد الخطط الذكي يحلل تفضيلاتك...</p>
 <p class="text-white text-sm mt-2" data-i18n="itinerary_loading_meta">جاري حساب المسافات والميزانية</p>
 </div>
 <div class="loading-screen flex flex-col items-center justify-center px-6 text-center text-white" id="loading">
@@ -83,21 +83,21 @@
 <div class="mb-5 flex items-center justify-between">
 <div>
 <p class="text-xs font-bold text-gold-600" data-i18n="edit_activity">تعديل النشاط</p>
-<h2 class="mt-1 text-xl font-extrabold text-navy-900">خصّص برنامجك</h2>
+<h2 class="mt-1 text-xl font-extrabold text-navy-900" data-i18n="customize_plan">خصّص برنامجك</h2>
 </div>
-<button aria-label="إغلاق" class="rounded-xl bg-gray-100 px-3 py-2 text-lg text-gray-600" id="close-edit" type="button">×</button>
+<button aria-label="إغلاق" data-i18n-aria-label="close" class="rounded-xl bg-gray-100 px-3 py-2 text-lg text-gray-600" id="close-edit" type="button">×</button>
 </div>
 <div class="space-y-3">
-<label class="block text-xs font-bold text-slate-500">الوقت<input class="edit-field mt-1" id="edit-time" required=""/></label>
-<label class="block text-xs font-bold text-slate-500">المكان<input class="edit-field mt-1" id="edit-place" required=""/></label>
-<label class="block text-xs font-bold text-slate-500">النشاط<input class="edit-field mt-1" id="edit-activity" required=""/></label>
+<label class="block text-xs font-bold text-slate-500"><span data-i18n="time_label">الوقت</span><input class="edit-field mt-1" id="edit-time" required=""/></label>
+<label class="block text-xs font-bold text-slate-500"><span data-i18n="place_label">المكان</span><input class="edit-field mt-1" id="edit-place" required=""/></label>
+<label class="block text-xs font-bold text-slate-500"><span data-i18n="activity_field">النشاط</span><input class="edit-field mt-1" id="edit-activity" required=""/></label>
 <div class="grid grid-cols-2 gap-3">
-<label class="block text-xs font-bold text-slate-500">المسافة<input class="edit-field mt-1" id="edit-distance" required=""/></label>
-<label class="block text-xs font-bold text-slate-500">المدة<input class="edit-field mt-1" id="edit-duration" required=""/></label>
+<label class="block text-xs font-bold text-slate-500"><span data-i18n="distance_label">المسافة</span><input class="edit-field mt-1" id="edit-distance" required=""/></label>
+<label class="block text-xs font-bold text-slate-500"><span data-i18n="duration_label">المدة</span><input class="edit-field mt-1" id="edit-duration" required=""/></label>
 </div>
 </div>
 <div class="mt-5 grid grid-cols-2 gap-3">
-<button class="rounded-xl bg-gold-500 px-4 py-3 text-sm font-bold text-white hover:bg-gold-600" type="submit">حفظ التعديل</button>
+<button class="rounded-xl bg-gold-500 px-4 py-3 text-sm font-bold text-white hover:bg-gold-600" data-i18n="save_changes" type="submit">حفظ التعديل</button>
 <button class="rounded-xl bg-gray-200 px-4 py-3 text-sm font-bold text-gray-700" data-i18n="cancel" id="cancel-edit" type="button">إلغاء</button>
 </div>
 </form>
@@ -121,6 +121,7 @@
       }[character]));
     }
     function tripLabel() { return tripData?.destinationDisplay || tripData?.destination || assistantText('destination_default'); }
+    function travelStyleText(style) { const keys = { 'مغامرة': 'style_adventure', 'استرخاء': 'style_relaxation', 'ثقافي': 'style_cultural', 'عائلي': 'style_family', 'رومانسي': 'style_romantic', 'اقتصادي': 'style_budget' }; return assistantText(keys[style] || 'varied_style', style || assistantText('varied_style')); }
     function renderHealthCard() {
       const activities = itinerary.flatMap((day) => day.activities || []);
       const budget = Number(tripData?.budget?.amount ?? tripData?.budget ?? 0);
@@ -156,7 +157,8 @@
 
     function formatDate(dateString) {
       const date = new Date(`${dateString}T12:00:00`);
-      return new Intl.DateTimeFormat('ar-MA', { day: 'numeric', month: 'long', year: 'numeric' }).format(date);
+      const lang = window.MySindbadI18n?.getLang?.() || 'ar';
+      return new Intl.DateTimeFormat(lang === 'fr' ? 'fr-FR' : lang === 'en' ? 'en-US' : 'ar-MA', { day: 'numeric', month: 'long', year: 'numeric' }).format(date);
     }
 
     function addDays(dateString, amount) {
@@ -335,7 +337,7 @@
         if (!grouped.has(day)) grouped.set(day, []);
         grouped.get(day).push({
           time: item.time || '',
-           place: item.place || item.name || item.place_name || 'نشاط',
+           place: item.place || item.name || item.place_name || assistantText('activity_label'),
            activity: item.activity || item.description || item.activity_description || '',
           distance: item.distance || '',
           duration: item.duration || '',
@@ -558,7 +560,7 @@
           <p class="mb-1 text-xs font-bold tracking-wide text-gold-600">MY SINDBAD · ${assistantText('smart_planner')}</p>
             <div class="mb-4 overflow-hidden rounded-2xl bg-gradient-to-br from-navy-900 to-gold-500 text-white"><img id="tripHeaderImg" src="" alt="${escapeHtml(tripLabel())}" class="h-36 w-full object-cover" onerror="this.style.display='none'; this.parentElement.style.background='linear-gradient(135deg, #0A192F, #D4AF37)'"><div class="p-3 text-center text-sm font-extrabold image-fallback-label">${escapeHtml(tripLabel())}</div></div>
             <h1 id="tripDestination" class="text-2xl font-extrabold leading-relaxed text-navy-900">${assistantText('trip_program')} ${escapeHtml(tripLabel())}</h1>
-            <p class="mt-1 text-sm leading-7 text-slate-500">${assistantText('suggested_daily_plan')} ${escapeHtml(tripData.travelStyle || assistantText('varied_style'))}، ${assistantText('editable_plan')}</p>
+            <p class="mt-1 text-sm leading-7 text-slate-500">${assistantText('suggested_daily_plan')} ${escapeHtml(travelStyleText(tripData.travelStyle))} ${assistantText('editable_plan')}</p>
           </div>
            <div class="mb-6 grid grid-cols-3 gap-2 rounded-2xl bg-navy-900 p-3 text-white shadow-lg">
              <div class="border-l border-white/15 px-2 text-center"><span class="block text-[.66rem] text-white/60">${assistantText('destination')}</span><strong id="tripDestination" class="mt-1 block truncate text-sm text-gold-400">${escapeHtml(tripLabel())}</strong></div>

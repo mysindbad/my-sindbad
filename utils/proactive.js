@@ -1,3 +1,7 @@
+import { getTranslation } from './i18n.js';
+
+const alertText = (key) => getTranslation(typeof document !== 'undefined' ? document.documentElement.lang || 'ar' : 'ar', key);
+
 export function evaluateAlerts({ weatherDaily = [], daysActivities = [], budget = 0, currentSpent = 0 }) {
   const alerts = [];
 
@@ -9,7 +13,7 @@ export function evaluateAlerts({ weatherDaily = [], daysActivities = [], budget 
         id: `rain-day-${idx + 1}`,
         type: 'warning',
         category: 'weather',
-        message: `احتمال أمطار بنسبة ${rainProb}% في اليوم ${idx + 1}`,
+        message: `${alertText('alert_rain_prefix')} ${rainProb}% ${alertText('alert_rain_middle')} ${idx + 1}`,
         action: 'REPLACE_OUTDOOR',
         day: idx + 1
       });
@@ -25,7 +29,7 @@ export function evaluateAlerts({ weatherDaily = [], daysActivities = [], budget 
         id: `density-day-${idx + 1}`,
         type: 'warning',
         category: 'density',
-        message: `اليوم ${idx + 1} مزدحم جداً (${count} أنشطة)`,
+        message: `${alertText('day_label')} ${idx + 1} ${alertText('alert_busy_suffix')} (${count} ${alertText('activity_count')})`,
         action: 'REDUCE_PACE',
         day: idx + 1
       });
@@ -38,7 +42,7 @@ export function evaluateAlerts({ weatherDaily = [], daysActivities = [], budget 
       id: 'budget-warning',
       type: 'danger',
       category: 'budget',
-      message: 'وصلت إلى 90% من ميزانيتك الكلية!',
+      message: alertText('alert_budget_90'),
       action: 'SHOW_CHEAP_ALT'
     });
   }
