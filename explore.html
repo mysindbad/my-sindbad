@@ -52,9 +52,10 @@
 <script src="./utils/appState.js"></script>
 <script>
 const tabParam = new URLSearchParams(window.location.search).get('tab');
-const defaultTab = tabParam && ['hotels', 'rest', 'spots'].includes(tabParam) ? tabParam : 'hotels';
-const initialTab = defaultTab === 'rest' ? 'restaurants' : defaultTab === 'spots' ? 'hotels' : defaultTab;
-let trip=null,activities=[],type=initialTab,total=0,spent=0,placeCache={hotels:null,restaurants:null};
+const validTabs = ['hotels', 'rest', 'spots'];
+const initialTab = validTabs.includes(tabParam) ? tabParam : 'hotels';
+const internalInitialTab = initialTab === 'rest' ? 'restaurants' : initialTab === 'spots' ? 'hotels' : initialTab;
+let trip=null,activities=[],type=internalInitialTab,total=0,spent=0,placeCache={hotels:null,restaurants:null};
 const BUDGET_PROMPT='اقترح بدائل أرخص للأنشطة الحالية';
 const $=id=>document.getElementById(id);
   function categoryFor(activity){const raw=String(activity?.category||activity?.type||activity?.title||activity?.name||activity?.place||'').toLowerCase();if(/accommodation|hotel|فندق|رياض|إقامة/.test(raw))return'accommodation';if(/food|restaurant|cafe|lunch|dinner|مطعم|مقهى|غداء|عشاء|فطور|أكل/.test(raw))return'food';if(/transport|نقل|تاكسي|سيارة|مشي|حافلة|قطار/.test(raw))return'transport';return'activities'}
