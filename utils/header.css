@@ -91,7 +91,7 @@
 
 .site-header__home:hover,
 .site-header__home:focus-visible {
-  background: #ffcc33;
+  background: var(--accent-gold-hover, #ffcc33);
   outline: none;
 }
 
