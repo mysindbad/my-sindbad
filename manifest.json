@@ -1,14 +1,14 @@
 {
   "name": "My Sindbad — رفيق السفر",
   "short_name": "My Sindbad",
-  "description": "رفيقك الذكي لتخطيط وتنسيق رحلاتك في المغرب بكل يسر وسهولة.",
+  "description": "رفيقك الذكي لتخطيط وتنسيق رحلاتك في المتشرب بكل تسر وسهولة.",
   "start_url": "./",
   "scope": "./",
   "id": "./",
   "display": "standalone",
   "orientation": "portrait",
-  "background_color": "#0A192F",
-  "theme_color": "#0A192F",
+  "background_color": "#0a1122",
+  "theme_color": "#0a1122",
   "lang": "ar",
   "dir": "rtl",
   "icons": [
@@ -19,9 +19,9 @@
       "purpose": "any"
     },
     {
-      "src": "./icons/icon-512.png",
+      "src": "./icons/app-icon.jpg",
       "sizes": "512x512",
-      "type": "image/png",
+      "type": "image/jpeg",
       "purpose": "any"
     },
     {
