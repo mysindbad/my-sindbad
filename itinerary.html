@@ -502,6 +502,7 @@
           <div class="mt-4 flex gap-2 border-t border-slate-100 pt-3">
             <button type="button" data-add="${dayIndex}:${activityIndex}" class="flex-1 rounded-xl px-3 py-2 text-xs font-bold transition ${activity.added ? 'bg-emerald-50 text-emerald-700' : 'bg-gold-500 text-white hover:bg-gold-600'}">${activity.added ? '✓ '+assistantText('added') : assistantText('add_to_trip')}</button>
             <a href="./map.html?day=${dayIndex + 1}&activity=${activityIndex}" class="rounded-xl bg-navy-900 px-3 py-2 text-center text-xs font-bold text-white transition hover:bg-navy-800" title="${assistantText('open_map')}">${assistantText('map')}</a>
+            <a href="${hasValidCoords(activity) ? ('./navigate.html?dest=' + activity.coords.lat + ',' + activity.coords.lng + '&name=' + encodeURIComponent(activity.place) + '&profile=walking') : '#'}" class="rounded-xl bg-gold-500 px-3 py-2 text-center text-xs font-bold text-white transition hover:bg-gold-600 ${hasValidCoords(activity) ? '' : 'opacity-40 pointer-events-none'}" title="ابدأ الملاحة" data-nav>🧭</a>
             <button type="button" data-edit="${dayIndex}:${activityIndex}" class="rounded-xl bg-slate-100 px-4 py-2 text-xs font-bold text-slate-700 transition hover:bg-slate-200">${assistantText('edit')} ✏️</button>
           </div>
         </article>`;
