@@ -747,7 +747,31 @@ body{background:#060e1a}.shell{max-width:480px;background:#fbf9f5;padding-bottom
          .hdr .brand-logo { width: 42px; height: 42px; }
          .hdr .user-name { display: none; }
        }
-      </style>
+      
+/* === My Sindbad: dark navy + gold glass home (reference match) === */
+.cats .cat{background:rgba(26,36,58,.55) !important;border-color:rgba(255,255,255,.10) !important;color:#fff !important;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);box-shadow:0 6px 18px rgba(0,0,0,.25)}
+.cats .cat .ci{background:rgba(212,175,55,.14) !important;color:#D4AF37 !important}
+.cats .cat:hover{background:rgba(26,36,58,.78) !important;border-color:rgba(212,175,55,.45) !important}
+.cats .cat:hover .ci{background:rgba(212,175,55,.22) !important}
+.empty-state{background:rgba(26,36,58,.55) !important;border-color:rgba(255,255,255,.10) !important;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);box-shadow:0 8px 24px rgba(0,0,0,.28)}
+.empty-state h3{color:#fff !important}
+.empty-state .es-icon{background:rgba(212,175,55,.15) !important;color:#D4AF37 !important}
+.hdr .u button{background:rgba(255,255,255,.06) !important;border-color:rgba(255,255,255,.14) !important;color:#fff !important}
+.hdr .u .av{background:rgba(212,175,55,.2) !important;color:#D4AF37 !important;border-color:rgba(212,175,55,.4) !important}
+.home-hero .greeting{color:#D4AF37 !important}
+.home-hero h2{color:#fff !important}
+.search-result{background:none !important}
+.search-result .ci{background:rgba(212,175,55,.14) !important;color:#D4AF37 !important}
+.live-place{background:rgba(26,36,58,.55) !important;border-color:rgba(255,255,255,.10) !important;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
+.live-place h3{color:#fff !important}
+.place-icon{background:rgba(212,175,55,.14) !important;color:#D4AF37 !important}
+.chip{background:rgba(26,36,58,.55) !important;border-color:rgba(255,255,255,.10) !important;color:#a0b0c8 !important}
+.chip.on{background:rgba(212,175,55,.85) !important;border-color:#D4AF37 !important;color:#0a1122 !important}
+.service-slide{background:linear-gradient(145deg,rgba(26,36,58,.6),rgba(18,27,48,.6)) !important;border-color:rgba(255,255,255,.10) !important;color:#fff !important;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
+.service-slide strong{color:#fff !important}
+.service-slide .service-icon{background:rgba(212,175,55,.14) !important;color:#D4AF37 !important}
+
+</style>
 <script src="./utils/i18n.js?m6=final1" type="module"></script>
 <script>(function(){try{var p=localStorage.getItem('themePreference')||'auto',h=new Date().getHours(),d=window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches,night=h>=19||h<6;document.documentElement.dataset.themePreference=p;document.documentElement.dataset.theme=(p==='dark'||(p==='auto'&&(night||d)))?'dark':'light';}catch(e){document.documentElement.dataset.theme='light';}})();</script>
 <link href="./theme.css" rel="stylesheet"/>
