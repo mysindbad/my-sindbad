@@ -970,7 +970,8 @@ function pgHome(P){
   const tStart=hasTrip?esc(getStartDate(trip)):'20';
   const tEnd=hasTrip?esc(getEndDate(trip)):'24 June 2025';
   const tDates=hasTrip?(tStart+' - '+tEnd):'20 - 24 June 2025';
-  const tImg=hasTrip?imageForCity(tripDestinationText(trip)):imageForCity('Barcelona');
+  const BARCELONA='https://media.base44.com/images/public/6a96c8b673985abfb03c538b/ebe14f77d_generated_image.png';
+  const tImg=hasTrip?imageForCity(tripDestinationText(trip)):BARCELONA;
   const ROBOT='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="8" width="16" height="12" rx="3"/><path d="M12 8V4M9 4h6"/><circle cx="9" cy="13" r="1.1" fill="currentColor" stroke="none"/><circle cx="15" cy="13" r="1.1" fill="currentColor" stroke="none"/><path d="M9 17h6"/></svg>';
   P.innerHTML=`
   <section class="ms-hero">
@@ -1007,7 +1008,14 @@ function pgHome(P){
   </a>
   `;
   document.body.classList.add('ms-home');
-  ensureCityImagesLoaded(()=>{});
+  ensureCityImagesLoaded(()=>{
+    if(hasTrip){
+      const img=imageForCity(tripDestinationText(trip))||BARCELONA;
+      const a=document.querySelector('.ms-trip-img'), b=document.querySelector('.ms-today-thumb');
+      if(a) a.style.backgroundImage=`url('${img}')`;
+      if(b) b.style.backgroundImage=`url('${img}')`;
+    }
+  });
 }
 function doSearch(){const q=$('q')?.value.trim();if(!q)return;sessionStorage.setItem('sb_destination_query',q);ls('sb_destination_query',q);window.location.href=`./create-trip.html?dest=${encodeURIComponent(q)}`;}
 render();
