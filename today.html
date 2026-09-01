@@ -42,7 +42,7 @@
 <div class="bg-white p-5 rounded-2xl border-2 border-amber-400 shadow-md" id="current-card">
 <div class="text-lg font-black text-slate-800" data-i18n="no_today_activity" id="current-title">لا أنشطة لهذا اليوم</div>
 <p class="text-xs text-slate-400 mb-4" id="current-time">--:--</p>
-<button class="hidden w-full bg-amber-500 hover:bg-amber-600 text-white font-bold py-3 rounded-xl shadow transition" data-i18n="arrived" id="btn-arrived">وصلت ✓</button>
+<button class="hidden w-full bg-amber-500 hover:bg-amber-600 text-white font-bold py-3 rounded-xl shadow transition" data-i18n="arrived" id="btn-arrived">وصلت ✓</button><button class="hidden w-full font-bold py-3 rounded-xl shadow transition mt-2" style="background:#0A192F;color:#D4AF37" data-i18n="start_navigation" id="btn-navigate">ابدأ الملاحة 🧭</button><button class="hidden w-full bg-white border-2 border-amber-400 text-amber-700 font-bold py-3 rounded-xl shadow transition mt-2" data-i18n="show_on_map" id="btn-map">إظهار على الخريطة 🗺️</button>
 </div>
 </div>
 <!-- Banner Alerts Container -->
@@ -96,6 +96,22 @@
           document.getElementById('btn-arrived').classList.add('hidden');
         }
       });
+      const curAct = savedActs[0];
+      const curCoords = curAct && (curAct.coords || (curAct.lat && curAct.lon ? { lat: curAct.lat, lng: curAct.lon } : null));
+      if (curCoords && Number.isFinite(curCoords.lat) && Number.isFinite(curCoords.lng)) {
+        const btnNav = document.getElementById('btn-navigate');
+        btnNav.classList.remove('hidden');
+        btnNav.addEventListener('click', () => {
+          const p = new URLSearchParams({ dest: curCoords.lat + ',' + curCoords.lng, name: curAct.title || curAct.place || '', profile: 'walking' });
+          location.href = './navigate.html?' + p.toString();
+        });
+        const btnMap = document.getElementById('btn-map');
+        btnMap.classList.remove('hidden');
+        btnMap.addEventListener('click', () => {
+          const p = new URLSearchParams({ lat: curCoords.lat, lng: curCoords.lng, name: curAct.title || curAct.place || '' });
+          location.href = './map.html?' + p.toString();
+        });
+      }
     }
   </script>
 <script defer src="./utils/header.js"></script>
