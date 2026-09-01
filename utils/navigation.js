@@ -2,9 +2,9 @@
   const tr = (key) => window.MySindbadI18n?.getTranslation?.(window.MySindbadI18n?.getLang?.() || 'ar', key) || key;
   const pages = [
     { id: 'home', href: './index.html', key: 'nav_home', label: '', icon: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m3 11 9-8 9 8M5 10v10h14V10M9 20v-6h6v6"/></svg>' },
-    { id: 'trip', href: './itinerary.html', key: 'nav_itinerary', label: '', icon: '<svg class="w-6 h-6" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M21 16v-2l-8-5V3.5a1.5 1.5 0 0 0-3 0V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5z"/></svg>' },
+    { id: 'trip', href: './itinerary.html', key: 'nav_itinerary', label: '', icon: '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M3 13h18"/></svg>' },
     { id: 'create', href: './create-trip.html', key: 'nav_create', label: '', center: true, icon: '<svg viewBox="0 0 24 24" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>' },
-    { id: 'explore', href: './explore.html', key: 'nav_explore', label: '', icon: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m21 21-4.3-4.3M10.5 18a7.5 7.5 0 1 1 0-15 7.5 7.5 0 0 1 0 15Zm0-11v7m-3.5-3.5h7"/></svg>' },
+    { id: 'explore', href: './explore.html', key: 'nav_explore', label: '', icon: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 22s8-7.58 8-13a8 8 0 1 0-16 0c0 5.42 8 13 8 13z"/><circle cx="12" cy="9" r="3"/></svg>' },
     { id: 'profile', href: './profile.html', key: 'nav_profile', label: '', icon: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="7" r="4"/><path d="M5 21a7 7 0 0 1 14 0"/></svg>' }
   ];
 
