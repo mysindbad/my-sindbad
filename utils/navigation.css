@@ -73,3 +73,9 @@
     border-radius: 0 0 28px 28px;
   }
 }
+/* Central create (+) button */
+.site-nav a.nav-center{position:relative;margin-top:-26px;}
+.site-nav a.nav-center .nav-icon{width:54px;height:54px;border-radius:50%;background:linear-gradient(135deg,#D4AF37,#b8941f);display:flex;align-items:center;justify-content:center;box-shadow:0 6px 18px rgba(212,175,55,.42);color:#0A192F;border:2px solid rgba(255,255,255,.18);}
+.site-nav a.nav-center .nav-icon svg{stroke:#0A192F;stroke-width:2.6;fill:none;}
+.site-nav a.nav-center:hover,.site-nav a.nav-center:focus-visible{background:transparent;color:#0A192F;outline:none;}
+.site-nav a.nav-center.active{background:transparent;}
