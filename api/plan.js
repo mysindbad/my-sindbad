@@ -1,4 +1,5 @@
 import { CITY_COORDS, CITY_DISPLAY, CITY_PLACES, nearestCityKey, normalizeCity } from './places-data.js';
+import { getWeatherContext, weatherContextText, getNearbyPlacesContext, placesContextText } from '../lib/tripContext.js';
 
 const MAX_DAYS = 14;
 const DAY_TIMES = ['09:00', '13:00', '17:00'];
@@ -166,9 +167,23 @@ async function safeFallbackPlan(input) {
 async function geminiPlan(input) {
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) throw new Error('AI planner unavailable');
+  let contextBlock = '';
+  try {
+    const coords = await geocode(input.destination);
+    if (coords) {
+      const [wctx, places] = await Promise.all([ getWeatherContext(coords.lat, coords.lon, input.startDate, input.endDate), getNearbyPlacesContext(coords.lat, coords.lon) ]);
+      const parts = [];
+      const wt = weatherContextText(wctx); if (wt) parts.push(wt);
+      const pt = placesContextText(places); if (pt) parts.push(pt);
+      if (parts.length) {
+        const nl = String.fromCharCode(10);
+        contextBlock = nl + nl + 'سياق إضافي للذكاء:' + nl + parts.join(nl + nl) + nl + 'استخدم هذا السياق لاختيار أنشطة مناسبة للطقس وأماكن حقيقية فقط.';
+      }
+    }
+  } catch (e) { console.warn('trip context failed', e.message); }
   const prompt = `أنشئ برنامج سفر لمدة ${input.dayCount} أيام إلى ${input.destination}.
 استخدم أماكن حقيقية مشهورة فقط بأسمائها الفعلية، ولا تستخدم أي أسماء عامة أو مخترعة مثل معالم المدينة أو سوق المدينة. كل نشاط يجب أن يكون مكاناً معروفاً يمكن البحث عنه في OpenStreetMap. اجعل في كل يوم نشاطين أو أكثر، وامزج بين فئات مختلفة، ورتب الأوقات زمنياً.
-البيانات: من ${input.startDate} إلى ${input.endDate}، ${input.travelers} مسافر، الميزانية ${input.budget} ${input.currency}، النمط ${input.travelStyle}، التفضيلات: ${input.preferences || 'لا توجد'}.
+البيانات: من ${input.startDate} إلى ${input.endDate}، ${input.travelers} مسافر، الميزانية ${input.budget} ${input.currency}، النمط ${input.travelStyle}، التفضيلات: ${input.preferences || 'لا توجد'}.${contextBlock}
 أعد JSON فقط دون Markdown بهذا الشكل: {"days":[{"day":1,"activities":[{"time":"10:00","title":"اسم المكان الحقيقي","desc":"وصف مختصر","cost":0,"duration":"120 min"}]}]}`;
   const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${encodeURIComponent(apiKey)}`, {
     method: 'POST',
