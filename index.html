@@ -972,6 +972,11 @@ function pgHome(P){
   const tDates=hasTrip?(tStart+' - '+tEnd):'20 - 24 June 2025';
   const BARCELONA='https://media.base44.com/images/public/6a96c8b673985abfb03c538b/ebe14f77d_generated_image.png';
   const tImg=hasTrip?imageForCity(tripDestinationText(trip)):BARCELONA;
+  const firstAct=hasTrip?((trip.itinerary&&trip.itinerary[0]&&trip.itinerary[0].activities&&trip.itinerary[0].activities[0])||null):null;
+  const msHomeTripsSection=hasTrip
+    ? `<div class="ms-sec"><span>Your Trips</span><a class="ms-link" href="./itinerary.html">View all</a></div><a class="ms-trip" href="./itinerary.html"><div class="ms-trip-img" style="background-image:url('${tImg}')"></div><div class="ms-trip-body"><h3>${tTitle}</h3><p>${tDates}</p><span class="ms-trip-people">${ic('users',14)} 2</span></div></a>${firstAct?`<div class="ms-sec"><span>Today's Plan</span><a class="ms-link" href="./today.html">See full itinerary</a></div><a class="ms-today" href="./today.html"><span class="ms-today-time">${firstAct.time||'•'}</span><span class="ms-today-rail"><span class="ms-today-dot"></span></span><span class="ms-today-tx"><b>${esc(firstAct.title||firstAct.place||'')}</b><small>${esc(firstAct.place||tTitle)}</small></span><span class="ms-today-thumb" style="background-image:url('${tImg}')"></span></a>`:''}`
+    : `<a class="ms-trip" href="./create-trip.html" style="align-items:center;justify-content:center;text-align:center"><div class="ms-trip-body" style="align-items:center;text-align:center"><h3>خطّط أول رحلة لك</h3><p>دع Sindbad يخطّط رحلتك بالذكاء الاصطناعي</p><span class="ms-trip-people">ابدأ الآن</span></div></a>`;
+
   const ROBOT='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="8" width="16" height="12" rx="3"/><path d="M12 8V4M9 4h6"/><circle cx="9" cy="13" r="1.1" fill="currentColor" stroke="none"/><circle cx="15" cy="13" r="1.1" fill="currentColor" stroke="none"/><path d="M9 17h6"/></svg>';
   P.innerHTML=`
   <section class="ms-hero">
@@ -992,20 +997,9 @@ function pgHome(P){
     <a class="ms-fg" href="./create-trip.html"><span class="ms-fg-ic">${ROBOT}</span><span class="ms-fg-lb">AI Trip Planner</span></a>
     <a class="ms-fg" href="./explore.html"><span class="ms-fg-ic">${ic('pin',22)}</span><span class="ms-fg-lb">Explore Places</span></a>
     <a class="ms-fg" href="./explore.html?tab=hotels"><span class="ms-fg-ic">${ic('hotel',22)}</span><span class="ms-fg-lb">Hotels</span></a>
-    <a class="ms-fg" href="./explore.html?tab=flights"><span class="ms-fg-ic">${ic('plane',22)}</span><span class="ms-fg-lb">Flights</span></a>
+    <a class="ms-fg" href="./create-trip.html"><span class="ms-fg-ic">${ic('plane',22)}</span><span class="ms-fg-lb">Flights</span></a>
   </section>
-  <div class="ms-sec"><span>Your Trips</span><a class="ms-link" href="./itinerary.html">View all</a></div>
-  <a class="ms-trip" href="./itinerary.html">
-    <div class="ms-trip-img" style="background-image:url('${tImg}')"></div>
-    <div class="ms-trip-body"><h3>${tTitle}</h3><p>${tDates}</p><span class="ms-trip-people">${ic('users',14)} 2</span></div>
-  </a>
-  <div class="ms-sec"><span>Today's Plan</span><a class="ms-link" href="./today.html">See full itinerary</a></div>
-  <a class="ms-today" href="./today.html">
-    <span class="ms-today-time">09:00</span>
-    <span class="ms-today-rail"><span class="ms-today-dot"></span></span>
-    <span class="ms-today-tx"><b>Sagrada Fam&iacute;lia</b><small>Barcelona, Spain</small></span>
-    <span class="ms-today-thumb" style="background-image:url('${tImg}')"></span>
-  </a>
+  ${msHomeTripsSection}
   `;
   document.body.classList.add('ms-home');
   ensureCityImagesLoaded(()=>{
