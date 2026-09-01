@@ -1,5 +1,6 @@
 import { fetchJson, handleOptions, sendUpstreamError, setCors } from '../lib/http.js';
 import { CITY_PLACES, nearestCityKey } from './places-data.js';
+import { normalizeOSMPlace, normalizeLocalPlace } from '../lib/placeModel.js';
 
 function localFallback(lat, lon, kind) {
   const cityKey = nearestCityKey({ lat, lon });
@@ -10,16 +11,7 @@ function localFallback(lat, lon, kind) {
       : kind === 'hotels'
         ? item.category === 'hotel'
         : !['food', 'hotel'].includes(item.category))
-    .map((item, index) => ({
-      id: `local/${cityKey}/${index}`,
-      name: item.title,
-      category: item.category,
-      address: '',
-      lat: item.lat,
-      lon: item.lng,
-      website: '',
-      phone: ''
-    }));
+    .map((item, index) => normalizeLocalPlace(item, cityKey, index));
 }
 
 export default async function handler(req, res) {
@@ -45,16 +37,9 @@ export default async function handler(req, res) {
 
   try {
     const data = await fetchJson(`https://overpass-api.de/api/interpreter?data=${encodeURIComponent(query)}`, {}, 25000);
-    const places = (data.elements || []).map((item) => ({
-      id: `${item.type}/${item.id}`,
-      name: item.tags?.name || item.tags?.['name:en'] || '',
-      category: item.tags?.amenity || item.tags?.tourism || kind,
-      address: item.tags?.['addr:street'] || item.tags?.['addr:city'] || '',
-      lat: item.lat ?? item.center?.lat,
-      lon: item.lon ?? item.center?.lon,
-      website: item.tags?.website || item.tags?.['contact:website'] || '',
-      phone: item.tags?.phone || ''
-    })).filter((item) => item.name && Number.isFinite(item.lat) && Number.isFinite(item.lon));
+    const places = (data.elements || [])
+      .map((el) => normalizeOSMPlace(el, { fallbackCategory: kind }))
+      .filter((p) => p.name && Number.isFinite(p.lat) && Number.isFinite(p.lon));
     return res.status(200).json(places);
   } catch (error) {
     const fallback = localFallback(lat, lon, kind);
