@@ -1,3 +1,5 @@
+import { getWeatherContext, weatherContextText, getNearbyPlacesContext, placesContextText } from '../lib/tripContext.js';
+
 const CATEGORY_COSTS = {
   accommodation: 800,
   food: 150,
@@ -237,12 +239,12 @@ function fallbackResponse(message, trip, language = 'ar') {
 
 const ASSISTANT_SYSTEM_PROMPT = 'أنت سندباد، رفيق سفر مغربي ودود. أجب باللغة المطلوبة فقط. رد على السلام والمجاملة ("لاباس"، "كيف حالك") بود وبإيجاز ثم وجّه للرحلة. نفّذ أي طلب ضمن نطاق السفر. خارج النطاق أعد جملة لطيفة تعيد المستخدم للسفر. استخدم سياق الرحلة والطقس الواقعي المرفق، ولا تخترع أماكن أو أرقاماً. أرجع JSON صالحاً فقط بالشكل {"type":"TEXT|REPLACE_ACTIVITY|REMOVE|MOVE|REPLAN","message":"...","preview":"...","day":1,"activityIndex":0,"options":[]}. عند أي تعديل، أضف preview واضحاً، ولا تدّع تنفيذ التعديل؛ التنفيذ يحتاج تأكيداً من الواجهة.';
 
-async function askGemini(message, trip, history = [], language = 'ar', weatherContext = null) {
+async function askGemini(message, trip, history = [], language = 'ar', weatherContext = null, contextBlock = '') {
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) return null;
   const contents = (Array.isArray(history) ? history.slice(-5) : []).map((item) => ({ role: item.role === 'assistant' || item.role === 'model' ? 'model' : 'user', parts: [{ text: String(item.content || item.text || '') }] })).filter((item) => item.parts[0].text);
   const tripContext = { destination: tripDestination(trip, language), days: Array.isArray(trip?.days) ? trip.days : [], activities: flattenActivities(trip).slice(0, 40) };
-  contents.push({ role: 'user', parts: [{ text: `لغة الرد المطلوبة: ${normaliseLanguage(language)}\nسياق الرحلة: ${JSON.stringify(tripContext)}\nسياق الطقس الواقعي (إن وجد): ${JSON.stringify(weatherContext || null)}\nرسالة المستخدم: ${message}` }] });
+  contents.push({ role: 'user', parts: [{ text: `لغة الرد المطلوبة: ${normaliseLanguage(language)}\nسياق الرحلة: ${JSON.stringify(tripContext)}\nسياق الطقس الواقعي (إن وجد): ${JSON.stringify(weatherContext || null)}\n${contextBlock}\nرسالة المستخدم: ${message}` }] });
   const response = await fetchWithTimeout(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${encodeURIComponent(apiKey)}`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -270,8 +272,26 @@ export default async function handler(req, res) {
   let weatherContext = null;
   if (isWeatherMessage(message)) weatherContext = await weatherResponse(trip, language);
 
+  let contextBlock = '';
   try {
-    const aiResponse = await askGemini(message, trip, history, language, weatherContext);
+    const ctxCoords = await geocodeDestination(tripDestination(trip, language));
+    if (ctxCoords) {
+      const wctx = await getWeatherContext(ctxCoords.lat, ctxCoords.lng, trip?.dates?.start || trip?.start_date, trip?.dates?.end || trip?.end_date);
+      const ctxParts = [];
+      const wt = weatherContextText(wctx); if (wt) ctxParts.push(wt);
+      if (/اقترح|أضف|اضف|بدّل|بدل|مطعم|مكان|فندق|نشاط|مقهى|recommend|suggest|add|place|restaurant|hotel|cafe/i.test(message)) {
+        const places = await getNearbyPlacesContext(ctxCoords.lat, ctxCoords.lng);
+        const pt = placesContextText(places); if (pt) ctxParts.push(pt);
+      }
+      if (ctxParts.length) {
+        const nl = String.fromCharCode(10);
+        contextBlock = 'سياق إضافيي للذكاء:' + nl + ctxParts.join(nl + nl) + nl + 'استخدمه لتقديم توصيات واقعية مناسبة للطقس.';
+      }
+    }
+  } catch (e) { console.warn('assistant context failed:', e.message); }
+
+  try {
+    const aiResponse = await askGemini(message, trip, history, language, weatherContext, contextBlock);
     const response = aiResponse && typeof aiResponse === 'object' ? aiResponse : (weatherContext || (isGreetingMessage(message) ? greetingResponse(message, trip, language) : fallbackResponse(message, trip, language)));
     if (weatherContext?.message && response.type === 'TEXT' && /\d/.test(weatherContext.message) && !/\d/.test(response.message || '')) response.message = `${response.message} ${weatherContext.message}`;
     if (response.type === 'REPLACE_ACTIVITY' || response.type === 'REPLACE') {
