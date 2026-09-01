@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html data-i18n-title="title_navigate" dir="rtl" lang="ar">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1, viewport-fit=cover" name="viewport"/>
+<title>الملاحة — My Sindbad</title>
+<meta content="#0A192F" name="theme-color"/>
+<link href="./icons/brand-logo.jpg" rel="icon" type="image/jpeg"/>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&family=Playfair+Display:wght@700&display=swap" rel="stylesheet"/>
+<link href="./utils/navigation.css" rel="stylesheet"/>
+<link href="./utils/header.css" rel="stylesheet"/>
+<link href="https://api.mapbox.com/mapbox-gl-js/v3.5.1/mapbox-gl.css" rel="stylesheet"/>
+<style>
+:root{--navy:#0A192F;--gold:#D4AF37;--dark:#b8941f;--bg:#fbf9f5;--line:#e8ecf2}
+*{box-sizing:border-box;font-family:Cairo,system-ui,sans-serif}body{margin:0;min-height:100vh;background:#060e1a;color:#0c1624}
+.shell{width:100%;max-width:480px;min-height:100vh;margin:auto;padding-bottom:calc(86px + env(safe-area-inset-bottom));background:var(--bg);box-shadow:0 0 60px #0005}
+.content{padding:18px}
+.intro p{margin:0;color:var(--dark);font-size:.68rem;font-weight:800}.intro h1{margin:.25rem 0 4px;color:var(--navy);font-size:1.35rem;font-weight:800}.intro .dest{color:#64748b;font-size:.78rem;margin:0 0 14px}
+.search-box{display:none;margin-bottom:14px}
+.search-box input{width:100%;min-height:44px;padding:0 .8rem;border:1px solid var(--line);border-radius:12px;background:#fff;font-size:.86rem;outline:0}
+.search-box input:focus{border-color:var(--gold)}
+.results{margin-top:8px;display:grid;gap:6px}
+.results .res{display:block;text-align:right;padding:10px 12px;border:1px solid var(--line);border-radius:12px;background:#fff;color:var(--navy);cursor:pointer;font-weight:700;font-size:.82rem}
+.results .res small{display:block;color:#94a3b8;font-weight:600;font-size:.66rem;margin-top:2px}
+.map-box{display:none;position:relative;border:2px solid var(--gold);border-radius:18px;overflow:hidden;box-shadow:0 12px 28px #0b1b5124}
+#navmap{height:52vh;min-height:340px;max-height:520px}
+.nav-panel{margin-top:14px;padding:14px;border:1px solid #d4af3780;border-radius:16px;background:#fff;box-shadow:0 8px 20px #0b1b5110}
+.nav-panel .modes{display:flex;gap:8px;margin-bottom:12px}
+.nav-panel .modes button{flex:1;min-height:44px;border:1px solid var(--line);border-radius:12px;background:#fff;color:#516174;cursor:pointer;font-size:.82rem;font-weight:700}
+.nav-panel .modes button.active{border-color:var(--gold);background:#fffaf0;color:var(--navy)}
+.nav-panel .stats{display:flex;gap:10px;margin-bottom:12px}
+.nav-panel .stat{flex:1;padding:10px;border-radius:12px;background:#0a192f;color:#fff;text-align:center}
+.nav-panel .stat small{display:block;color:#fffb;font-size:.6rem;margin-bottom:3px}
+.nav-panel .stat b{font-size:1.05rem;font-weight:800;color:var(--gold)}
+.nav-panel .status{min-height:20px;color:#475569;font-size:.76rem;font-weight:700;margin-bottom:10px;text-align:center}
+.nav-panel .warn{display:none;background:#fff7ed;border:1px solid #fdba74;color:#b45309;padding:8px 10px;border-radius:10px;font-size:.72rem;font-weight:700;margin-bottom:10px;text-align:center}
+.nav-panel .actions{display:flex;gap:8px}
+.nav-panel .actions button{flex:1;min-height:50px;border:0;border-radius:14px;font-weight:800;font-size:.92rem;cursor:pointer}
+#start-btn{background:var(--gold);color:var(--navy)}
+#stop-btn{display:none;background:#ef4444;color:#fff}
+</style>
+</head>
+<body>
+<main class="shell">
+<div data-site-header=""></div>
+<section class="content">
+<div class="intro"><p>MY SINDBAD · ملاحة ذكية</p><h1 data-i18n="nav_heading">ابدأ الملاحة</h1><p class="dest" id="dest-name">—</p></div>
+<div class="search-box" id="search-box">
+<input id="q" type="search" data-i18n-ph="nav_search_ph" placeholder="ابحث عن وجهة..." autocomplete="off"/>
+<div class="results" id="results"></div>
+</div>
+<div class="map-box" id="map-box">
+<div id="navmap"></div>
+<div class="nav-panel">
+<div class="modes">
+<button data-i18n="mode_walking" id="mode-walking" type="button">مشياً 🚶</button>
+<button data-i18n="mode_driving" id="mode-driving" type="button">بالسيارة 🚗</button>
+</div>
+<div class="stats">
+<div class="stat"><small data-i18n="distance_label">المسافة</small><b id="dist">—</b></div>
+<div class="stat"><small data-i18n="eta_label">الوقت المتوقع</small><b id="eta">—</b></div>
+</div>
+<div class="warn" id="warn" data-i18n="nav_off_route_warn">تبتعد عن المسار</div>
+<div class="status" id="status" data-i18n="nav_ready">جاهز — اضغط ابدأ الملاحة</div>
+<div class="actions">
+<button id="start-btn" type="button" data-i18n="start_navigation">ابدأ الملاحة</button>
+<button id="stop-btn" type="button" data-i18n="stop_navigation">إيقاف</button>
+</div>
+</div>
+</div>
+</section>
+<nav data-active="map" data-site-nav=""></nav>
+</main>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="./utils/supabaseClient.js" type="module"></script>
+<script src="./utils/auth.js"></script>
+<script src="./utils/appState.js"></script>
+<script src="./utils/i18n.js"></script>
+<script src="./utils/theme.js"></script>
+<script src="./utils/header.js"></script>
+<script src="./utils/navigation.js"></script>
+<script src="https://api.mapbox.com/mapbox-gl-js/v3.5.1/mapbox-gl.js"></script>
+<script src="./utils/msLocation.js"></script>
+<script src="./utils/msRouting.js"></script>
+<script src="./utils/msNavigation.js"></script>
+<script>
+(function(){
+  'use strict';
+  var $=function(id){return document.getElementById(id);};
+  var t=function(k,f){return (window.MySindbadI18n&&window.MySindbadI18n.getTranslation&&window.MySindbadI18n.getTranslation((window.MySindbadI18n.getLang&&window.MySindbadI18n.getLang())||'ar',k))||f;};
+  function fmtDist(m){if(m==null)return '—';return m>=1000?(m/1000).toFixed(1)+' '+t('unit_km','كم'):Math.round(m)+' '+t('unit_m','م');}
+  function fmtDur(s){if(s==null)return '—';var m=Math.max(0,Math.round(s/60));if(m<60)return m+' '+t('unit_minute','د');var h=Math.floor(m/60),r=m%60;return h+' '+t('unit_hour','س')+' '+r+' '+t('unit_minute','د');}
+  var params=new URLSearchParams(location.search);
+  var dest=null, profile=params.get('profile')==='driving'?'driving':'walking';
+  var destStr=params.get('dest'), nameStr=params.get('name')||'';
+  if(destStr){var p=destStr.split(',');var la=Number(p[0]),lo=Number(p[1]);if(Number.isFinite(la)&&Number.isFinite(lo))dest={lat:la,lng:lo};}
+  var map=null, navigating=false;
+  $('dest-name').textContent=nameStr||(dest?t('nav_destination','الوجهة'):'—');
+  (profile==='driving'?$('mode-driving'):$('mode-walking')).classList.add('active');
+
+  async function initMap(center){
+    var token=await window.MSRouting.getToken();
+    if(!window.mapboxgl||!token){$('status').textContent=t('nav_map_unavailable','الخريطة غير متاحة حالياً');return null;}
+    mapboxgl.accessToken=token;
+    map=new mapboxgl.Map({container:'navmap',style:'mapbox://styles/mapbox/streets-v12',center:center?[center.lng,center.lat]:[-6,31.8],zoom:center?14:5});
+    map.addControl(new mapboxgl.NavigationControl(),'bottom-right');
+    return map;
+  }
+  function setUI(snap){
+    $('dist').textContent=fmtDist(snap.distanceRemaining);
+    $('eta').textContent=fmtDur(snap.durationRemaining);
+    var msg='', warn=false;
+    if(snap.state==='preparing')msg=t('nav_preparing','جاري التحضير...');
+    else if(snap.state==='waiting_gps')msg=t('nav_waiting_gps','بانتظار إشارة GPS...');
+    else if(snap.state==='denied'){msg=t('nav_denied','تم رفض إذن الموقع. فعّل الموقع للمتابعة.');warn=true;}
+    else if(snap.rerouting)msg=t('nav_rerouting','إعادة حساب الطريق...');
+    else if(snap.state==='navigating'){msg=t('nav_navigating','في الطريق...');var th=snap.profile==='driving'?45:18;if(snap.offRouteDistance>th)msg=t('nav_off_route','تبتعد عن المسار — إعادة الحساب...');}
+    else if(snap.state==='arrived')msg=t('nav_arrived','وصلت إلى وجهتك ✓');
+    else if(snap.state==='error')msg=t('nav_error','تعذّر حساب المسار.');
+    $('status').textContent=msg;$('warn').hidden=!warn;
+  }
+  async function startNav(){
+    if(!dest){return;}
+    if(!map){map=await initMap(dest);}
+    if(!map){return;}
+    navigating=true;$('start-btn').hidden=true;$('stop-btn').hidden=false;
+    $('mode-walking').disabled=true;$('mode-driving').disabled=true;
+    window.MSNavigation.on(setUI);
+    await window.MSNavigation.start({map:map,destination:dest,profile:profile,mapboxgl:mapboxgl});
+  }
+  function stopNav(){window.MSNavigation.stop();navigating=false;$('start-btn').hidden=false;$('stop-btn').hidden=true;$('mode-walking').disabled=false;$('mode-driving').disabled=false;$('status').textContent=t('nav_ready','جاهز — اضغط ابدأ الملاحة');$('warn').hidden=true;}
+  $('mode-walking').addEventListener('click',function(){if(navigating)return;profile='walking';$('mode-walking').classList.add('active');$('mode-driving').classList.remove('active');});
+  $('mode-driving').addEventListener('click',function(){if(navigating)return;profile='driving';$('mode-driving').classList.add('active');$('mode-walking').classList.remove('active');});
+  $('start-btn').addEventListener('click',startNav);
+  $('stop-btn').addEventListener('click',stopNav);
+
+  if(!dest){
+    $('search-box').style.display='block';
+    var st;
+    $('q').addEventListener('input',function(){
+      clearTimeout(st);var v=$('q').value.trim();
+      if(v.length<2){$('results').innerHTML='';return;}
+      st=setTimeout(async function(){
+        try{var r=await fetch('/api/search?q='+encodeURIComponent(v)).then(function(x){return x.json();});
+          var html='';(r||[]).slice(0,6).forEach(function(p){html+='<button class="res" data-lat="'+p.lat+'" data-lon="'+p.lon+'" data-name="'+(p.name||'').replace(/"/g,'')+'">'+(p.name||p.displayName||'')+'<small>'+(p.displayName||'')+'</small></button>';});
+          $('results').innerHTML=html;
+        }catch(e){}
+      },350);
+    });
+    $('results').addEventListener('click',function(e){var b=e.target.closest('.res');if(!b)return;dest={lat:Number(b.dataset.lat),lng:Number(b.dataset.lon)};$('dest-name').textContent=b.dataset.name||t('nav_destination','الوجهة');$('search-box').style.display='none';$('map-box').style.display='block';initMap(dest);});
+  }else{
+    $('map-box').style.display='block';initMap(dest);
+  }
+})();
+</script>
+</body>
+</html>
