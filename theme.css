@@ -1,89 +1,89 @@
 :root,
 html[data-theme='light'] {
-  --bg-primary: #fbf9f5;
-  --bg-secondary: #f4f7fb;
-  --bg-elevated: #ffffff;
-  --text-primary: #0A192F;
-  --text-secondary: #475569;
-  --text-muted: #475569;
-  --border-color: #cbd5e1;
+  --bg-primary: #0a1122;
+  --bg-secondary: #121b30;
+  --bg-elevated: #1a243a;
+  --text-primary: #ffffff;
+  --text-secondary: #a0b0c8;
+  --text-muted: #8190a8;
+  --border-color: rgba(255, 255, 255, 0.10);
   --accent-gold: #D4AF37;
-  --accent-gold-text: #0A192F;
+  --accent-gold-text: #0a1122;
   --accent-gold-hover: #ffcc33;
-  --success-bg: #f0fdf4;
-  --success-text: #15803d;
+  --success-bg: rgba(34, 197, 94, 0.12);
+  --success-text: #86efac;
   --success-indicator: #22c55e;
-  --success-border: #bbf7d0;
-  --header-bg: #0A192F;
-  --nav-bg: rgba(10, 25, 47, 0.96);
+  --success-border: rgba(34, 197, 94, 0.30);
+  --header-bg: #0a1122;
+  --nav-bg: rgba(10, 17, 34, 0.92);
   --nav-text: rgba(255, 255, 255, 0.72);
   --nav-border: rgba(255, 255, 255, 0.12);
   --input-border-dark: rgba(255, 255, 255, 0.6);
   --nav-active-text: #ffcc33;
   --nav-active-bg: rgba(212, 175, 55, 0.18);
-  --navy-brand: #0A192F;
+  --navy-brand: #0a1122;
   --gold-brand: #D4AF37;
   --navy-950: #060e1a;
-  --navy-900: #0A192F;
-  --navy-800: #243b53;
-  --navy-700: #334e68;
-  --navy-50: #f4f7fb;
+  --navy-900: #0a1122;
+  --navy-800: #16223a;
+  --navy-700: #243352;
+  --navy-50: #121b30;
   --gold-dark: #b8941f;
   --gold-light: rgba(212, 175, 55, 0.12);
-  --border-subtle: #e2e8f0;
-  --danger-light: #fee2e2;
-  --success: #166534;
-  --warning: #92400e;
-  --error: #b91c1c;
+  --border-subtle: rgba(255, 255, 255, 0.08);
+  --danger-light: rgba(185, 28, 28, 0.15);
+  --success: #86efac;
+  --warning: #fbbf24;
+  --error: #fca5a5;
   --text-on-accent: var(--accent-gold-text);
   --text-on-dark: #f1f5f9;
   --text-on-dark-soft: #d9e2ef;
   --text-on-dark-muted: #e4eaf2;
   --background: var(--bg-primary);
   --color: var(--text-primary);
-  --card-bg: var(--bg-elevated);
+  --card-bg: rgba(26, 36, 58, 0.55);
   --border: var(--border-color);
-  --surface-0: var(--bg-primary);
-  --surface-1: var(--bg-elevated);
-  --surface-2: #fffaf0;
+  --surface-0: #0a1122;
+  --surface-1: #121b30;
+  --surface-2: #1a243a;
   --text-strong: var(--text-primary);
-  --border-soft: #e2e8f0;
-  color-scheme: light;
+  --border-soft: rgba(255, 255, 255, 0.08);
+  color-scheme: dark;
 }
 
 html[data-theme='dark'] {
-  --bg-primary: #0a192f;
-  --bg-secondary: #111c2f;
-  --bg-elevated: #1e293b;
-  --text-primary: #f8fafc;
-  --text-secondary: #cbd5e1;
-  --text-muted: #94a3b8;
-  --border-color: #475569;
+  --bg-primary: #0a1122;
+  --bg-secondary: #121b30;
+  --bg-elevated: #1a243a;
+  --text-primary: #ffffff;
+  --text-secondary: #a0b0c8;
+  --text-muted: #8190a8;
+  --border-color: rgba(255, 255, 255, 0.10);
   --accent-gold: #D4AF37;
-  --accent-gold-text: #0A192F;
+  --accent-gold-text: #0a1122;
   --accent-gold-hover: #ffcc33;
-  --success-bg: #f0fdf4;
-  --success-text: #15803d;
+  --success-bg: rgba(34, 197, 94, 0.12);
+  --success-text: #86efac;
   --success-indicator: #22c55e;
-  --success-border: #bbf7d0;
-  --header-bg: #0A192F;
-  --nav-bg: rgba(10, 25, 47, 0.96);
+  --success-border: rgba(34, 197, 94, 0.30);
+  --header-bg: #0a1122;
+  --nav-bg: rgba(10, 17, 34, 0.92);
   --nav-text: rgba(255, 255, 255, 0.72);
   --nav-border: rgba(255, 255, 255, 0.12);
   --input-border-dark: rgba(255, 255, 255, 0.6);
   --nav-active-text: #ffcc33;
   --nav-active-bg: rgba(212, 175, 55, 0.18);
-  --navy-brand: #0A192F;
+  --navy-brand: #0a1122;
   --gold-brand: #D4AF37;
   --navy-950: #060e1a;
-  --navy-900: #0A192F;
-  --navy-800: #243b53;
-  --navy-700: #334e68;
-  --navy-50: #f4f7fb;
+  --navy-900: #0a1122;
+  --navy-800: #16223a;
+  --navy-700: #243352;
+  --navy-50: #121b30;
   --gold-dark: #b8941f;
   --gold-light: rgba(212, 175, 55, 0.12);
-  --border-subtle: #475569;
-  --danger-light: #3b1f2a;
+  --border-subtle: rgba(255, 255, 255, 0.08);
+  --danger-light: rgba(185, 28, 28, 0.15);
   --success: #86efac;
   --warning: #fbbf24;
   --error: #fca5a5;
@@ -93,26 +93,29 @@ html[data-theme='dark'] {
   --text-on-dark-muted: #e4eaf2;
   --background: var(--bg-primary);
   --color: var(--text-primary);
-  --card-bg: var(--bg-elevated);
+  --card-bg: rgba(26, 36, 58, 0.55);
   --border: var(--border-color);
-  --surface-0: var(--bg-secondary);
-  --surface-1: var(--bg-elevated);
-  --surface-2: #27364d;
+  --surface-0: #0a1122;
+  --surface-1: #121b30;
+  --surface-2: #1a243a;
   --text-strong: var(--text-primary);
-  --border-soft: #475569;
+  --border-soft: rgba(255, 255, 255, 0.08);
   color-scheme: dark;
 }
 
-/* !important is limited to theme overrides so page-local inline CSS cannot defeat the active theme. */
+/* Base shell with a subtle navy radial gradient like the reference design */
 html[data-theme] body {
-  background: var(--background) !important;
+  background: radial-gradient(130% 90% at 50% -10%, #121b30 0%, #0a1122 55%, #070d1c 100%) !important;
+  background-attachment: fixed;
   color: var(--color) !important;
 }
 html[data-theme] .shell,
 html[data-theme] main.shell {
-  background: var(--surface-0) !important;
+  background: transparent !important;
   color: var(--color) !important;
 }
+
+/* Glassmorphism cards: semi-transparent navy + blur + soft gold-tinted border */
 html[data-theme] .bg-white,
 html[data-theme] dialog,
 html[data-theme] .card,
@@ -128,6 +131,9 @@ html[data-theme] .saved-place {
   background-color: var(--card-bg) !important;
   color: var(--color) !important;
   border-color: var(--border) !important;
+  backdrop-filter: blur(14px) saturate(140%);
+  -webkit-backdrop-filter: blur(14px) saturate(140%);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.35);
 }
 html[data-theme] .bg-slate-50,
 html[data-theme] .bg-gray-50 {
@@ -156,6 +162,8 @@ html[data-theme] .m6-assistant-quick {
   background: var(--card-bg) !important;
   color: var(--color) !important;
   border-color: var(--border) !important;
+  backdrop-filter: blur(14px) saturate(140%);
+  -webkit-backdrop-filter: blur(14px) saturate(140%);
 }
 html[data-theme] .assistant-head h2,
 html[data-theme] .assistant-bubble,
@@ -185,6 +193,9 @@ html[data-theme] .trips {
   background: var(--card-bg) !important;
   color: var(--color) !important;
   border-color: var(--border) !important;
+  backdrop-filter: blur(14px) saturate(140%);
+  -webkit-backdrop-filter: blur(14px) saturate(140%);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.35);
 }
 html[data-theme] button,
 html[data-theme] a {
@@ -209,7 +220,7 @@ html[data-theme='light'] .text-gold-600,
 html[data-theme='light'] .text-amber-400,
 html[data-theme='light'] .text-amber-500,
 html[data-theme='light'] .text-amber-600 {
-  color: #7a5600 !important;
+  color: var(--accent-gold, #D4AF37) !important;
 }
 html[data-theme='dark'] .text-gold-500,
 html[data-theme='dark'] .text-gold-600,
@@ -221,4 +232,19 @@ html[data-theme='dark'] .text-amber-600 {
 html[data-theme] ::placeholder {
   color: var(--text-muted);
   opacity: 1;
+}
+html[data-theme] input,
+html[data-theme] select,
+html[data-theme] textarea {
+  background-color: rgba(255, 255, 255, 0.04) !important;
+}
+html[data-theme] header,
+html[data-theme] .header,
+html[data-theme] .app-header,
+html[data-theme] nav.bottom-nav,
+html[data-theme] .bottom-nav {
+  background: var(--nav-bg) !important;
+  backdrop-filter: blur(16px) saturate(160%);
+  -webkit-backdrop-filter: blur(16px) saturate(160%);
+  border-color: var(--nav-border) !important;
 }
