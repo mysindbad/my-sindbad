@@ -40,6 +40,14 @@
 }
 
 .site-nav a:active {
+  transform: scale(0.94);
+}
+
+.site-nav a:active .nav-icon {
+  transform: scale(0.92);
+}
+
+.site-nav a:active {
   transform: scale(0.97);
 }
 
