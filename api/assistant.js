@@ -1,4 +1,5 @@
 import { getWeatherContext, weatherContextText, getNearbyPlacesContext, placesContextText } from '../lib/tripContext.js';
+import { recommendPlaces, recommendationsText } from '../lib/recommendations.js';
 
 const CATEGORY_COSTS = {
   accommodation: 800,
@@ -282,6 +283,8 @@ export default async function handler(req, res) {
       if (/اقترح|أضف|اضف|بدّل|بدل|مطعم|مكان|فندق|نشاط|مقهى|recommend|suggest|add|place|restaurant|hotel|cafe/i.test(message)) {
         const places = await getNearbyPlacesContext(ctxCoords.lat, ctxCoords.lng);
         const pt = placesContextText(places); if (pt) ctxParts.push(pt);
+        const recs = recommendPlaces(places, wctx, { hour: new Date().getHours(), limit: 6 });
+        const rt = recommendationsText(recs); if (rt) ctxParts.push(rt);
       }
       if (ctxParts.length) {
         const nl = String.fromCharCode(10);
