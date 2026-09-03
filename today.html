@@ -57,6 +57,7 @@
     import { renderSmartRecs } from './js/msRecommend.js';
 
     const trip = window.AppState?.getTrip?.() || {};
+    if (!trip || !trip.destination || !trip.dates || !trip.dates.start) { window.location.href = './create-trip.html'; }
     const lang = () => window.MySindbadI18n?.getLang?.() || localStorage.getItem('userLang') || 'ar';
     const t = (key, fallback = '') => window.MySindbadI18n?.getTranslation?.(lang(), key) || fallback;
     const normalized = window.MySindbadCity?.normalizeCityName(trip.destinationDisplay || trip.destination || trip.destinationName || trip.city || t('city_marrakech')) || { display: trip.destination || t('city_marrakech') };
