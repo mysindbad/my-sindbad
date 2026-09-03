@@ -1000,6 +1000,7 @@ function pgHome(P){
     <a class="ms-fg" href="./create-trip.html"><span class="ms-fg-ic">${ic('plane',22)}</span><span class="ms-fg-lb">Flights</span></a>
   </section>
   ${msHomeTripsSection}
+  <div id="smart-recs" class="ms-recs-section"></div>
   `;
   document.body.classList.add('ms-home');
   ensureCityImagesLoaded(()=>{
@@ -1010,6 +1011,14 @@ function pgHome(P){
       if(b) b.style.backgroundImage=`url('${img}')`;
     }
   });
+  (async () => {
+    try {
+      const coords = trip && trip.cityCoords;
+      if (!coords || !Number.isFinite(coords.lat) || !Number.isFinite(coords.lng)) return;
+      const m = await import("./js/msRecommend.js");
+      m.renderSmartRecs(document.getElementById("smart-recs"), { coords, theme: "dark" });
+    } catch (e) {}
+  })();
 }
 function doSearch(){const q=$('q')?.value.trim();if(!q)return;sessionStorage.setItem('sb_destination_query',q);ls('sb_destination_query',q);window.location.href=`./create-trip.html?dest=${encodeURIComponent(q)}`;}
 render();
