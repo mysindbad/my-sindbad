@@ -20,11 +20,11 @@
 <script src="./utils/geocode.js"></script>
 <link href="https://api.mapbox.com/mapbox-gl-js/v3.5.1/mapbox-gl.css" rel="stylesheet"/>
 <style>
-    :root{--navy:#0A192F;--gold:#D4AF37;--dark:#b8941f;--bg:#fbf9f5;--line:#e8ecf2}
-    *{box-sizing:border-box;font-family:Cairo,system-ui,sans-serif}body{margin:0;min-height:100vh;background:#060e1a;color:#0c1624}
-    .shell{width:100%;max-width:480px;min-height:100vh;margin:auto;padding-bottom:calc(86px + env(safe-area-inset-bottom));background:var(--bg);box-shadow:0 0 60px #0005}
-    .header{position:sticky;top:0;z-index:1000;display:flex;align-items:center;justify-content:space-between;min-height:76px;padding:calc(14px + env(safe-area-inset-top)) 18px 12px;background:#0a192ff7;border-bottom:1px solid #d4af374d;color:#fff}
-    .brand{display:flex;align-items:center;gap:.7rem;color:#fff;text-decoration:none}.brand img{width:46px;height:46px;border-radius:14px;border:1px solid #d4af3770;object-fit:cover}.brand b{display:block;color:var(--gold);font:700 1.2rem 'Playfair Display',Georgia,serif}.brand small{display:block;color:#fffb;font-size:.65rem}
+    :root{--navy:#0A192F;--gold:#D4AF37;--dark:#b8941f;--bg:var(--bg-primary);--line:var(--border-color)}
+    *{box-sizing:border-box;font-family:Cairo,system-ui,sans-serif}body{margin:0;min-height:100vh}
+    .shell{box-shadow:0 0 60px #0005}
+    /* legacy .header removed — page uses shared .site-header (data-site-header) */
+    /* legacy .brand removed — shared .site-header__brand owns brand markup */
     .content{padding:18px}.intro p{margin:0;color:var(--dark);font-size:.68rem;font-weight:800}.intro h1{margin:.25rem 0 14px;color:var(--navy);font-size:1.45rem;font-weight:800}
     .trip-panel{margin-bottom:12px;padding:12px;border:1px solid #d4af3780;border-radius:16px;background:#fff;box-shadow:0 8px 20px #0b1b5110}.trip-toolbar{display:flex;align-items:center;gap:8px}.trip-toolbar label{flex:1;color:var(--navy);font-size:.72rem;font-weight:800}.trip-toolbar select{width:100%;margin-top:5px;padding:8px;border:1px solid var(--line);border-radius:10px;background:#fffaf0;color:var(--navy);font-weight:700}.trip-summary{min-width:145px;padding:8px;border-radius:10px;background:#0a192f;color:#fff;font-size:.64rem;line-height:1.7;text-align:center}.trip-activities{display:grid;gap:6px;margin-top:10px}.trip-activity{display:flex;align-items:center;gap:8px;padding:8px;border:1px solid var(--line);border-radius:10px;background:#fbf9f5;color:var(--navy);cursor:pointer;text-align:right}.trip-activity.current{border-color:var(--gold);background:#fffaf0}.trip-activity .number{display:grid;place-items:center;width:24px;height:24px;flex:none;border-radius:8px;background:var(--navy);color:#fff;font-size:.7rem;font-weight:800}.trip-activity.current .number{background:var(--gold);color:var(--navy)}.trip-activity strong{display:block;font-size:.68rem}.trip-activity small{display:block;color:#64748b;font-size:.6rem}.trip-empty{margin:10px 0 0;color:#64748b;font-size:.68rem;line-height:1.8}
     .map-wrap{position:relative;z-index:1;display:none;overflow:hidden;border:2px solid var(--gold);border-radius:18px;box-shadow:0 12px 28px #0b1b5124}.map-wrap.expanded{display:block}#map{height:70vh;min-height:420px;max-height:610px}.trip-search{width:100%;margin-top:10px;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:#fff;color:var(--navy);outline:0;font-size:.72rem}.trip-search:focus{border-color:var(--gold)}
@@ -32,16 +32,15 @@
     .modes{display:flex;gap:8px;margin:12px 0}.modes button{flex:1;min-height:44px;border:1px solid var(--line);border-radius:12px;background:#fff;color:#516174;cursor:pointer;font-size:.8rem;font-weight:700}.modes button.active{border-color:var(--gold);background:#fffaf0;color:var(--navy)}
     .status{min-height:22px;margin:0 2px 8px;color:#64748b;font-size:.7rem}.place{display:none;margin-top:12px;padding:15px;border:1px solid #d4af3775;border-radius:18px;background:#0a192fe8;color:#fff;box-shadow:0 12px 28px #06101c33;backdrop-filter:blur(14px)}.place.show{display:block}.place h2{margin:0 0 7px;font-size:1rem}.meta{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}.meta div{padding:8px;border:1px solid #fff2;border-radius:10px;background:#fff1}.meta small{display:block;color:#fffa;font-size:.62rem}.meta b{display:block;color:var(--gold);font-size:.78rem}.add{width:100%;min-height:44px;border:0;border-radius:12px;background:var(--gold);color:var(--navy);cursor:pointer;font-weight:800}
     .mapboxgl-ctrl-group button{color:var(--navy)!important}.marker{width:22px;height:22px;border:3px solid #fff;border-radius:50% 50% 50% 0;background:var(--navy);box-shadow:0 3px 9px #0006;transform:rotate(-45deg)}.marker.current{background:var(--gold)}.marker:after{content:'';display:block;width:6px;height:6px;margin:5px auto;border-radius:50%;background:#fff}.marker.current:after{background:var(--navy)}
-    .nav{position:fixed;bottom:0;left:50%;z-index:1000;display:flex;width:100%;max-width:480px;transform:translateX(-50%);padding:8px 8px calc(8px + env(safe-area-inset-bottom));background:#0a192ff7;border-top:1px solid #fff2;box-shadow:0 -4px 18px #0003;backdrop-filter:blur(14px)}.nav a{display:flex;min-height:52px;flex:1;flex-direction:column;align-items:center;justify-content:center;gap:3px;border-radius:12px;color:#fffa;text-decoration:none;font-size:.6rem}.nav a.active{background:#d4af3729;color:var(--gold);font-weight:800}
-    @media(min-width:700px){body{padding:22px 0}.shell{min-height:calc(100vh - 44px);border-radius:28px;overflow:hidden}.nav{position:absolute;border-radius:0 0 28px 28px}}
+    /* legacy .nav removed — page uses shared .site-nav (data-site-nav) */
+    @media(min-width:700px){body{padding:22px 0}.shell{min-height:calc(100vh - 44px);border-radius:28px;overflow:hidden}}
     @media(max-width:699px){body.map-open{overflow:hidden}.map-wrap.expanded{position:fixed;inset:0;z-index:1100;border:0;border-radius:0;background:#0b1729}.map-wrap.expanded #map{height:100dvh;min-height:100dvh;max-height:none}.map-wrap.expanded .search{top:calc(12px + env(safe-area-inset-top));left:60px}.map-wrap.expanded .locate{bottom:calc(88px + env(safe-area-inset-bottom));left:14px}.map-close,.drawer-toggle{position:absolute;z-index:600;display:grid;place-items:center;min-width:42px;min-height:42px;border:0;border-radius:12px;background:#0A192F;color:#fff;box-shadow:0 5px 16px #0005;cursor:pointer;font-weight:800}.map-close{top:calc(12px + env(safe-area-inset-top));right:12px}.drawer-toggle{right:14px;bottom:calc(88px + env(safe-area-inset-bottom));background:#D4AF37;color:#0A192F}.map-wrap:not(.expanded) .map-close,.map-wrap:not(.expanded) .drawer-toggle{display:none}body.map-open .trip-panel{position:fixed;right:0;bottom:0;left:0;z-index:1160;max-height:46dvh;margin:0;overflow:auto;border-radius:20px 20px 0 0;transform:translateY(calc(100% - 58px));transition:transform .22s ease;box-shadow:0 -12px 30px #0005}body.map-open .trip-panel.drawer-open{transform:translateY(0)}body.map-open .content{padding:0}body.map-open .intro,body.map-open .status,body.map-open .place,body.map-open .modes,body.map-open .saved-places,body.map-open section>h2{display:none}}
     @media(min-width:700px){.map-close,.drawer-toggle{display:none}}
     .saved-places{display:grid;gap:8px;margin-top:16px}.saved-place{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:10px;border:1px solid var(--line);border-radius:12px;background:#fff}.saved-place strong{font-size:.72rem;color:var(--navy)}.saved-place small{display:block;color:#64748b;font-size:.62rem}.saved-place div:last-child{display:flex;gap:5px}.saved-place button{min-height:34px;padding:0 8px;border:1px solid var(--line);border-radius:8px;background:#fffaf0;color:var(--navy);font-size:.62rem;font-weight:700;cursor:pointer}
       /* Contrast pass: map-specific controls inherit the shared semantic colors. */
     .trip-activity small,.trip-empty,.status,.saved-place small{color:var(--text-secondary,#475569)}
     .meta small{color:var(--text-on-dark,#f8fafc)}
-    .nav a{color:var(--text-secondary,#cbd5e1)}
-    .nav a.active{color:var(--accent-gold,#D4AF37)}
+    /* legacy .nav a overrides removed — shared .site-nav a owns nav link styles */
 
     /* Mobile usability pass: presentation only; behavior remains unchanged. */
     .map-wrap{width:100%;isolation:isolate}
@@ -82,7 +81,7 @@
   <link rel="stylesheet" href="./system.css">
 </head>
 <body>
-<main class="shell">
+<main class="shell shell--wide">
 <div data-site-header=""></div>
 <section class="content">
 <div class="intro"><p data-i18n="map_intro">MY SINDBAD · ملاحتك الذكية</p><h1 data-i18n="map_heading">اكتشف المكان، وابدأ الرحلة</h1></div>
