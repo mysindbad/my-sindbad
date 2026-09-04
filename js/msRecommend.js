@@ -36,8 +36,10 @@ export async function renderSmartRecs(container, opts) {
       var p = r.place;
       var dist = Number.isFinite(p.distanceKm) ? p.distanceKm.toFixed(1) + ' \u0643\u0645' : '';
       var reason = r.reasons[0] || '';
-      var navHref = './navigate.html?dest=' + encodeURIComponent(p.lat + ',' + p.lng) + '&name=' + encodeURIComponent(p.name || '') + '&profile=walking';
-      var mapHref = './map.html?lat=' + p.lat + '&lng=' + p.lng + '&name=' + encodeURIComponent(p.name || '');
+      var lon = p.lon != null ? p.lon : (p.coordinates && p.coordinates.lng);
+      var placeHref = './place.html?lat=' + p.lat + '&lon=' + lon + '&name=' + encodeURIComponent(p.name || '');
+      var navHref = './navigate.html?dest=' + encodeURIComponent(p.lat + ',' + lon) + '&name=' + encodeURIComponent(p.name || '') + '&profile=walking';
+      var mapHref = './map.html?lat=' + p.lat + '&lng=' + lon + '&name=' + encodeURIComponent(p.name || '');
       if (theme === 'dark') {
         return '<div style="background:#142030;border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:.7rem .8rem;space-y:2">' +
           '<div style="display:flex;justify-content:space-between;align-items:flex-start">' +
@@ -46,6 +48,7 @@ export async function renderSmartRecs(container, opts) {
           '<span style="color:#D4AF37;font-size:.8rem">\u2605</span></div>' +
           (reason ? '<p style="color:rgba(255,255,255,.72);font-size:.78rem;margin-top:.35rem">\u2713 ' + esc(reason) + '</p>' : '') +
           '<div style="display:flex;gap:.4rem;margin-top:.55rem">' +
+          '<a href="' + placeHref + '" style="flex:1;text-align:center;font-size:.72rem;font-weight:700;padding:.4rem;border-radius:10px;background:rgba(212,175,55,.16);color:#D4AF37;border:1px solid rgba(212,175,55,.3);text-decoration:none">تفاصيل</a>' +
           '<a href="' + navHref + '" style="flex:1;text-align:center;font-size:.78rem;font-weight:700;padding:.4rem;border-radius:10px;background:#0A192F;color:#D4AF37;text-decoration:none">\u0645\u0644\u0627\u062d\u0629 \ud83e\udded</a>' +
           '<a href="' + mapHref + '" style="flex:1;text-align:center;font-size:.78rem;font-weight:700;padding:.4rem;border-radius:10px;background:rgba(212,175,55,.16);color:#D4AF37;border:1px solid rgba(212,175,55,.3);text-decoration:none">\u062e\u0631\u064a\u0637\u0629 \ud83d\uddfa\ufe0f</a>' +
           '</div></div>';
@@ -57,6 +60,7 @@ export async function renderSmartRecs(container, opts) {
         '<span class="text-amber-600 text-xs font-bold">\u2605</span></div>' +
         (reason ? '<p class="text-xs text-slate-600">\u2713 ' + esc(reason) + '</p>' : '') +
         '<div class="flex gap-2">' +
+        '<a href="' + placeHref + '" class="flex-1 text-center text-xs font-bold py-2 rounded-xl bg-white border-2 border-amber-400 text-amber-700">تفاصيل</a>' +
         '<a href="' + navHref + '" class="flex-1 text-center text-xs font-bold py-2 rounded-xl" style="background:#0A192F;color:#D4AF37">\u0645\u0644\u0627\u062d\u0629 \ud83e\udded</a>' +
         '<a href="' + mapHref + '" class="flex-1 text-center text-xs font-bold py-2 rounded-xl bg-white border-2 border-amber-400 text-amber-700">\u062e\u0631\u064a\u0637\u0629 \ud83d\uddfa\ufe0f</a>' +
         '</div></div>';

@@ -17,22 +17,31 @@
 <script src="./utils/i18n.js?m6=final1" type="module"></script>
 </head>
 <body class="bg-slate-50 text-slate-900 pb-24">
-<main class="shell" style="max-width:480px;margin:0 auto;min-height:100vh;padding-bottom:calc(86px + env(safe-area-inset-bottom))">
+<main class="shell" style="max-width:640px;margin:0 auto;min-height:100vh;padding-bottom:calc(86px + env(safe-area-inset-bottom))">
 <div data-site-header=""></div>
 <section style="padding:18px">
-  <div id="loading" class="ms-loading">جارٍ تحميل بيانات المكان...</div>
+  <div id="loading" class="ms-loading" data-i18n="place_loading">جارٍ تحميل بيانات المكان...</div>
+  <div id="not-found" class="ms-empty" hidden>
+    <div style="width:64px;height:64px;margin:0 auto 1rem;border-radius:50%;display:grid;place-items:center;background:var(--gold-light);color:var(--accent-gold);font-size:1.8rem">📍</div>
+    <h3 data-i18n="place_not_found">بيانات المكان غير متوفرة</h3>
+    <p data-i18n="place_not_found_desc">لم نتمكن من العثور على هذا المكان في مصادرنا الموثوقة. لن نعرض بيانات غير مؤكدة.</p>
+    <a href="./explore.html" class="ms-btn" data-i18n="explore_places">استكشف الأماكن</a>
+  </div>
   <div id="error-box" class="ms-error" hidden>
-    <p>تعذّر تحميل بيانات هذا المكان الآن.</p>
-    <button class="ms-btn" id="retry-btn">إعادة المحاولة</button>
+    <p data-i18n="place_load_error">تعذّر تحميل بيانات هذا المكان الآن.</p>
+    <button class="ms-btn" id="retry-btn" data-i18n="retry">إعادة المحاولة</button>
   </div>
   <article id="place-card" hidden>
     <h1 id="p-name" style="font-size:1.5rem;font-weight:800;color:var(--color);margin:0 0 .35rem"></h1>
-    <div id="p-category" class="ms-chip" style="margin-bottom:1rem"></div>
+    <div style="display:flex;flex-wrap:wrap;gap:.4rem;margin-bottom:1rem">
+      <span id="p-category" class="ms-chip"></span>
+      <span id="p-coords" class="ms-chip" style="direction:ltr">—</span>
+    </div>
     <div id="p-fields" style="display:grid;gap:.6rem"></div>
     <div id="p-source" class="ms-badge" style="margin:.9rem 0"></div>
-    <div style="display:flex;gap:.6rem;margin-top:1rem">
-      <button class="ms-btn ms-btn--block" id="add-trip">أضف إلى رحلتي</button>
-      <a class="ms-btn ms-btn--navy ms-btn--block" id="go-nav">خذني إلى هناك</a>
+    <div style="display:flex;flex-direction:column;gap:.6rem;margin-top:1rem">
+      <button class="ms-btn ms-btn--block" id="add-trip" data-i18n="place_add_to_trip">أضف إلى رحلتي</button>
+      <a class="ms-btn ms-btn--navy ms-btn--block" id="go-nav" data-i18n="take_me_there">خذني إلى هناك</a>
     </div>
   </article>
 </section>
@@ -44,76 +53,82 @@
 (function(){
   'use strict';
   var $=function(id){return document.getElementById(id);};
-  var t=function(k,f){return (window.MySindbadI18n&&window.MySindbadI18n.getTranslation&&window.MySindbadI18n.getTranslation((window.MySindbadI18n.getLang&&window.MySindbadI18n.getLang())||'ar',k))||f;};
-  var params=new URLSearchParams(location.search);
-  var lat=Number(params.get('lat')), lng=Number(params.get('lng'));
-  var nameStr=params.get('name')||'';
-  if(!Number.isFinite(lat)||!Number.isFinite(lng)){ $('loading').hidden=true; $('error-box').hidden=false; return; }
-
+  function lang(){return (window.MySindbadI18n&&window.MySindbadI18n.getLang&&window.MySindbadI18n.getLang())||'ar';}
+  function T(k,f){return (window.MySindbadI18n&&window.MySindbadI18n.getTranslation&&window.MySindbadI18n.getTranslation(lang(),k))||f;}
   function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+  function showToast(msg){var el=$('toast');el.textContent=msg;el.style.display='block';setTimeout(function(){el.style.display='none';},2200);}
+
+  var params=new URLSearchParams(location.search);
+  var lat=Number(params.get('lat')), lon=Number(params.get('lon'));
+  var kind=params.get('kind')||'';
+  var nameStr=params.get('name')||'';
+  var idStr=params.get('id')||'';
+
+  function showLoading(){$('loading').hidden=false;$('not-found').hidden=true;$('error-box').hidden=true;$('place-card').hidden=true;}
+  function showNotFound(){$('loading').hidden=true;$('not-found').hidden=false;$('error-box').hidden=true;$('place-card').hidden=true;}
+  function showError(){$('loading').hidden=true;$('not-found').hidden=true;$('error-box').hidden=false;$('place-card').hidden=true;}
+
+  if(!Number.isFinite(lat)||!Number.isFinite(lon)){showNotFound();return;}
+
   function fieldRow(label,value,quality){
-    if(!value) return '';
-    var q = quality==='absent' ? ' <span style="color:var(--text-muted);font-size:.7rem">('+t('not_available','غير متوفر')+')</span>' : '';
-    return '<div style="padding:.7rem .9rem;border:1px solid var(--border-color);border-radius:12px;background:var(--card-bg)"><div style="font-size:.72rem;color:var(--text-muted);font-weight:700;margin-bottom:.2rem">'+esc(label)+'</div><div style="font-size:.9rem;color:var(--color)">'+esc(value)+q+'</div></div>';
+    var absent = !value || quality==='absent';
+    var valHtml = absent
+      ? '<span style="color:var(--text-muted);font-style:italic">'+esc(T('not_available','غير متوفر حاليًا'))+'</span>'
+      : esc(value);
+    return '<div style="padding:.7rem .9rem;border:1px solid var(--border-color);border-radius:12px;background:var(--card-bg)"><div style="font-size:.72rem;color:var(--text-muted);font-weight:700;margin-bottom:.2rem">'+esc(label)+'</div><div style="font-size:.9rem;color:var(--color);word-break:break-word">'+valHtml+'</div></div>';
   }
 
   async function loadPlace(){
-    $('loading').hidden=false; $('error-box').hidden=true; $('place-card').hidden=true;
+    showLoading();
     try{
-      var kinds=['tourism','food','hotels'];
+      var kinds = kind ? [kind] : ['tourism','food','hotels'];
       var all=[];
       for(var i=0;i<kinds.length;i++){
         try{
-          var r=await fetch('/api/places?lat='+lat+'&lon='+lng+'&kind='+kinds[i]).then(function(x){return x.json();});
+          var r=await fetch('/api/places?lat='+lat+'&lon='+lon+'&kind='+kinds[i]).then(function(x){return x.json();});
           if(Array.isArray(r)) all=all.concat(r);
         }catch(e){}
       }
       var match=null;
-      var nameLow=(nameStr||'').trim().toLowerCase();
-      if(nameLow){
-        for(var j=0;j<all.length;j++){ if((all[j].name||'').trim().toLowerCase()===nameLow){ match=all[j]; break; } }
-        if(!match){ for(var k=0;k<all.length;k++){ var n=(all[k].name||'').toLowerCase(); if(n.indexOf(nameLow)>=0||nameLow.indexOf(n)>=0){ match=all[k]; break; } } }
+      if(idStr){
+        for(var j=0;j<all.length;j++){ if(all[j].id===idStr||all[j].sourceId===idStr){match=all[j];break;} }
       }
-      if(!match && all.length){
-        var best=null,bd=Infinity;
-        for(var m=0;m<all.length;m++){ var d=Math.abs(all[m].lat-lat)+Math.abs(all[m].lon-lng); if(d<bd){bd=d;best=all[m];} }
-        if(bd<0.01) match=best;
-      }
-      $('loading').hidden=true;
       if(!match){
-        match={name:nameStr||t('place_unknown','مكان'),category:'place',lat:lat,lon:lng,source:'url',dataQuality:{}};
+        for(var k=0;k<all.length;k++){
+          if(Math.abs(all[k].lat-lat)<1e-6 && Math.abs(all[k].lon-lon)<1e-6){match=all[k];break;}
+        }
       }
+      if(!match){showNotFound();return;}
       renderPlace(match);
-    }catch(e){
-      $('loading').hidden=true; $('error-box').hidden=false;
-    }
+    }catch(e){showError();}
   }
 
   function renderPlace(p){
-    $('p-name').textContent=p.name||t('place_unknown','مكان');
+    $('p-name').textContent=p.name||T('place_unknown','مكان');
     $('p-category').textContent=p.category||'';
+    $('p-coords').textContent=(Number.isFinite(p.lat)?Number(p.lat).toFixed(5):'—')+', '+(Number.isFinite(p.lon)?Number(p.lon).toFixed(5):'—');
     var dq=p.dataQuality||{};
     var html='';
-    html+=fieldRow(t('place_address','العنوان'),p.address,dq.address);
-    html+=fieldRow(t('place_description','الوصف'),p.description,dq.description);
-    html+=fieldRow(t('place_opening_hours','ساعات العمل'),p.openingHours,dq.openingHours);
-    html+=fieldRow(t('place_website','الموقع الإلكتروني'),p.website,dq.website);
-    html+=fieldRow(t('place_phone','الهاتف'),p.phone,dq.phone);
-    if(p.estimatedCost!=null && dq.estimatedCost==='real') html+=fieldRow(t('place_cost','التكلفة التقريبية'),p.estimatedCost+' MAD',dq.estimatedCost);
+    html+=fieldRow(T('place_address','العنوان'),p.address,dq.address);
+    html+=fieldRow(T('place_description','الوصف'),p.description,dq.description);
+    html+=fieldRow(T('place_opening_hours','ساعات العمل'),p.openingHours,dq.openingHours);
+    html+=fieldRow(T('place_website','الموقع الإلكتروني'),p.website,dq.website);
+    html+=fieldRow(T('place_phone','الهاتف'),p.phone,dq.phone);
+    html+=fieldRow(T('place_cost','التكلفة التقريبية'),(dq.estimatedCost==='real'&&p.estimatedCost!=null)?(p.estimatedCost+' MAD'):'',dq.estimatedCost);
     $('p-fields').innerHTML=html;
-    var srcMap={osm:'OpenStreetMap','local:verified':t('place_source_verified','بيانات محلية موثّقة'),url:'URL'};
-    $('p-source').textContent=t('place_source','المصدر')+': '+(srcMap[p.source]||p.source||'—');
-    $('place-card').hidden=false;
+    var srcMap={osm:'OpenStreetMap','local:verified':T('place_source_verified','بيانات محلية موثّقة')};
+    $('p-source').textContent=T('place_source','المصدر')+': '+(srcMap[p.source]||p.source||'—');
+    $('loading').hidden=true;$('place-card').hidden=false;
 
     $('add-trip').onclick=function(){
       var trip=window.AppState&&window.AppState.getTrip&&window.AppState.getTrip();
-      if(!trip){ showToast(t('create_trip_first','أنشئ رحلة أولاً')); return; }
+      if(!trip){showToast(T('place_create_trip_first','أنشئ رحلة أولاً'));return;}
       var act={id:'place-'+Date.now(),name:p.name,place:p.name,title:p.name,description:p.description||'',coords:{lat:p.lat,lng:p.lon},lat:p.lat,lon:p.lon,category:p.category||'place',cost:p.estimatedCost||0,day:1,day_number:1};
-      if(window.AppState.addActivity){ window.AppState.addActivity(act).then(function(ok){ showToast(ok?t('added_to_trip','تمت الإضافة إلى رحلتك'):t('already_added','مضاف بالفعل')); }); }
+      if(window.AppState.addActivity){window.AppState.addActivity(act).then(function(ok){showToast(ok?T('place_added_to_trip','تمت الإضافة إلى رحلتك'):T('place_already_added','مضاف بالفعل'));});}
     };
     $('go-nav').href='./navigate.html?dest='+encodeURIComponent(p.lat+','+p.lon)+'&name='+encodeURIComponent(p.name||'')+'&profile=walking';
   }
-  function showToast(msg){ var el=$('toast'); el.textContent=msg; el.style.display='block'; setTimeout(function(){el.style.display='none';},2200); }
+
   $('retry-btn').onclick=loadPlace;
   loadPlace();
 })();

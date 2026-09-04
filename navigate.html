@@ -12,8 +12,8 @@
 <link href="./utils/header.css" rel="stylesheet"/>
 <link href="https://api.mapbox.com/mapbox-gl-js/v3.5.1/mapbox-gl.css" rel="stylesheet"/>
 <style>
-:root{--navy:#0A192F;--gold:#D4AF37;--dark:#b8941f;--bg:#fbf9f5;--line:#e8ecf2}
-*{box-sizing:border-box;font-family:Cairo,system-ui,sans-serif}body{margin:0;min-height:100vh;background:#060e1a;color:#0c1624}
+:root{--navy:var(--navy-brand,#0A192F);--gold:var(--accent-gold,#D4AF37);--dark:var(--gold-dark,#b8941f);--bg:var(--bg-primary,#fbf9f5);--line:var(--border-color,#e8ecf2)}
+*{box-sizing:border-box;font-family:Cairo,system-ui,sans-serif}body{margin:0;min-height:100vh;color:var(--color)}
 .shell{width:100%;max-width:480px;min-height:100vh;margin:auto;padding-bottom:calc(86px + env(safe-area-inset-bottom));background:var(--bg);box-shadow:0 0 60px #0005}
 .content{padding:18px}
 .intro p{margin:0;color:var(--dark);font-size:.68rem;font-weight:800}.intro h1{margin:.25rem 0 4px;color:var(--navy);font-size:1.35rem;font-weight:800}.intro .dest{color:#64748b;font-size:.78rem;margin:0 0 14px}
@@ -46,6 +46,8 @@
 #start-btn{background:var(--gold);color:var(--navy)}
 #stop-btn{display:none;background:#ef4444;color:#fff}
 </style>
+<script>(function(){try{var p=localStorage.getItem('themePreference')||'auto',h=new Date().getHours(),d=window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches,night=h>=19||h<6;document.documentElement.dataset.themePreference=p;document.documentElement.dataset.theme=(p==='dark'||(p==='auto'&&(night||d)))?'dark':'light';}catch(e){document.documentElement.dataset.theme='light';}})();</script>
+<link href="./theme.css" rel="stylesheet"/>
 </head>
 <body>
 <main class="shell">
