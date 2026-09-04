@@ -33,8 +33,10 @@
   margin: 0 auto;
   align-items: center;
   justify-content: space-between;
-  gap: 16px;
+  gap: 12px;
 }
+.site-header__brand { flex: 1 1 auto; min-width: 0; }
+.site-header__home, .site-header__lang { flex: 0 0 auto; }
 
 .site-header__brand {
   display: inline-flex;
@@ -66,6 +68,7 @@
 .site-header__wordmark strong {
   color: var(--accent-gold, #D4AF37);
   font: 700 1.05rem 'Playfair Display', Georgia, serif;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 132px;
 }
 
 .site-header__wordmark small {
@@ -97,6 +100,12 @@
 
 .site-header__home:active {
   transform: scale(0.97);
+}
+.site-header__lang { min-height: 36px; padding: 4px 8px; border: 1px solid var(--accent-gold, #D4AF37); border-radius: 8px; background: transparent; color: inherit; font: inherit; font-size: 0.72rem; font-weight: 700; cursor: pointer; }
+@media (max-width: 380px) {
+  .site-header__wordmark small { display: none; }
+  .site-header__home { padding-inline: 10px; font-size: 0.7rem; }
+  .site-header__lang { font-size: 0.66rem; min-width: 0; padding: 4px 6px; }
 }
 
 @media (min-width: 700px) {

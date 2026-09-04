@@ -257,8 +257,8 @@ html[data-theme='dark'] .card {
 /* Community compose button — keep on-screen, no overlap with bottom nav */
 .compose-btn, .fab-compose {
   position: fixed; z-index: 900;
-  bottom: calc(var(--nav-h) + env(safe-area-inset-bottom) + var(--sp-4));
-  inset-inline-end: var(--sp-4);
+  bottom: calc(92px + env(safe-area-inset-bottom));
+  right: max(18px, calc(50% - 222px));
 }
 @media (max-width: 430px) {
   .compose-btn, .fab-compose { inset-inline-end: var(--sp-3); }
