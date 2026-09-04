@@ -42,6 +42,11 @@ html[data-theme='dark'] {
   background: transparent;
   padding-bottom: calc(var(--nav-h) + env(safe-area-inset-bottom));
 }
+/* Wide modifier — pages that need more horizontal room (itinerary side-by-side, etc.)
+   instead of redefining .shell from scratch per page. */
+.shell--wide { max-width: 640px; }
+@media (min-width: 768px) { .shell--wide { max-width: 920px; } }
+@media (min-width: 1024px) { .shell--wide { max-width: 1180px; } }
 
 /* ============ CONTENT ============ */
 .content { padding: var(--sp-4) var(--sp-4); flex: 1; width: 100%; }
@@ -87,7 +92,9 @@ small { font-size: var(--fs-xs); }
 .btn.gold, .ms-btn { background: var(--accent-gold); color: var(--text-on-accent); }
 .btn.sm, .ms-btn--sm { min-height: 36px; padding: .35rem .85rem; font-size: var(--fs-sm); border-radius: var(--r-sm); }
 .btn.w, .ms-btn--block { width: 100%; }
-.btn:disabled { opacity: .55; cursor: not-allowed; }
+/* Icon-only button (square, centered) — canonical variant */
+.btn-icon, .ms-btn--icon { width: 44px; min-height: 44px; padding: 0; border-radius: var(--r-sm); }
+.btn:disabled, .ms-btn:disabled { opacity: .55; cursor: not-allowed; }
 
 /* ============ CARD ============ */
 .card, .ms-card {

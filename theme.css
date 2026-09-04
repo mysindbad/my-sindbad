@@ -279,42 +279,7 @@ html[data-theme='dark'] .bottom-nav {
   -webkit-backdrop-filter: blur(16px) saturate(160%);
 }
 
-/* ============ Unified design-system primitives (opt-in) ============ */
-.ms-btn {
-  display: inline-flex; align-items: center; justify-content: center; gap: .5rem;
-  min-height: 44px; padding: .65rem 1.2rem; border: 0; border-radius: 14px;
-  background: var(--accent-gold); color: var(--text-on-accent);
-  font-weight: 700; font-size: .9rem; cursor: pointer; text-decoration: none;
-  font-family: inherit;
-}
-.ms-btn--navy { background: var(--navy-brand); color: var(--text-on-dark); }
-.ms-btn--ghost { background: transparent; border: 1px solid var(--border-color); color: var(--color); }
-.ms-btn--block { width: 100%; }
-.ms-input {
-  width: 100%; min-height: 44px; padding: .65rem .9rem;
-  border: 1px solid var(--border-color); border-radius: 12px;
-  background: var(--surface-2); color: var(--color); font-size: .9rem; outline: 0;
-  font-family: inherit;
-}
-.ms-input:focus { border-color: var(--accent-gold); box-shadow: 0 0 0 3px var(--gold-light); }
-.ms-card {
-  background: var(--card-bg); border: 1px solid var(--border-color);
-  border-radius: 16px; padding: 1rem; box-shadow: 0 8px 30px rgba(10,25,47,.06);
-}
-.ms-chip {
-  display: inline-flex; align-items: center; gap: .35rem;
-  padding: .3rem .75rem; border-radius: 9999px;
-  background: var(--surface-2); border: 1px solid var(--border-color);
-  color: var(--color); font-size: .72rem; font-weight: 600;
-}
-.ms-badge {
-  display: inline-flex; align-items: center; padding: .2rem .6rem;
-  border-radius: 8px; background: var(--gold-light); color: var(--accent-gold);
-  font-size: .68rem; font-weight: 700;
-}
-.ms-empty { text-align: center; padding: 2.2rem 1.2rem; color: var(--color); }
-.ms-empty h3 { font-size: 1.05rem; font-weight: 700; margin: .5rem 0 .35rem; color: var(--color); }
-.ms-empty p { font-size: .85rem; color: var(--text-muted); line-height: 1.6; margin: 0 0 1.2rem; }
+/* ============ Loading / error states (unique here; system.css owns buttons/cards/inputs/chips/badges/empty) ============ */
 .ms-loading {
   display: flex; align-items: center; justify-content: center; gap: .5rem;
   padding: 1.5rem; color: var(--text-muted); font-size: .85rem;

@@ -158,7 +158,11 @@
     const obs = new MutationObserver(function (mutations) {
       mutations.forEach(function (m) {
         m.addedNodes.forEach(function (node) {
-          if (node.nodeType === 1) processElement(node);
+          if (node.nodeType !== 1) return;
+          // Skip our own injected icon spans to avoid self-triggered reprocessing/flicker.
+          if (node.classList && node.classList.contains(ICON_CLASS)) return;
+          if (node.closest && node.closest('.' + ICON_CLASS)) return;
+          processElement(node);
         });
       });
     });
