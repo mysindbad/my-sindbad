@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html data-i18n-title="title_place" dir="rtl" lang="ar">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1, viewport-fit=cover" name="viewport"/>
+<title>تفاصيل المكان — My Sindbad</title>
+<meta content="#0A192F" name="theme-color"/>
+<link href="./icons/brand-logo.jpg" rel="icon" type="image/jpeg"/>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&family=Playfair+Display:wght@700&display=swap" rel="stylesheet"/>
+<link href="./utils/navigation.css" rel="stylesheet"/>
+<link href="./utils/header.css" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>(function(){try{var p=localStorage.getItem('themePreference')||'auto',h=new Date().getHours(),d=window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches,night=h>=19||h<6;document.documentElement.dataset.themePreference=p;document.documentElement.dataset.theme=(p==='dark'||(p==='auto'&&(night||d)))?'dark':'light';}catch(e){document.documentElement.dataset.theme='light';}})();</script>
+<link href="./theme.css" rel="stylesheet"/>
+<script defer="" src="./theme.js"></script>
+<script src="./utils/i18n.js?m6=final1" type="module"></script>
+</head>
+<body class="bg-slate-50 text-slate-900 pb-24">
+<main class="shell" style="max-width:480px;margin:0 auto;min-height:100vh;padding-bottom:calc(86px + env(safe-area-inset-bottom))">
+<div data-site-header=""></div>
+<section style="padding:18px">
+  <div id="loading" class="ms-loading">جارٍ تحميل بيانات المكان...</div>
+  <div id="error-box" class="ms-error" hidden>
+    <p>تعذّر تحميل بيانات هذا المكان الآن.</p>
+    <button class="ms-btn" id="retry-btn">إعادة المحاولة</button>
+  </div>
+  <article id="place-card" hidden>
+    <h1 id="p-name" style="font-size:1.5rem;font-weight:800;color:var(--color);margin:0 0 .35rem"></h1>
+    <div id="p-category" class="ms-chip" style="margin-bottom:1rem"></div>
+    <div id="p-fields" style="display:grid;gap:.6rem"></div>
+    <div id="p-source" class="ms-badge" style="margin:.9rem 0"></div>
+    <div style="display:flex;gap:.6rem;margin-top:1rem">
+      <button class="ms-btn ms-btn--block" id="add-trip">أضف إلى رحلتي</button>
+      <a class="ms-btn ms-btn--navy ms-btn--block" id="go-nav">خذني إلى هناك</a>
+    </div>
+  </article>
+</section>
+<nav data-active="explore" data-site-nav=""></nav>
+</main>
+<div id="toast" style="position:fixed;bottom:90px;left:50%;transform:translateX(-50%);padding:10px 16px;border-radius:12px;background:var(--navy-brand);color:#fff;font-size:.78rem;font-weight:700;display:none;z-index:50"></div>
+<script src="./utils/appState.js"></script>
+<script>
+(function(){
+  'use strict';
+  var $=function(id){return document.getElementById(id);};
+  var t=function(k,f){return (window.MySindbadI18n&&window.MySindbadI18n.getTranslation&&window.MySindbadI18n.getTranslation((window.MySindbadI18n.getLang&&window.MySindbadI18n.getLang())||'ar',k))||f;};
+  var params=new URLSearchParams(location.search);
+  var lat=Number(params.get('lat')), lng=Number(params.get('lng'));
+  var nameStr=params.get('name')||'';
+  if(!Number.isFinite(lat)||!Number.isFinite(lng)){ $('loading').hidden=true; $('error-box').hidden=false; return; }
+
+  function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+  function fieldRow(label,value,quality){
+    if(!value) return '';
+    var q = quality==='absent' ? ' <span style="color:var(--text-muted);font-size:.7rem">('+t('not_available','غير متوفر')+')</span>' : '';
+    return '<div style="padding:.7rem .9rem;border:1px solid var(--border-color);border-radius:12px;background:var(--card-bg)"><div style="font-size:.72rem;color:var(--text-muted);font-weight:700;margin-bottom:.2rem">'+esc(label)+'</div><div style="font-size:.9rem;color:var(--color)">'+esc(value)+q+'</div></div>';
+  }
+
+  async function loadPlace(){
+    $('loading').hidden=false; $('error-box').hidden=true; $('place-card').hidden=true;
+    try{
+      var kinds=['tourism','food','hotels'];
+      var all=[];
+      for(var i=0;i<kinds.length;i++){
+        try{
+          var r=await fetch('/api/places?lat='+lat+'&lon='+lng+'&kind='+kinds[i]).then(function(x){return x.json();});
+          if(Array.isArray(r)) all=all.concat(r);
+        }catch(e){}
+      }
+      var match=null;
+      var nameLow=(nameStr||'').trim().toLowerCase();
+      if(nameLow){
+        for(var j=0;j<all.length;j++){ if((all[j].name||'').trim().toLowerCase()===nameLow){ match=all[j]; break; } }
+        if(!match){ for(var k=0;k<all.length;k++){ var n=(all[k].name||'').toLowerCase(); if(n.indexOf(nameLow)>=0||nameLow.indexOf(n)>=0){ match=all[k]; break; } } }
+      }
+      if(!match && all.length){
+        var best=null,bd=Infinity;
+        for(var m=0;m<all.length;m++){ var d=Math.abs(all[m].lat-lat)+Math.abs(all[m].lon-lng); if(d<bd){bd=d;best=all[m];} }
+        if(bd<0.01) match=best;
+      }
+      $('loading').hidden=true;
+      if(!match){
+        match={name:nameStr||t('place_unknown','مكان'),category:'place',lat:lat,lon:lng,source:'url',dataQuality:{}};
+      }
+      renderPlace(match);
+    }catch(e){
+      $('loading').hidden=true; $('error-box').hidden=false;
+    }
+  }
+
+  function renderPlace(p){
+    $('p-name').textContent=p.name||t('place_unknown','مكان');
+    $('p-category').textContent=p.category||'';
+    var dq=p.dataQuality||{};
+    var html='';
+    html+=fieldRow(t('place_address','العنوان'),p.address,dq.address);
+    html+=fieldRow(t('place_description','الوصف'),p.description,dq.description);
+    html+=fieldRow(t('place_opening_hours','ساعات العمل'),p.openingHours,dq.openingHours);
+    html+=fieldRow(t('place_website','الموقع الإلكتروني'),p.website,dq.website);
+    html+=fieldRow(t('place_phone','الهاتف'),p.phone,dq.phone);
+    if(p.estimatedCost!=null && dq.estimatedCost==='real') html+=fieldRow(t('place_cost','التكلفة التقريبية'),p.estimatedCost+' MAD',dq.estimatedCost);
+    $('p-fields').innerHTML=html;
+    var srcMap={osm:'OpenStreetMap','local:verified':t('place_source_verified','بيانات محلية موثّقة'),url:'URL'};
+    $('p-source').textContent=t('place_source','المصدر')+': '+(srcMap[p.source]||p.source||'—');
+    $('place-card').hidden=false;
+
+    $('add-trip').onclick=function(){
+      var trip=window.AppState&&window.AppState.getTrip&&window.AppState.getTrip();
+      if(!trip){ showToast(t('create_trip_first','أنشئ رحلة أولاً')); return; }
+      var act={id:'place-'+Date.now(),name:p.name,place:p.name,title:p.name,description:p.description||'',coords:{lat:p.lat,lng:p.lon},lat:p.lat,lon:p.lon,category:p.category||'place',cost:p.estimatedCost||0,day:1,day_number:1};
+      if(window.AppState.addActivity){ window.AppState.addActivity(act).then(function(ok){ showToast(ok?t('added_to_trip','تمت الإضافة إلى رحلتك'):t('already_added','مضاف بالفعل')); }); }
+    };
+    $('go-nav').href='./navigate.html?dest='+encodeURIComponent(p.lat+','+p.lon)+'&name='+encodeURIComponent(p.name||'')+'&profile=walking';
+  }
+  function showToast(msg){ var el=$('toast'); el.textContent=msg; el.style.display='block'; setTimeout(function(){el.style.display='none';},2200); }
+  $('retry-btn').onclick=loadPlace;
+  loadPlace();
+})();
+</script>
+<script defer src="./utils/header.js"></script>
+</body>
+</html>

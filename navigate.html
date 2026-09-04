@@ -35,6 +35,12 @@
 .nav-panel .stat b{font-size:1.05rem;font-weight:800;color:var(--gold)}
 .nav-panel .status{min-height:20px;color:#475569;font-size:.76rem;font-weight:700;margin-bottom:10px;text-align:center}
 .nav-panel .warn{display:none;background:#fff7ed;border:1px solid #fdba74;color:#b45309;padding:8px 10px;border-radius:10px;font-size:.72rem;font-weight:700;margin-bottom:10px;text-align:center}
+.gps-panel{margin-top:10px;padding:12px;border:1px solid var(--line);border-radius:12px;background:#fffaf0}
+.gps-panel p{font-size:.78rem;color:#475569;margin:0 0 .6rem;line-height:1.6}
+.gps-panel .gps-actions{display:flex;gap:8px}
+.gps-panel button,.gps-panel a{flex:1;display:inline-flex;align-items:center;justify-content:center;min-height:42px;border:0;border-radius:11px;font-weight:700;font-size:.8rem;cursor:pointer;text-decoration:none;font-family:inherit}
+.gps-panel .gps-retry{background:var(--gold);color:var(--navy)}
+.gps-panel .gps-alt{background:#fff;border:1px solid var(--line);color:var(--navy)}
 .nav-panel .actions{display:flex;gap:8px}
 .nav-panel .actions button{flex:1;min-height:50px;border:0;border-radius:14px;font-weight:800;font-size:.92rem;cursor:pointer}
 #start-btn{background:var(--gold);color:var(--navy)}
@@ -63,6 +69,7 @@
 </div>
 <div class="warn" id="warn" data-i18n="nav_off_route_warn">تبتعد عن المسار</div>
 <div class="status" id="status" data-i18n="nav_ready">جاهز — اضغط ابدأ الملاحة</div>
+<div class="gps-panel" id="gps-panel" hidden></div>
 <div class="actions">
 <button id="start-btn" type="button" data-i18n="start_navigation">ابدأ الملاحة</button>
 <button id="stop-btn" type="button" data-i18n="stop_navigation">إيقاف</button>
@@ -91,6 +98,13 @@
   var t=function(k,f){return (window.MySindbadI18n&&window.MySindbadI18n.getTranslation&&window.MySindbadI18n.getTranslation((window.MySindbadI18n.getLang&&window.MySindbadI18n.getLang())||'ar',k))||f;};
   function fmtDist(m){if(m==null)return '—';return m>=1000?(m/1000).toFixed(1)+' '+t('unit_km','كم'):Math.round(m)+' '+t('unit_m','م');}
   function fmtDur(s){if(s==null)return '—';var m=Math.max(0,Math.round(s/60));if(m<60)return m+' '+t('unit_minute','د');var h=Math.floor(m/60),r=m%60;return h+' '+t('unit_hour','س')+' '+r+' '+t('unit_minute','د');}
+
+  var waitingTimer=null;
+  function clearWaiting(){ if(waitingTimer){clearTimeout(waitingTimer);waitingTimer=null;} }
+  function showGPSDetail(html){ var p=$('gps-panel'); p.innerHTML=html; p.hidden=false; }
+  function hideGPSDetail(){ var p=$('gps-panel'); p.hidden=true; p.innerHTML=''; }
+  function bindRetry(){ var r=$('gps-retry'); if(r) r.onclick=startNav; }
+
   var params=new URLSearchParams(location.search);
   var dest=null, profile=params.get('profile')==='driving'?'driving':'walking';
   var destStr=params.get('dest'), nameStr=params.get('name')||'';
@@ -111,13 +125,30 @@
     $('dist').textContent=fmtDist(snap.distanceRemaining);
     $('eta').textContent=fmtDur(snap.durationRemaining);
     var msg='', warn=false;
-    if(snap.state==='preparing')msg=t('nav_preparing','جاري التحضير...');
-    else if(snap.state==='waiting_gps')msg=t('nav_waiting_gps','بانتظار إشارة GPS...');
-    else if(snap.state==='denied'){msg=t('nav_denied','تم رفض إذن الموقع. فعّل الموقع للمتابعة.');warn=true;}
-    else if(snap.rerouting)msg=t('nav_rerouting','إعادة حساب الطريق...');
-    else if(snap.state==='navigating'){msg=t('nav_navigating','في الطريق...');var th=snap.profile==='driving'?45:18;if(snap.offRouteDistance>th)msg=t('nav_off_route','تبتعد عن المسار — إعادة الحساب...');}
-    else if(snap.state==='arrived')msg=t('nav_arrived','وصلت إلى وجهتك ✓');
-    else if(snap.state==='error')msg=t('nav_error','تعذّر حساب المسار.');
+    if(snap.state==='preparing'){msg=t('nav_preparing','جاري التحضير...');hideGPSDetail();clearWaiting();}
+    else if(snap.state==='waiting_gps'){
+      msg=t('nav_waiting_gps','بانتظار إشارة GPS...');
+      clearWaiting();
+      waitingTimer=setTimeout(function(){
+        showGPSDetail('<p>'+t('nav_waiting_timeout','ما زلنا ننتظر إشارة GPS. تأكد أن GPS مفعّل وأنك في مكان مفتوح، أو تابع باستخدام الخريطة فقط.')+'</p><div class="gps-actions"><button class="gps-retry" id="gps-retry">'+t('retry','إعادة المحاولة')+'</button><a class="gps-alt" href="./map.html">'+t('nav_open_map','فتح الخريطة')+'</a></div>');
+        bindRetry();
+      },15000);
+    }
+    else if(snap.state==='denied'){
+      msg=t('nav_denied','تم رفض إذن الموقع.');
+      warn=true; clearWaiting();
+      showGPSDetail('<p>'+t('nav_denied_explain','نحتاج موقعك لحساب المسار والملاحة. فعّل إذن الموقع من إعدادات المتصفح/النظام ثم أعد المحاولة. يمكنك أيضاً تصفح الخريطة بدون ملاحة.')+'</p><div class="gps-actions"><button class="gps-retry" id="gps-retry">'+t('retry','إعادة المحاولة')+'</button><a class="gps-alt" href="./map.html">'+t('nav_open_map','فتح الخريطة')+'</a></div>');
+      bindRetry();
+    }
+    else if(snap.rerouting){msg=t('nav_rerouting','إعادة حساب الطريق...');hideGPSDetail();}
+    else if(snap.state==='navigating'){msg=t('nav_navigating','في الطريق...');var th=snap.profile==='driving'?45:18;if(snap.offRouteDistance>th)msg=t('nav_off_route','تبتعد عن المسار — إعادة الحساب...');hideGPSDetail();clearWaiting();}
+    else if(snap.state==='arrived'){msg=t('nav_arrived','وصلت إلى وجهتك ✓');hideGPSDetail();clearWaiting();}
+    else if(snap.state==='error'){
+      msg=t('nav_error','تعذّر حساب المسار.');
+      clearWaiting();
+      showGPSDetail('<p>'+t('nav_error_explain','تعذّر حساب المسار الآن. تحقق من اتصالك بالإنترنت ثم أعد المحاولة.')+'</p><div class="gps-actions"><button class="gps-retry" id="gps-retry">'+t('retry','إعادة المحاولة')+'</button></div>');
+      bindRetry();
+    }
     $('status').textContent=msg;$('warn').hidden=!warn;
   }
   async function startNav(){
@@ -129,7 +160,7 @@
     window.MSNavigation.on(setUI);
     await window.MSNavigation.start({map:map,destination:dest,profile:profile,mapboxgl:mapboxgl});
   }
-  function stopNav(){window.MSNavigation.stop();navigating=false;$('start-btn').hidden=false;$('stop-btn').hidden=true;$('mode-walking').disabled=false;$('mode-driving').disabled=false;$('status').textContent=t('nav_ready','جاهز — اضغط ابدأ الملاحة');$('warn').hidden=true;}
+  function stopNav(){window.MSNavigation.stop();navigating=false;clearWaiting();hideGPSDetail();$('start-btn').hidden=false;$('stop-btn').hidden=true;$('mode-walking').disabled=false;$('mode-driving').disabled=false;$('status').textContent=t('nav_ready','جاهز — اضغط ابدأ الملاحة');$('warn').hidden=true;}
   $('mode-walking').addEventListener('click',function(){if(navigating)return;profile='walking';$('mode-walking').classList.add('active');$('mode-driving').classList.remove('active');});
   $('mode-driving').addEventListener('click',function(){if(navigating)return;profile='driving';$('mode-driving').classList.add('active');$('mode-walking').classList.remove('active');});
   $('start-btn').addEventListener('click',startNav);

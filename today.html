@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-
 <html data-i18n-title="title_today" dir="rtl" lang="ar">
 <head>
 <meta charset="utf-8"/>
@@ -8,6 +7,7 @@
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="./utils/cityImages.js"></script>
 <link href="./utils/navigation.css" rel="stylesheet"/>
+<link href="./utils/header.css" rel="stylesheet"/>
 <script src="./utils/i18n.js?m6=final1" type="module"></script>
 <script>(function(){try{var p=localStorage.getItem('themePreference')||'auto',h=new Date().getHours(),d=window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches,night=h>=19||h<6;document.documentElement.dataset.themePreference=p;document.documentElement.dataset.theme=(p==='dark'||(p==='auto'&&(night||d)))?'dark':'light';}catch(e){document.documentElement.dataset.theme='light';}})();</script>
 <link href="./theme.css" rel="stylesheet"/>
@@ -15,6 +15,19 @@
 </head>
 <body class="bg-slate-50 text-slate-900 pb-20">
 <div class="max-w-md mx-auto p-4 space-y-4">
+<!-- Empty state (no active trip) -->
+<div id="empty-state" class="hidden" style="text-align:center;padding:3rem 1.2rem">
+  <div style="width:64px;height:64px;margin:0 auto 1rem;border-radius:50%;display:grid;place-items:center;background:var(--gold-light);color:var(--accent-gold);font-size:1.8rem">🧭</div>
+  <h3 data-i18n="today_empty_title" style="font-size:1.15rem;font-weight:700;color:var(--color);margin:0 0 .4rem">ابدأ رحلتك أولاً</h3>
+  <p data-i18n="today_empty_text" style="font-size:.88rem;color:var(--text-muted);line-height:1.6;margin:0 0 1.3rem">ما عندك حتى الآن رحلة نشيطة. أنشئ رحلة باش تستافد من وضع اليوم، التوصيات الذكية، والملاحة.</p>
+  <div style="display:flex;flex-direction:column;gap:.6rem">
+    <a href="./create-trip.html" class="ms-btn ms-btn--block" data-i18n="create_trip">إنشاء رحلة</a>
+    <a href="./explore.html" class="ms-btn ms-btn--ghost ms-btn--block" data-i18n="explore_places">استكشف الأماكن</a>
+  </div>
+</div>
+
+<!-- Main content (has active trip) -->
+<div id="main-content" class="hidden">
 <!-- Header Weather -->
 <header class="bg-gradient-to-r from-amber-500 to-amber-600 rounded-2xl p-4 text-white shadow-lg flex justify-between items-center">
 <div>
@@ -50,6 +63,7 @@
 <!-- Banner Alerts Container -->
 <div id="alerts-container"></div>
 </div>
+</div>
 <script src="./utils/appState.js"></script>
 <script type="module">
     import { evaluateAlerts } from './utils/proactive.js';
@@ -57,67 +71,75 @@
     import { renderSmartRecs } from './js/msRecommend.js';
 
     const trip = window.AppState?.getTrip?.() || {};
-    if (!trip || !trip.destination || !trip.dates || !trip.dates.start) { window.location.href = './create-trip.html'; }
-    const lang = () => window.MySindbadI18n?.getLang?.() || localStorage.getItem('userLang') || 'ar';
-    const t = (key, fallback = '') => window.MySindbadI18n?.getTranslation?.(lang(), key) || fallback;
-    const normalized = window.MySindbadCity?.normalizeCityName(trip.destinationDisplay || trip.destination || trip.destinationName || trip.city || t('city_marrakech')) || { display: trip.destination || t('city_marrakech') };
-    const destinationDisplay = normalized.display || t('city_marrakech');
-    document.getElementById('today-city').textContent = destinationDisplay;
-    document.getElementById('today-date').textContent = new Date().toLocaleDateString(lang() === 'fr' ? 'fr-FR' : lang() === 'en' ? 'en-US' : 'ar-MA', { weekday: 'long', month: 'short', day: 'numeric' });
-    const cityCoords = trip.cityCoords || { lat: 31.6295, lng: -7.9811 };
-    const weatherText = (code) => code === 0 ? t('weather_sunny') : code < 3 ? t('weather_partly') : code < 70 ? t('weather_cloudy') : t('weather_showers');
-    async function fetchWithTimeout(input, init = {}, timeoutMs = 5000) { const controller = new AbortController(); const timer = setTimeout(() => controller.abort(), timeoutMs); try { return await fetch(input, { ...init, signal: controller.signal }); } finally { clearTimeout(timer); } }
-    try {
-      const res = await fetchWithTimeout(`https://api.open-meteo.com/v1/forecast?latitude=${encodeURIComponent(cityCoords.lat)}&longitude=${encodeURIComponent(cityCoords.lng)}&current=temperature_2m,weather_code&timezone=auto`);
-      const data = await res.json();
-      if (data.current) {
-        document.getElementById('weather-temp').textContent = `${Math.round(data.current.temperature_2m)}°C`;
-        document.getElementById('weather-desc').textContent = weatherText(Number(data.current.weather_code));
-      }
-    } catch {}
+    const hasTrip = !!(trip && trip.destination && trip.dates && trip.dates.start);
 
-    const savedActs = window.AppState?.getActivities?.() || [];
-    const daysActivities = Array.isArray(trip.itinerary) ? trip.itinerary : (savedActs.length ? [{ activities: savedActs, totalHours: savedActs.length * 2 }] : []);
-    const tripBudget = Number(trip?.budget?.amount ?? trip?.budget ?? 0);
-    const currentSpent = savedActs.reduce((sum, activity) => sum + Number(activity?.cost || activity?.price || 0), 0);
-    const alerts = evaluateAlerts({ weatherDaily: Array.isArray(trip.weatherDaily) ? trip.weatherDaily : [], daysActivities, budget: tripBudget, currentSpent });
-    document.getElementById('alerts-container').innerHTML = alerts.map((alert) => `<aside class="rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-950 shadow-sm"><strong class="block mb-1">${t('proactive_alert')}</strong><span>${alert.message}</span></aside>`).join('');
-    if (!savedActs.length) {
-      document.getElementById('progress-bar').style.width = '0%';
-      document.getElementById('progress-percent').textContent = '0%';
-      document.getElementById('current-title').textContent = t('no_today_activity');
-      document.getElementById('btn-arrived').classList.add('hidden');
+    if (!hasTrip) {
+      document.getElementById('empty-state').classList.remove('hidden');
+      document.getElementById('main-content').classList.add('hidden');
     } else {
-      document.getElementById('btn-arrived').classList.remove('hidden');
-      document.getElementById('current-title').textContent = savedActs[0].title || savedActs[0].place || t('activity_first');
-      let count = 0;
-      document.getElementById('btn-arrived').addEventListener('click', () => {
-        count = Math.min(100, count + 33);
-        document.getElementById('progress-bar').style.width = count + '%';
-        document.getElementById('progress-percent').textContent = count + '%';
-        if (count >= 99) {
-          document.getElementById('current-title').textContent = t('all_done');
-          document.getElementById('btn-arrived').classList.add('hidden');
+      document.getElementById('empty-state').classList.add('hidden');
+      document.getElementById('main-content').classList.remove('hidden');
+      const lang = () => window.MySindbadI18n?.getLang?.() || localStorage.getItem('userLang') || 'ar';
+      const t = (key, fallback = '') => window.MySindbadI18n?.getTranslation?.(lang(), key) || fallback;
+      const normalized = window.MySindbadCity?.normalizeCityName(trip.destinationDisplay || trip.destination || trip.destinationName || trip.city || t('city_marrakech')) || { display: trip.destination || t('city_marrakech') };
+      const destinationDisplay = normalized.display || t('city_marrakech');
+      document.getElementById('today-city').textContent = destinationDisplay;
+      document.getElementById('today-date').textContent = new Date().toLocaleDateString(lang() === 'fr' ? 'fr-FR' : lang() === 'en' ? 'en-US' : 'ar-MA', { weekday: 'long', month: 'short', day: 'numeric' });
+      const cityCoords = trip.cityCoords || { lat: 31.6295, lng: -7.9811 };
+      const weatherText = (code) => code === 0 ? t('weather_sunny') : code < 3 ? t('weather_partly') : code < 70 ? t('weather_cloudy') : t('weather_showers');
+      async function fetchWithTimeout(input, init = {}, timeoutMs = 5000) { const controller = new AbortController(); const timer = setTimeout(() => controller.abort(), timeoutMs); try { return await fetch(input, { ...init, signal: controller.signal }); } finally { clearTimeout(timer); } }
+      try {
+        const res = await fetchWithTimeout(`https://api.open-meteo.com/v1/forecast?latitude=${encodeURIComponent(cityCoords.lat)}&longitude=${encodeURIComponent(cityCoords.lng)}&current=temperature_2m,weather_code&timezone=auto`);
+        const data = await res.json();
+        if (data.current) {
+          document.getElementById('weather-temp').textContent = `${Math.round(data.current.temperature_2m)}°C`;
+          document.getElementById('weather-desc').textContent = weatherText(Number(data.current.weather_code));
         }
-      });
-      const curAct = savedActs[0];
-      const curCoords = curAct && (curAct.coords || (curAct.lat && curAct.lon ? { lat: curAct.lat, lng: curAct.lon } : null));
-      if (curCoords && Number.isFinite(curCoords.lat) && Number.isFinite(curCoords.lng)) {
-        const btnNav = document.getElementById('btn-navigate');
-        btnNav.classList.remove('hidden');
-        btnNav.addEventListener('click', () => {
-          const p = new URLSearchParams({ dest: curCoords.lat + ',' + curCoords.lng, name: curAct.title || curAct.place || '', profile: 'walking' });
-          location.href = './navigate.html?' + p.toString();
+      } catch {}
+
+      const savedActs = window.AppState?.getActivities?.() || [];
+      const daysActivities = Array.isArray(trip.itinerary) ? trip.itinerary : (savedActs.length ? [{ activities: savedActs, totalHours: savedActs.length * 2 }] : []);
+      const tripBudget = Number(trip?.budget?.amount ?? trip?.budget ?? 0);
+      const currentSpent = savedActs.reduce((sum, activity) => sum + Number(activity?.cost || activity?.price || 0), 0);
+      const alerts = evaluateAlerts({ weatherDaily: Array.isArray(trip.weatherDaily) ? trip.weatherDaily : [], daysActivities, budget: tripBudget, currentSpent });
+      document.getElementById('alerts-container').innerHTML = alerts.map((alert) => `<aside class="rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-950 shadow-sm"><strong class="block mb-1">${t('proactive_alert')}</strong><span>${alert.message}</span></aside>`).join('');
+      if (!savedActs.length) {
+        document.getElementById('progress-bar').style.width = '0%';
+        document.getElementById('progress-percent').textContent = '0%';
+        document.getElementById('current-title').textContent = t('no_today_activity');
+        document.getElementById('btn-arrived').classList.add('hidden');
+      } else {
+        document.getElementById('btn-arrived').classList.remove('hidden');
+        document.getElementById('current-title').textContent = savedActs[0].title || savedActs[0].place || t('activity_first');
+        let count = 0;
+        document.getElementById('btn-arrived').addEventListener('click', () => {
+          count = Math.min(100, count + 33);
+          document.getElementById('progress-bar').style.width = count + '%';
+          document.getElementById('progress-percent').textContent = count + '%';
+          if (count >= 99) {
+            document.getElementById('current-title').textContent = t('all_done');
+            document.getElementById('btn-arrived').classList.add('hidden');
+          }
         });
-        const btnMap = document.getElementById('btn-map');
-        btnMap.classList.remove('hidden');
-        btnMap.addEventListener('click', () => {
-          const p = new URLSearchParams({ lat: curCoords.lat, lng: curCoords.lng, name: curAct.title || curAct.place || '' });
-          location.href = './map.html?' + p.toString();
-        });
+        const curAct = savedActs[0];
+        const curCoords = curAct && (curAct.coords || (curAct.lat && curAct.lon ? { lat: curAct.lat, lng: curAct.lon } : null));
+        if (curCoords && Number.isFinite(curCoords.lat) && Number.isFinite(curCoords.lng)) {
+          const btnNav = document.getElementById('btn-navigate');
+          btnNav.classList.remove('hidden');
+          btnNav.addEventListener('click', () => {
+            const p = new URLSearchParams({ dest: curCoords.lat + ',' + curCoords.lng, name: curAct.title || curAct.place || '', profile: 'walking' });
+            location.href = './navigate.html?' + p.toString();
+          });
+          const btnMap = document.getElementById('btn-map');
+          btnMap.classList.remove('hidden');
+          btnMap.addEventListener('click', () => {
+            const p = new URLSearchParams({ lat: curCoords.lat, lng: curCoords.lng, name: curAct.title || curAct.place || '' });
+            location.href = './map.html?' + p.toString();
+          });
+        }
       }
+      renderSmartRecs(document.getElementById('smart-recs'), { coords: cityCoords });
     }
-    renderSmartRecs(document.getElementById('smart-recs'), { coords: cityCoords });
   </script>
 <script defer src="./utils/header.js"></script>
 </body>
