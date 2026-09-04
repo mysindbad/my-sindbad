@@ -43,6 +43,7 @@
     trash: SVG('<path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"/>'),
     target: SVG('<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1"/>'),
     clock: SVG('<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>'),
+    cash: SVG('<rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="3"/>'),
   };
 
   // Emoji → icon name (UI icons only). Keys are the exact emoji chars used in the app.
@@ -158,11 +159,14 @@
     const obs = new MutationObserver(function (mutations) {
       mutations.forEach(function (m) {
         m.addedNodes.forEach(function (node) {
-          if (node.nodeType !== 1) return;
-          // Skip our own injected icon spans to avoid self-triggered reprocessing/flicker.
-          if (node.classList && node.classList.contains(ICON_CLASS)) return;
-          if (node.closest && node.closest('.' + ICON_CLASS)) return;
-          processElement(node);
+          if (node.nodeType === 1) {
+            if (node.classList && node.classList.contains(ICON_CLASS)) return;
+            if (node.closest && node.closest('.' + ICON_CLASS)) return;
+            processElement(node);
+          } else if (node.nodeType === 3 && node.parentNode && node.parentNode.nodeType === 1) {
+            var parent = node.parentNode;
+            if (!(parent.closest && parent.closest('.' + ICON_CLASS))) processElement(parent);
+          }
         });
       });
     });

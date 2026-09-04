@@ -49,7 +49,7 @@ Object.assign(translations.en, { assistant_general_help:'I can help organize you
 Object.assign(translations.fr, { assistant_general_help:'Je peux vous aider à organiser votre voyage.', unit_km:'km', unit_m:'m', unit_hour:'h', unit_minute:'min', minute:'minute', budget_used:'utilisé', main_navigation:'Navigation principale', ai_optimise:'Optimiser avec l’IA', assistant_message:'Message de l’assistant', city_istanbul:'Istanbul', days:'jours', destination_image:'Image', economic_style:'Économique', edit_data:'Modifier les données', featured:'Mis en avant', invalid_place:'Lieu non valide.', map:'Carte', map_destination:'Destination sur la carte', not_specified:'Non précisé', open_share_link:'Ouvrir le lien partagé', quick_actions:'Actions rapides', same_city_alternative:'Alternative adaptée dans la même ville', saved_activity_label:'Activité enregistrée', share_ready:'Lien de partage prêt.', smart_planner:'Générateur de programme intelligent', today_mode:'Mode aujourd’hui', trip_program:'Programme du voyage à', varied_style:'Varié', verify_data:'Vérifiez vos données.' });
 
 export function getTranslation(lang = 'ar', key = '') {
-  return translations[lang]?.[key] || translations.en?.[key] || translations.ar[key] || key;
+  return translations[lang]?.[key] || translations.en?.[key] || translations.ar[key] || '';
 }
 
 const dynamicRules = [
@@ -76,6 +76,7 @@ function translateValue(original, lang = current) {
   if (current === 'fr' && frenchExtraTranslations[original.trim()]) return frenchExtraTranslations[original.trim()];
   return original;
 }
+function stripEmoji(s){return String(s||'').replace(/[\u{1F000}-\u{1FAFF}\u{2600}-\u{27BF}\u{2B00}-\u{2BFF}\u{2190}-\u{21FF}\u{FE00}-\u{FE0F}]/gu,'').trim();}
 function markAndApply(root = typeof document !== 'undefined' ? document : null) {
   if (!root || applying) return;
   applying = true;
@@ -88,15 +89,15 @@ function markAndApply(root = typeof document !== 'undefined' ? document : null) 
     if (!el.dataset.i18nOriginal && raw) el.dataset.i18nOriginal = raw;
     const inferred = key || exact[raw];
     const value = inferred ? getTranslation(current, inferred) : translateValue(el.dataset.i18nOriginal || raw);
-    if (value && el.textContent !== value) el.textContent = value;
+    if (value && el.textContent !== value && stripEmoji(el.textContent) !== stripEmoji(value)) el.textContent = value;
   });
-  root.querySelectorAll?.('[data-i18n-placeholder]:not([data-i18n-ignore]),[data-i18n-ph]:not([data-i18n-ignore])').forEach((el) => { const key = el.dataset.i18nPlaceholder || el.dataset.i18nPh; el.placeholder = getTranslation(current, key); });
-  root.querySelectorAll?.('[data-i18n-title]:not([data-i18n-ignore])').forEach((el) => { el.title = getTranslation(current, el.dataset.i18nTitle); });
-  root.querySelectorAll?.('[data-i18n-aria-label]:not([data-i18n-ignore])').forEach((el) => { el.setAttribute('aria-label', getTranslation(current, el.dataset.i18nAriaLabel)); });
+  root.querySelectorAll?.('[data-i18n-placeholder]:not([data-i18n-ignore]),[data-i18n-ph]:not([data-i18n-ignore])').forEach((el) => { const key = el.dataset.i18nPlaceholder || el.dataset.i18nPh; const ph = getTranslation(current, key); if (ph) el.placeholder = ph; });
+  root.querySelectorAll?.('[data-i18n-title]:not([data-i18n-ignore])').forEach((el) => { const tt = getTranslation(current, el.dataset.i18nTitle); if (tt) el.title = tt; });
+  root.querySelectorAll?.('[data-i18n-aria-label]:not([data-i18n-ignore])').forEach((el) => { const al = getTranslation(current, el.dataset.i18nAriaLabel); if (al) el.setAttribute('aria-label', al); });
   const titleKey = document.documentElement.getAttribute('data-i18n-title') || document.body?.getAttribute('data-i18n-title');
   if (titleKey) {
     const translatedTitle = getTranslation(current, titleKey);
-    if (document.title !== translatedTitle) document.title = translatedTitle;
+    if (translatedTitle && document.title !== translatedTitle) document.title = translatedTitle;
   }
   applying = false;
 }

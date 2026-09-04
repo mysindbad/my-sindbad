@@ -915,18 +915,18 @@ function authHTML(){return `
  <div class="auth">
   <div class="logo">${LOGO}</div>
   <h1 class="en">My Sindbad</h1>
-   <div class="tag">${t('welcome_tagline')}</div>
+   <div class="tag">${t('welcome_tagline','رفيقك الذكي في كل رحلة')}</div>
   <div class="auth-card">
    <div class="tabs">
-    <button class="${authTab==='login'?'on':''}" onclick="authTab='login';render()">${t('login')}</button>
-    <button class="${authTab==='reg'?'on':''}" onclick="authTab='reg';render()">${t('register')}</button>
+    <button class="${authTab==='login'?'on':''}" onclick="authTab='login';render()">${t('login','تسجيل الدخول')}</button>
+    <button class="${authTab==='reg'?'on':''}" onclick="authTab='reg';render()">${t('register','إنشاء حساب')}</button>
    </div>
    ${authTab==='reg'?`<label>${t('full_name')}<input class="inp" id="rName" placeholder="${t('name_placeholder')}"></label>`:''}
    <label>${t('email')}<input class="inp" id="aEmail" type="email" placeholder="name@example.com"></label>
    <label>${t('password')}<input class="inp" id="aPass" type="password" placeholder="••••••••"></label>
    <div class="err" id="aErr"></div>
-   <button class="btn navy w" onclick="${authTab==='reg'?'doReg()':'doLogin()'}">${authTab==='reg'?t('register'):t('login')}</button>
-   <button class="btn ghost w" style="margin-top:.6rem" onclick="session={name:t('guest_name'),guest:1};ls('sb_session',session);render()">${t('continue_guest')}</button>
+   <button class="btn navy w" onclick="${authTab==='reg'?'doReg()':'doLogin()'}">${authTab==='reg'?t('register','إنشاء حساب'):t('login','تسجيل الدخول')}</button>
+   <button class="btn ghost w" style="margin-top:.6rem" onclick="session={name:t('guest_name','زائر'),guest:1};ls('sb_session',session);render()">${t('continue_guest','المتابعة كزائر')}</button>
   </div>
   <div class="feat"><span>${t('feature_planning')}</span><span>${t('feature_maps')}</span><span>${t('feature_experiences')}</span></div>
  </div>`;}
@@ -1022,9 +1022,8 @@ function pgHome(P){
   })();
 }
 function doSearch(){const q=$('q')?.value.trim();if(!q)return;sessionStorage.setItem('sb_destination_query',q);ls('sb_destination_query',q);window.location.href=`./create-trip.html?dest=${encodeURIComponent(q)}`;}
-render();
-window.setTimeout(()=>document.getElementById('splashScreen')?.remove(),650);
-document.addEventListener('DOMContentLoaded',applyDynamicTheme);
+function bootHome(){ render(); window.setTimeout(()=>document.getElementById('splashScreen')?.remove(),650); applyDynamicTheme(); }
+if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', bootHome, { once: true }); else bootHome();
 </script>
 <script>
 if ('serviceWorker' in navigator) {

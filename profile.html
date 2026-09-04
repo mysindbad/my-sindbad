@@ -82,11 +82,6 @@
     .setting{min-height:70px;padding:12px 14px}
     .setting-info{min-height:44px;font-size:.8rem}
     .setting-icon{width:40px;height:40px;font-size:1.1rem}
-    .setting:nth-child(1) .setting-icon::before{content:'🌐'}
-    .setting:nth-child(2) .setting-icon::before{content:'¤'}
-    .setting:nth-child(3) .setting-icon::before{content:'🔔'}
-    .setting:nth-child(4) .setting-icon::before{content:'🌙'}
-    .setting:nth-child(1) .setting-icon,.setting:nth-child(2) .setting-icon,.setting:nth-child(3) .setting-icon,.setting:nth-child(4) .setting-icon{font-size:0}
     select{min-height:44px;font-size:.74rem}
     .toggle{width:56px;min-width:56px;height:44px;min-height:44px}
     .toggle::after{top:10px}
@@ -114,7 +109,7 @@
 <script>(function(){try{var p=localStorage.getItem('themePreference')||'auto',h=new Date().getHours(),d=window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches,night=h>=19||h<6;document.documentElement.dataset.themePreference=p;document.documentElement.dataset.theme=(p==='dark'||(p==='auto'&&(night||d)))?'dark':'light';}catch(e){document.documentElement.dataset.theme='light';}})();</script>
 <link href="./theme.css" rel="stylesheet"/>
 <script defer="" src="./theme.js"></script>
-  <link rel="stylesheet" href="./system.css">
+<link rel="stylesheet" href="./system.css">
 </head>
 <body>
 <main class="shell">
@@ -132,10 +127,10 @@
 </section>
 <h2 class="section-title" data-i18n="settings">الإعدادات</h2>
 <section aria-label="إعدادات الحساب" data-i18n-aria-label="account_settings" class="settings">
-<label class="setting"><span class="setting-info"><span aria-hidden="true" class="setting-icon">文</span><span data-i18n="language">اللغة</span></span><select aria-label="اختيار اللغة" data-i18n-aria-label="language_select" data-language-select="" id="language"><option value="ar" data-i18n="language_ar">العربية</option><option value="en" data-i18n="language_en">English</option><option value="fr" data-i18n="language_fr">Français</option></select></label>
-<div class="setting"><span class="setting-info"><span aria-hidden="true" class="setting-icon">¤</span><span data-i18n="currency_converter">العملة</span></span><strong class="currency-badge" aria-label="MAD">MAD</strong></div>
-<div class="setting"><span class="setting-info"><span aria-hidden="true" class="setting-icon">♧</span><span data-i18n="notifications">الإشعارات</span></span><button aria-checked="false" aria-label="تفعيل الإشعارات" data-i18n-aria-label="notifications_toggle" class="toggle" id="notifications" role="switch" type="button"></button></div>
-<label class="setting"><span class="setting-info"><span aria-hidden="true" class="setting-icon">◐</span><span data-i18n="theme">المظهر</span></span><select aria-label="اختيار المظهر" data-i18n-aria-label="theme_select" id="theme"><option data-i18n="theme_auto" value="auto">تلقائي</option><option data-i18n="theme_light" value="light">نهاري</option><option data-i18n="theme_dark" value="dark">ليلي</option></select></label>
+<label class="setting"><span class="setting-info"><span aria-hidden="true" class="setting-icon"></span><span data-i18n="language">اللغة</span></span><select aria-label="اختيار اللغة" data-i18n-aria-label="language_select" data-language-select="" id="language"><option value="ar" data-i18n="language_ar">العربية</option><option value="en" data-i18n="language_en">English</option><option value="fr" data-i18n="language_fr">Français</option></select></label>
+<div class="setting"><span class="setting-info"><span aria-hidden="true" class="setting-icon"></span><span data-i18n="currency_converter">العملة</span></span><strong class="currency-badge" aria-label="MAD">MAD</strong></div>
+<div class="setting"><span class="setting-info"><span aria-hidden="true" class="setting-icon"></span><span data-i18n="notifications">الإشعارات</span></span><button aria-checked="false" aria-label="تفعيل الإشعارات" data-i18n-aria-label="notifications_toggle" class="toggle" id="notifications" role="switch" type="button"></button></div>
+<label class="setting"><span class="setting-info"><span aria-hidden="true" class="setting-icon"></span><span data-i18n="theme">المظهر</span></span><select aria-label="اختيار المظهر" data-i18n-aria-label="theme_select" id="theme"><option data-i18n="theme_auto" value="auto">تلقائي</option><option data-i18n="theme_light" value="light">نهاري</option><option data-i18n="theme_dark" value="dark">ليلي</option></select></label>
 </section>
 <h2 class="section-title" data-i18n="saved_trips">الرحلات المحفوظة</h2>
 <section aria-live="polite" class="trips" id="saved-trips"></section>
@@ -215,6 +210,6 @@
   </script>
 <script src="./utils/navigation.js"></script>
 <script src="./utils/header.js"></script>
-  <script src="./utils/icons.js" defer></script>
+<script src="./utils/icons.js" defer></script>
 </body>
 </html>
