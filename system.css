@@ -86,20 +86,20 @@ small { font-size: var(--fs-xs); }
   display: inline-flex; align-items: center; justify-content: center; gap: var(--sp-2);
   min-height: 44px; padding: .65rem 1.2rem;
   border: 1px solid transparent; border-radius: var(--r-md);
-  background: var(--accent-gold); color: var(--text-on-accent);
+  background: var(--accent-gold, #D4AF37); color: var(--text-on-accent, #0A192F);
   font-weight: 700; font-size: var(--fs-base); font-family: inherit;
   cursor: pointer; text-decoration: none; line-height: 1.2;
   transition: background-color var(--ease), transform var(--ease), box-shadow var(--ease);
 }
-.btn:hover, .ms-btn:hover { background: var(--accent-gold-hover); }
+.btn:hover, .ms-btn:hover { background: var(--accent-gold-hover, #ffcc33); }
 .btn:active, .ms-btn:active { transform: scale(.98); }
 .btn:focus-visible, .ms-btn:focus-visible { outline: none; box-shadow: 0 0 0 3px var(--gold-light); }
 
-/* Variants */
-.btn.navy, .ms-btn--navy { background: var(--navy-brand); color: var(--text-on-dark); }
-.btn.navy:hover, .ms-btn--navy:hover { background: var(--navy-800); }
-.btn.ghost, .ms-btn--ghost { background: transparent; border-color: var(--border-color); color: var(--text-primary); }
-.btn.ghost:hover, .ms-btn--ghost:hover { background: var(--surface-2); }
+/* Variants — with hardcoded fallbacks so they render correctly even if theme vars are missing */
+.btn.navy, .ms-btn--navy { background: var(--navy-brand, #0A192F); color: var(--text-on-dark, #ffffff); }
+.btn.navy:hover, .ms-btn--navy:hover { background: var(--navy-800, #243b53); }
+.btn.ghost, .ms-btn--ghost { background: transparent; border: 1px solid var(--border-color, #cbd5e1); color: var(--text-primary, #0A192F); }
+.btn.ghost:hover, .ms-btn--ghost:hover { background: var(--surface-2, #f4f7fb); }
 .btn.danger { background: var(--error); color: #fff; }
 .btn.danger:hover { background: #991b1b; }
 .btn.gold, .ms-btn { background: var(--accent-gold); color: var(--text-on-accent); }
