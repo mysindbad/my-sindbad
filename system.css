@@ -67,6 +67,12 @@ h3 { font-size: var(--fs-lg); font-weight: 700; }
 p { line-height: var(--lh-base); font-size: var(--fs-base); }
 small { font-size: var(--fs-xs); }
 
+/* Page intro — shared hero pattern (kicker + title + subtitle) used by community/explore/navigate/map */
+.intro { margin: 0 0 var(--sp-4); }
+.intro > p { margin: 0; color: var(--accent-gold-text, var(--accent-gold)); font-size: var(--fs-xs); font-weight: 800; letter-spacing: .02em; }
+.intro > h1 { margin: .3rem 0 .15rem; font-size: var(--fs-2xl); font-weight: 800; line-height: var(--lh-tight); color: var(--text-primary); }
+.intro > small, .intro > span, .intro > .dest { display: block; margin: .25rem 0 0; color: var(--text-secondary); font-size: var(--fs-sm); font-weight: 600; line-height: var(--lh-base); }
+
 /* Section heading (canonical .sec) */
 .sec {
   display: flex; align-items: center; gap: var(--sp-2);

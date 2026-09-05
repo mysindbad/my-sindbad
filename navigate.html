@@ -16,21 +16,21 @@
 *{box-sizing:border-box;font-family:Cairo,system-ui,sans-serif}body{margin:0;min-height:100vh;color:var(--color)}
 .shell{width:100%;max-width:480px;min-height:100vh;margin:auto;padding-bottom:calc(86px + env(safe-area-inset-bottom));background:var(--bg);box-shadow:0 0 60px #0005}
 .content{padding:18px}
-.intro p{margin:0;color:var(--dark);font-size:.68rem;font-weight:800}.intro h1{margin:.25rem 0 4px;color:var(--navy);font-size:1.35rem;font-weight:800}.intro .dest{color:#64748b;font-size:.78rem;margin:0 0 14px}
+/* .intro hero typography owned by system.css canonical */
 .search-box{display:none;margin-bottom:14px}
 .search-box input{width:100%;min-height:44px;padding:0 .8rem;border:1px solid var(--line);border-radius:12px;background:#fff;font-size:.86rem;outline:0}
 .search-box input:focus{border-color:var(--gold)}
 .results{margin-top:8px;display:grid;gap:6px}
 .results .res{display:block;text-align:right;padding:10px 12px;border:1px solid var(--line);border-radius:12px;background:#fff;color:var(--navy);cursor:pointer;font-weight:700;font-size:.82rem}
 .results .res small{display:block;color:#94a3b8;font-weight:600;font-size:.66rem;margin-top:2px}
-.map-box{display:none;position:relative;border:2px solid var(--gold);border-radius:18px;overflow:hidden;box-shadow:0 12px 28px #0b1b5124}
+.map-box{display:none;position:relative;border:2px solid var(--gold);border-radius:var(--r-lg);overflow:hidden;box-shadow:var(--sh-lg)}
 #navmap{height:52vh;min-height:340px;max-height:520px}
-.nav-panel{margin-top:14px;padding:14px;border:1px solid #d4af3780;border-radius:16px;background:#fff;box-shadow:0 8px 20px #0b1b5110}
+.nav-panel{margin-top:14px;padding:14px;border:1px solid #d4af3780;border-radius:var(--r-md);background:var(--card-bg);box-shadow:var(--sh-md)}
 .nav-panel .modes{display:flex;gap:8px;margin-bottom:12px}
-.nav-panel .modes button{flex:1;min-height:44px;border:1px solid var(--line);border-radius:12px;background:#fff;color:#516174;cursor:pointer;font-size:.82rem;font-weight:700}
+.nav-panel .modes button{flex:1;min-height:44px;border:1px solid var(--line);border-radius:var(--r-sm);background:#fff;color:#516174;cursor:pointer;font-size:.82rem;font-weight:700}
 .nav-panel .modes button.active{border-color:var(--gold);background:#fffaf0;color:var(--navy)}
 .nav-panel .stats{display:flex;gap:10px;margin-bottom:12px}
-.nav-panel .stat{flex:1;padding:10px;border-radius:12px;background:#0a192f;color:#fff;text-align:center}
+.nav-panel .stat{flex:1;padding:10px;border-radius:var(--r-sm);background:#0a192f;color:#fff;text-align:center}
 .nav-panel .stat small{display:block;color:#fffb;font-size:.6rem;margin-bottom:3px}
 .nav-panel .stat b{font-size:1.05rem;font-weight:800;color:var(--gold)}
 .nav-panel .status{min-height:20px;color:#475569;font-size:.76rem;font-weight:700;margin-bottom:10px;text-align:center}
@@ -38,11 +38,11 @@
 .gps-panel{margin-top:10px;padding:12px;border:1px solid var(--line);border-radius:12px;background:#fffaf0}
 .gps-panel p{font-size:.78rem;color:#475569;margin:0 0 .6rem;line-height:1.6}
 .gps-panel .gps-actions{display:flex;gap:8px}
-.gps-panel button,.gps-panel a{flex:1;display:inline-flex;align-items:center;justify-content:center;min-height:42px;border:0;border-radius:11px;font-weight:700;font-size:.8rem;cursor:pointer;text-decoration:none;font-family:inherit}
+.gps-panel button,.gps-panel a{flex:1;display:inline-flex;align-items:center;justify-content:center;min-height:44px;border:0;border-radius:var(--r-xs);font-weight:700;font-size:.8rem;cursor:pointer;text-decoration:none;font-family:inherit}
 .gps-panel .gps-retry{background:var(--gold);color:var(--navy)}
 .gps-panel .gps-alt{background:#fff;border:1px solid var(--line);color:var(--navy)}
 .nav-panel .actions{display:flex;gap:8px}
-.nav-panel .actions button{flex:1;min-height:50px;border:0;border-radius:14px;font-weight:800;font-size:.92rem;cursor:pointer}
+.nav-panel .actions button{flex:1;min-height:50px;border:0;border-radius:var(--r-md);font-weight:800;font-size:.92rem;cursor:pointer}
 #start-btn{background:var(--gold);color:var(--navy)}
 #stop-btn{display:none;background:#ef4444;color:#fff}
 </style>
@@ -188,6 +188,6 @@
   }
 })();
 </script>
-  <script src="./utils/icons.js" defer></script>
+<script src="./utils/icons.js" defer></script>
 </body>
 </html>
