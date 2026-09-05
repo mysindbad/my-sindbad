@@ -18,6 +18,7 @@
 <script src="./utils/auth.js"></script>
 <script src="./utils/cityImages.js"></script>
 <script src="./utils/geocode.js"></script>
+<script src="./utils/msLocation.js"></script>
 <script>
     tailwind.config = {
       theme: {
@@ -233,6 +234,26 @@
     let tripData = null;
     let itinerary = [];
     let editing = { day: 0, activity: 0 };
+
+    // Phase 15 — AI Location Awareness: in-memory freshness only.
+    // No watcher, no localStorage, never stored in trip/history/AppState.
+    const ASSISTANT_LOCATION_TTL = 5 * 60 * 1000;
+    let assistantLocation = null;
+    async function getAssistantLocation() {
+      if (assistantLocation && (Date.now() - assistantLocation.fetchedAt) < ASSISTANT_LOCATION_TTL) {
+        return { lat: assistantLocation.lat, lng: assistantLocation.lng, accuracy: assistantLocation.accuracy };
+      }
+      const MSLocation = window.MSLocation;
+      if (!MSLocation || typeof MSLocation.has !== 'function' || !MSLocation.has()) return null;
+      try {
+        const pos = await MSLocation.current({ enableHighAccuracy: false, maximumAge: 300000, timeout: 6000 });
+        if (pos && Number.isFinite(pos.lat) && Number.isFinite(pos.lng) && !(pos.lat === 0 && pos.lng === 0)) {
+          assistantLocation = { lat: pos.lat, lng: pos.lng, accuracy: Number.isFinite(pos.accuracy) ? pos.accuracy : null, fetchedAt: Date.now() };
+          return { lat: assistantLocation.lat, lng: assistantLocation.lng, accuracy: assistantLocation.accuracy };
+        }
+      } catch (error) { return null; }
+      return null;
+    }
 
     function escapeHtml(value) {
       return String(value ?? '').replace(/[&<>"']/g, (character) => ({
@@ -633,7 +654,10 @@
       addAssistantMessage('ai', assistantText('assistant_loading'), { loading: true });
       const loadingMessageIndex = assistantMessages.length - 1;
       try {
-        const response = await fetchWithTimeout('/api/assistant', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ message, trip: assistantTripPayload(), history: assistantHistory(), language: window.MySindbadI18n?.getLang?.() || localStorage.getItem('userLang') || 'ar' }) });
+        const location = await getAssistantLocation();
+        const payload = { message, trip: assistantTripPayload(), history: assistantHistory(), language: window.MySindbadI18n?.getLang?.() || localStorage.getItem('userLang') || 'ar' };
+        if (location) payload.location = location;
+        const response = await fetchWithTimeout('/api/assistant', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
         if (!response.ok) throw new Error('assistant');
         const result = await response.json();
         assistantMessages.splice(loadingMessageIndex, 1);

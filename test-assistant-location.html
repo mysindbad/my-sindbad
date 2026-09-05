@@ -147,6 +147,27 @@ async function runAsync() {
   assert('payload includes location when present', !!withLoc.location && withLoc.location.lat === 31.63);
   assert('payload omits location when absent', !('location' in withoutLoc));
 
+  // --- Phase 17 regression: location awareness must remain in itinerary.html ---
+  // Mirrors sendAssistantMessage contract: location optional + ephemeral, never in
+  // history/trip/localStorage, assistant runs without it on GPS failure.
+  {
+    const m = makeFreshnessModule(makeMSLocation({ resolve: { lat: 31.63, lng: -7.99, accuracy: 20 } }), now);
+    const loc = await m.get();
+    assert('regression: location obtained when available', !!loc && loc.lat === 31.63, JSON.stringify(loc));
+    const payloadWith = { message: 'أقرب مطعم', trip: tripPayload, history, language: 'ar' };
+    if (loc) payloadWith.location = loc;
+    assert('regression: location enters payload when available', !!payloadWith.location && payloadWith.location.lat === 31.63, JSON.stringify(payloadWith.location));
+    assert('regression: location not in history', !JSON.stringify(history).includes('lat') && !JSON.stringify(history).includes('location'));
+    assert('regression: location not in trip', !JSON.stringify(tripPayload).includes('"location"'));
+    assert('regression: freshness cache in-memory only (no localStorage key)', typeof m._cache === 'function' && !('localStorage' in m));
+    const failModule = makeFreshnessModule(makeMSLocation({ reject: 'DENIED' }), now);
+    const failLoc = await failModule.get();
+    const payloadFail = { message: 'أقرب مطعم', trip: tripPayload, history, language: 'ar' };
+    if (failLoc) payloadFail.location = failLoc;
+    assert('regression: GPS failure → no location in payload', !('location' in payloadFail), JSON.stringify(payloadFail));
+    assert('regression: assistant sends payload despite GPS failure', !!payloadFail.message && payloadFail.message === 'أقرب مطعم', payloadFail.message);
+  }
+
   render();
 }
 
