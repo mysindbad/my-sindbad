@@ -50,8 +50,12 @@
       + '</div>';
   }
 
-  /* ===== AI Assistant (preserved from original, FAB touch fix via CSS) ===== */
-  const assistantMarkup = ''
+  /* ===== AI Assistant (preserved from original, FAB touch fix via CSS) =====
+     NOTE: assistantMarkup is a FUNCTION (not const) so it's evaluated at
+     mountAssistant() time — AFTER i18n.js loads. This prevents raw translation
+     keys from appearing in the quick prompt buttons. */
+  function assistantMarkup() {
+    return ''
     + '<button id="m6-assistant-fab" class="m6-assistant-fab ms-ai-fab" type="button"'
     +   ' aria-label="' + tr('assistant_title') + '" title="' + tr('assistant_title') + '">'
     +   '<span>🤖</span>'
@@ -61,23 +65,24 @@
     +   '<div class="m6-assistant-grabber" aria-hidden="true"></div>'
     +   '<header class="m6-assistant-head">'
     +     '<div>'
-    +       '<h2>' + tr('assistant_title') + '</h2>'
-    +       '<p>' + tr('assistant_subtitle') + '</p>'
+    +       '<h2 data-i18n="assistant_title">' + tr('assistant_title') + '</h2>'
+    +       '<p data-i18n="assistant_subtitle">' + tr('assistant_subtitle') + '</p>'
     +     '</div>'
-    +     '<button id="m6-assistant-close" type="button" aria-label="' + tr('close') + '">×</button>'
+    +     '<button id="m6-assistant-close" type="button" aria-label="' + tr('close') + '" data-i18n-aria-label="close">×</button>'
     +   '</header>'
     +   '<div id="m6-assistant-messages" class="m6-assistant-messages" aria-live="polite"></div>'
     +   '<div id="m6-assistant-error" class="m6-assistant-error"></div>'
     +   '<div class="m6-assistant-quick">'
-    +     '<button type="button" data-assistant-prompt="' + tr('assistant_salutation') + '">' + tr('assistant_salutation') + '</button>'
-    +     '<button type="button" data-assistant-prompt="' + tr('assistant_wellbeing') + '">' + tr('assistant_wellbeing') + '</button>'
-    +     '<button type="button" data-assistant-prompt="' + tr('assistant_today_prompt') + '">' + tr('assistant_today_prompt') + '</button>'
+    +     '<button type="button" data-assistant-prompt-key="assistant_salutation" data-i18n="assistant_salutation">' + tr('assistant_salutation') + '</button>'
+    +     '<button type="button" data-assistant-prompt-key="assistant_wellbeing" data-i18n="assistant_wellbeing">' + tr('assistant_wellbeing') + '</button>'
+    +     '<button type="button" data-assistant-prompt-key="assistant_today_prompt" data-i18n="assistant_today_prompt">' + tr('assistant_today_prompt') + '</button>'
     +   '</div>'
     +   '<form id="m6-assistant-form" class="m6-assistant-form">'
-    +     '<input id="m6-assistant-input" type="text" autocomplete="off" placeholder="' + tr('assistant_input') + '" required>'
-    +     '<button type="submit" aria-label="' + tr('assistant_send') + '">➤</button>'
+    +     '<input id="m6-assistant-input" type="text" autocomplete="off" data-i18n-ph="assistant_input" placeholder="' + tr('assistant_input') + '" required>'
+    +     '<button type="submit" aria-label="' + tr('assistant_send') + '" data-i18n-aria-label="assistant_send">➤</button>'
     +   '</form>'
     + '</section>';
+  }
 
   function setScrolledState() {
     const header = document.querySelector('.site-header');
@@ -95,7 +100,8 @@
 
   function mountAssistant() {
     if (document.getElementById('m6-assistant-fab') || /itinerary(?:\.html)?$/.test(location.pathname)) return;
-    document.body.insertAdjacentHTML('beforeend', assistantMarkup);
+    document.body.insertAdjacentHTML('beforeend', assistantMarkup());
+    setTimeout(() => window.MySindbadI18n?.refresh?.(), 0);
     const fab = document.getElementById('m6-assistant-fab');
     const sheet = document.getElementById('m6-assistant-sheet');
     const backdrop = document.getElementById('m6-assistant-backdrop');
@@ -222,9 +228,10 @@
     close.addEventListener('click', shut);
     backdrop.addEventListener('click', shut);
     form.addEventListener('submit', (event) => { event.preventDefault(); send(input.value); });
-    document.querySelectorAll('[data-assistant-prompt]').forEach((button) => button.addEventListener('click', () => {
+    document.querySelectorAll('[data-assistant-prompt-key]').forEach((button) => button.addEventListener('click', () => {
       open();
-      input.value = button.dataset.assistantPrompt || '';
+      const key = button.dataset.assistantPromptKey;
+      input.value = key ? text(key, '') : '';
       input.focus();
     }));
   }
