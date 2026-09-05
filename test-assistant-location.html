@@ -25,6 +25,7 @@
 // Pure validation — MUST stay in sync with api/assistant.js parseLocation
 function parseLocation(value) {
   if (!value || typeof value !== 'object') return null;
+  if (value.lat == null || value.lng == null) return null;
   const lat = Number(value.lat);
   const lng = Number(value.lng);
   if (!Number.isFinite(lat) || !Number.isFinite(lng)) return null;

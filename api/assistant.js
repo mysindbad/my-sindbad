@@ -37,6 +37,7 @@ function localize(language, ar, en, fr) { return normaliseLanguage(language) ===
 // Phase 15 — Parse and validate optional user location from client. Never trust client input.
 function parseLocation(value) {
   if (!value || typeof value !== 'object') return null;
+  if (value.lat == null || value.lng == null) return null;
   const lat = Number(value.lat);
   const lng = Number(value.lng);
   if (!Number.isFinite(lat) || !Number.isFinite(lng)) return null;
