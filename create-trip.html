@@ -16,6 +16,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="./utils/supabaseClient.js" type="module"></script>
 <script src="./utils/cityImages.js"></script>
+<script src="./utils/geocode.js"></script>
 <script>
     tailwind.config = {
       theme: {
@@ -218,10 +219,8 @@
       const known = Object.entries(CITY_COORDS).find(([city]) => String(name || '').includes(city));
       if (known) return known[1];
       try {
-        const response = await fetchWithTimeout(`https://nominatim.openstreetmap.org/search?format=jsonv2&limit=1&accept-language=ar&q=${encodeURIComponent(name)}`, { headers: { Accept: 'application/json' } });
-        const [first] = await response.json();
-        const lat = Number(first?.lat), lng = Number(first?.lon);
-        if (Number.isFinite(lat) && Number.isFinite(lng) && !(lat === 0 && lng === 0)) return { lat, lng };
+        const result = await window.MySindbadGeocode?.geocode?.(name, { lang: 'ar' });
+        if (result && result.coordinates) return { lat: result.coordinates.lat, lng: result.coordinates.lng };
       } catch (error) { /* no city center available */ }
       return null;
     }
