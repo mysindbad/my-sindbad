@@ -15,6 +15,7 @@
 <link href="./theme.css" rel="stylesheet"/>
 <script defer="" src="./theme.js"></script>
 <script src="./utils/i18n.js?m6=final1" type="module"></script>
+<script type="module" src="./utils/msPlaces.js"></script>
   <link rel="stylesheet" href="./system.css">
 </head>
 <body class="bg-slate-50 text-slate-900 pb-24">
@@ -38,11 +39,13 @@
       <span id="p-category" class="ms-chip"></span>
       <span id="p-coords" class="ms-chip" style="direction:ltr">—</span>
     </div>
+    <div id="p-photos" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:.5rem;margin-bottom:1rem"></div>
     <div id="p-fields" style="display:grid;gap:.6rem"></div>
     <div id="p-source" class="ms-badge" style="margin:.9rem 0"></div>
     <div style="display:flex;flex-direction:column;gap:.6rem;margin-top:1rem">
       <button class="ms-btn ms-btn--block" id="add-trip" data-i18n="place_add_to_trip">أضف إلى رحلتي</button>
-      <a class="ms-btn ms-btn--navy ms-btn--block" id="go-nav" data-i18n="take_me_there">خذني إلى هناك</a>
+      <a class="ms-btn ms-btn--block" id="show-map" data-i18n="show_on_map" href="#">عرض على الخريطة</a>
+      <a class="ms-btn ms-btn--navy ms-btn--block" id="go-nav" data-i18n="take_me_there" href="#">خذني إلى هناك</a>
     </div>
   </article>
 </section>
@@ -64,6 +67,16 @@
   var kind=params.get('kind')||'';
   var nameStr=params.get('name')||'';
   var idStr=params.get('id')||'';
+  var sourceStr=params.get('source')||'';
+  var sidStr=params.get('sid')||'';
+  var catStr=params.get('cat')||'';
+  var canonicalId=(sourceStr && sidStr) ? (sourceStr+':'+sidStr) : idStr;
+  // derive kind from canonical category if not provided
+  if(!kind && catStr){
+    if(catStr==='hotel'||catStr==='hostel'||catStr==='guest_house'||catStr==='accommodation') kind='hotels';
+    else if(catStr==='restaurant'||catStr==='cafe'||catStr==='fast_food'||catStr==='food') kind='food';
+    else kind='tourism';
+  }
 
   function showLoading(){$('loading').hidden=false;$('not-found').hidden=true;$('error-box').hidden=true;$('place-card').hidden=true;}
   function showNotFound(){$('loading').hidden=true;$('not-found').hidden=false;$('error-box').hidden=true;$('place-card').hidden=true;}
@@ -91,8 +104,12 @@
         }catch(e){}
       }
       var match=null;
-      if(idStr){
-        for(var j=0;j<all.length;j++){ if(all[j].id===idStr||all[j].sourceId===idStr){match=all[j];break;} }
+      if(canonicalId){
+        for(var j=0;j<all.length;j++){
+          var p=all[j];
+          var pid=(p.source && p.sourceId) ? (p.source+':'+p.sourceId) : (p.id||p.sourceId||'');
+          if(pid===canonicalId || p.id===canonicalId || p.sourceId===canonicalId){match=p;break;}
+        }
       }
       if(!match){
         for(var k=0;k<all.length;k++){
@@ -105,9 +122,17 @@
   }
 
   function renderPlace(p){
+    var MSP=window.MSPlaces;
+    var cp=MSP?MSP.toCanonical(p):p;
     $('p-name').textContent=p.name||T('place_unknown','مكان');
     $('p-category').textContent=p.category||'';
     $('p-coords').textContent=(Number.isFinite(p.lat)?Number(p.lat).toFixed(5):'—')+', '+(Number.isFinite(p.lon)?Number(p.lon).toFixed(5):'—');
+    // photos (only real photos, never invented)
+    var photosEl=$('p-photos');
+    if(photosEl){
+      var photos=(cp && Array.isArray(cp.photos))?cp.photos:[];
+      photosEl.innerHTML=photos.length?photos.map(function(ph){return '<img src="'+esc(ph.url)+'" alt="'+esc(p.name||'')+'" style="width:100%;height:90px;object-fit:cover;border-radius:10px;border:1px solid var(--border-color)" loading="lazy">';}).join(''):'';
+    }
     var dq=p.dataQuality||{};
     var html='';
     html+=fieldRow(T('place_address','العنوان'),p.address,dq.address);
@@ -121,18 +146,33 @@
     $('p-source').textContent=T('place_source','المصدر')+': '+(srcMap[p.source]||p.source||'—');
     $('loading').hidden=true;$('place-card').hidden=false;
 
+    // Show on map (canonical identity)
+    var showMap=$('show-map');
+    if(showMap){ showMap.href = MSP?MSP.mapUrl(p):('./map.html?lat='+encodeURIComponent(p.lat)+'&lng='+encodeURIComponent(p.lon)+'&name='+encodeURIComponent(p.name||'')); }
+
+    // Add to trip (canonical id → dedup)
     $('add-trip').onclick=function(){
       var trip=window.AppState&&window.AppState.getTrip&&window.AppState.getTrip();
       if(!trip){showToast(T('place_create_trip_first','أنشئ رحلة أولاً'));return;}
-      var act={id:'place-'+Date.now(),name:p.name,place:p.name,title:p.name,description:p.description||'',coords:{lat:p.lat,lng:p.lon},coordinates:{lat:p.lat,lng:p.lon},lat:p.lat,lon:p.lon,category:p.category||'place',cost:p.estimatedCost||0,day:1,day_number:1};
-      if(window.AppState.addActivity){window.AppState.addActivity(act).then(function(ok){showToast(ok?T('place_added_to_trip','تمت الإضافة إلى رحلتك'):T('place_already_added','مضاف بالفعل'));});}
+      if(MSP && MSP.addPlaceToTrip){
+        MSP.addPlaceToTrip(p,{day:1}).then(function(r){
+          if(r.ok) showToast(T('place_added_to_trip','تمت الإضافة إلى رحلتك'));
+          else if(r.reason==='duplicate') showToast(T('place_already_added','مضاف بالفعل'));
+          else if(r.reason==='no-trip') showToast(T('place_create_trip_first','أنشئ رحلة أولاً'));
+          else showToast(T('place_add_failed','تعذّت الإضافة'));
+        });
+      } else {
+        var act={id:'place-'+Date.now(),name:p.name,place:p.name,title:p.name,description:p.description||'',coords:{lat:p.lat,lng:p.lon},coordinates:{lat:p.lat,lng:p.lon},lat:p.lat,lon:p.lon,category:p.category||'place',cost:p.estimatedCost||0,day:1,day_number:1};
+        if(window.AppState.addActivity){window.AppState.addActivity(act).then(function(ok){showToast(ok?T('place_added_to_trip','تمت الإضافة إلى رحلتك'):T('place_already_added','مضاف بالفعل'));});}
+      }
     };
-    $('go-nav').href='./navigate.html?dest='+encodeURIComponent(p.lat+','+p.lon)+'&name='+encodeURIComponent(p.name||'')+'&profile=walking';
+    // Navigate (canonical coordinates)
+    $('go-nav').href = MSP?MSP.navigateUrl(p,'walking'):('./navigate.html?dest='+encodeURIComponent(p.lat+','+p.lon)+'&name='+encodeURIComponent(p.name||'')+'&profile=walking');
   }
 
   $('retry-btn').onclick=loadPlace;
   loadPlace();
-})();
+ })();
 </script>
 <script defer src="./utils/header.js"></script>
   <script src="./utils/icons.js" defer></script>
