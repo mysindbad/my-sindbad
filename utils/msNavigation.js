@@ -84,7 +84,7 @@
     if (at <= 0) return 0;
     let idx = session.currentStepIndex >= 0 ? session.currentStepIndex : 0;
     const HYSTERESIS = 3; // meters — don't advance until 3m past the maneuver point
-    while (idx < steps.length - 1 && at > steps[idx].cumEnd + HYSTERESIS) {
+    while (idx < steps.length - 1 && at >= steps[idx].cumEnd + HYSTERESIS) {
       idx++;
     }
     return idx;
