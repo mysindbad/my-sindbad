@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Phase 18 — Community → Place → Map → Navigate Tests — My Sindbad</title>
+<style>
+  body { font-family: Cairo, system-ui, sans-serif; background: #060e1a; color: #e4eaf2; margin: 0; padding: 24px; }
+  h1 { font-size: 1.1rem; color: #D4AF37; margin: 0 0 6px; }
+  p.sub { color: #94a3b8; font-size: .75rem; margin: 0 0 14px; }
+  .summary { margin: 12px 0; padding: 12px 14px; border-radius: 12px; background: #0A192F; font-weight: 800; }
+  .ok { color: #34d399; } .fail { color: #f87171; }
+  .row { display: flex; gap: 10px; align-items: center; padding: 8px 10px; border-bottom: 1px solid rgba(255,255,255,.06); font-size: .8rem; }
+  .row .name { flex: 1; } .row .res { font-weight: 800; min-width: 50px; text-align: center; }
+  pre { background: #0A192F; padding: 10px; border-radius: 8px; overflow:auto; font-size:.72rem; color:#fbbf24; }
+  h2 { color:#cbd5e1; font-size:.85rem; margin:18px 0 6px; border-bottom:1px solid rgba(255,255,255,.08); padding-bottom:4px }
+</style>
+</head>
+<body>
+<h1>Phase 18 — Community → Place → Map → Navigate Tests</h1>
+<p class="sub">Deterministic tests for canonical community place flow, identity, URLs, add-to-trip, dedup, and end-to-end journey. No network.</p>
+<div id="summary" class="summary"></div>
+<div id="results"></div>
+<pre id="log"></pre>
+<script type="module">
+import { placeUrl, mapUrl, navigateUrl, addPlaceToTrip, placeActivityId, placeIdentity, toCanonical, validCoordinates, extractCoords, normalizeCategory } from './utils/msPlaces.js';
+
+const results = [];
+let passed = 0, failed = 0;
+function assert(name, cond, detail) {
+  const ok = !!cond;
+  if (ok) passed++; else failed++;
+  results.push({ name, ok, detail: detail || '' });
+}
+
+// ---- Mock AppState for addPlaceToTrip tests ----
+let activitiesStore = [];
+window.AppState = {
+  getTrip: () => ({ id: 'test-trip', destination: 'مراكش' }),
+  getActivities: () => activitiesStore,
+  addActivity: async (act) => {
+    if (activitiesStore.some(a => a.id === act.id)) return false;
+    activitiesStore.push(act);
+    return true;
+  }
+};
+
+// ---- Community raw post → canonical place ----
+const communityPost = { id: 101, location: 'مراكش، المغرب', description: 'تجربة رائعة', image: './images/marrakech.jpg', lat: 31.6295, lon: -7.9811 };
+function postToPlace(post) {
+  return { name: post.location, source: 'community', sourceId: String(post.id), category: 'place', description: post.description, image: post.image, lat: Number(post.lat), lon: Number(post.lon) };
+}
+
+const rawPlace = postToPlace(communityPost);
+const cp = toCanonical(rawPlace);
+assert('community raw → canonical has source', cp.source === 'community', cp.source);
+assert('community raw → canonical has sourceId', cp.sourceId === '101', cp.sourceId);
+assert('community raw → canonical has coords', validCoordinates(cp), JSON.stringify(cp.coordinates));
+assert('community raw → canonical coords correct', cp.coordinates.lat === 31.6295 && cp.coordinates.lng === -7.9811, JSON.stringify(cp.coordinates));
+assert('community raw → canonical category', cp.category === 'place', cp.category);
+assert('community raw → canonical name', cp.name === 'مراكش، المغرب', cp.name);
+assert('community raw → canonical description', cp.description === 'تجربة رائعة', cp.description);
+assert('community raw → canonical photos from image', Array.isArray(cp.photos) && cp.photos.length === 1 && cp.photos[0].url === './images/marrakech.jpg', JSON.stringify(cp.photos));
+
+// ---- Deterministic identity (no name-only) ----
+const id1 = placeIdentity(rawPlace);
+const id2 = placeIdentity(postToPlace({ id: 101, location: 'اسم مختلف', lat: 31.6295, lon: -7.9811 }));
+assert('identity = source:sourceId', id1 === 'community:101', id1);
+assert('same source/sourceId → same identity (different name)', id1 === id2, id1 + ' vs ' + id2);
+assert('identity not name-based', !id1.includes('مراكش'), id1);
+
+const actId1 = placeActivityId(rawPlace);
+const actId2 = placeActivityId(postToPlace({ id: 101, location: 'different', lat: 31.6295, lon: -7.9811 }));
+assert('activity id = source:sourceId', actId1 === 'community:101', actId1);
+assert('same source/sourceId → same activity id', actId1 === actId2, actId1 + ' vs ' + actId2);
+
+// ---- Community → Place URL identity ----
+const pUrl = placeUrl(rawPlace);
+const pParams = new URLSearchParams(pUrl.split('?')[1]);
+assert('placeUrl has id param', pParams.get('id') === 'community:101', pParams.get('id'));
+assert('placeUrl has source param', pParams.get('source') === 'community', pParams.get('source'));
+assert('placeUrl has sid param', pParams.get('sid') === '101', pParams.get('sid'));
+assert('placeUrl has lat', pParams.get('lat') === '31.629500', pParams.get('lat'));
+assert('placeUrl has lon', pParams.get('lon') === '-7.981100', pParams.get('lon'));
+assert('placeUrl has name', pParams.get('name') === 'مراكش، المغرب', pParams.get('name'));
+assert('placeUrl has cat', pParams.get('cat') === 'place', pParams.get('cat'));
+assert('placeUrl starts with place.html', pUrl.startsWith('./place.html?'), pUrl);
+
+// ---- Community → Map URL identity ----
+const mUrl = mapUrl(rawPlace);
+const mParams = new URLSearchParams(mUrl.split('?')[1]);
+assert('mapUrl has lat', mParams.get('lat') === '31.629500', mParams.get('lat'));
+assert('mapUrl has lng', mParams.get('lng') === '-7.981100', mParams.get('lng'));
+assert('mapUrl has id', mParams.get('id') === 'community:101', mParams.get('id'));
+assert('mapUrl has source', mParams.get('source') === 'community', mParams.get('source'));
+assert('mapUrl has sid', mParams.get('sid') === '101', mParams.get('sid'));
+assert('mapUrl has name', mParams.get('name') === 'مراكش، المغرب', mParams.get('name'));
+assert('mapUrl has cat', mParams.get('cat') === 'place', mParams.get('cat'));
+assert('mapUrl starts with map.html', mUrl.startsWith('./map.html?'), mUrl);
+
+// ---- Community → Navigate URL coordinates ----
+const nUrl = navigateUrl(rawPlace, 'walking');
+const nParams = new URLSearchParams(nUrl.split('?')[1]);
+assert('navigateUrl has dest', nParams.get('dest') === '31.6295,-7.9811', nParams.get('dest'));
+assert('navigateUrl has profile walking', nParams.get('profile') === 'walking', nParams.get('profile'));
+assert('navigateUrl has name', nParams.get('name') === 'مراكش، المغرب', nParams.get('name'));
+assert('navigateUrl starts with navigate.html', nUrl.startsWith('./navigate.html?'), nUrl);
+
+const nUrlDrive = navigateUrl(rawPlace, 'driving');
+const nParamsDrive = new URLSearchParams(nUrlDrive.split('?')[1]);
+assert('navigateUrl driving profile', nParamsDrive.get('profile') === 'driving', nParamsDrive.get('profile'));
+
+// ---- Community → Add to Trip ----
+activitiesStore = [];
+const addResult = await addPlaceToTrip(rawPlace, { day: 1 });
+assert('add to trip ok', addResult.ok === true, JSON.stringify(addResult));
+assert('add to trip activity id', addResult.activity && addResult.activity.id === 'community:101', addResult.activity?.id);
+assert('add to trip activity coords', addResult.activity && addResult.activity.coords.lat === 31.6295 && addResult.activity.coords.lng === -7.9811, JSON.stringify(addResult.activity?.coords));
+assert('add to trip activity source', addResult.activity && addResult.activity.source === 'community', addResult.activity?.source);
+assert('add to trip activity sourceId', addResult.activity && addResult.activity.sourceId === '101', addResult.activity?.sourceId);
+assert('add to trip activity category', addResult.activity && addResult.activity.category === 'place', addResult.activity?.category);
+assert('add to trip activity name', addResult.activity && addResult.activity.name === 'مراكش، المغرب', addResult.activity?.name);
+assert('add to trip stored in AppState', activitiesStore.length === 1 && activitiesStore[0].id === 'community:101', JSON.stringify(activitiesStore.map(a=>a.id)));
+
+// ---- duplicate Community add ----
+const dupResult = await addPlaceToTrip(rawPlace, { day: 1 });
+assert('duplicate add not ok', dupResult.ok === false, JSON.stringify(dupResult));
+assert('duplicate add reason', dupResult.reason === 'duplicate', dupResult.reason);
+assert('duplicate not stored again', activitiesStore.length === 1, 'len=' + activitiesStore.length);
+
+// ---- same source/sourceId → same activity id (different coords) ----
+const placeA = postToPlace({ id: 200, location: 'مكان أ', lat: 30, lon: -7 });
+const placeB = postToPlace({ id: 200, location: 'مكان ب', lat: 31, lon: -8 });
+assert('same source/sourceId diff name → same activity id', placeActivityId(placeA) === placeActivityId(placeB), placeActivityId(placeA) + ' vs ' + placeActivityId(placeB));
+
+// ---- legacy coords work without source ----
+const legacyPlace = { name: 'مكان قديم', lat: 30.5, lon: -9.5 };
+const legacyCp = toCanonical(legacyPlace);
+const legacyId = placeActivityId(legacyCp);
+assert('legacy has coords', validCoordinates(legacyCp), JSON.stringify(legacyCp.coordinates));
+assert('legacy identity is coord-based', legacyId.startsWith('place:'), legacyId);
+assert('legacy identity includes coords', legacyId === 'place:30.500000,-9.500000', legacyId);
+assert('legacy no source → unknown source', legacyCp.source === 'unknown', legacyCp.source);
+
+// ---- invalid coords rejected ----
+const noCoordsPlace = postToPlace({ id: 300, location: 'بدون إحداثيات', lat: null, lon: null });
+const noCoordsResult = await addPlaceToTrip(noCoordsPlace, { day: 1 });
+assert('no coords → add fails', noCoordsResult.ok === false, JSON.stringify(noCoordsResult));
+assert('no coords → reason no-coords', noCoordsResult.reason === 'no-coords', noCoordsResult.reason);
+
+const zeroPlace = postToPlace({ id: 301, location: 'صفر', lat: 0, lon: 0 });
+const zeroResult = await addPlaceToTrip(zeroPlace, { day: 1 });
+assert('zero coords → no-coords', zeroResult.reason === 'no-coords', zeroResult.reason);
+
+// ---- no trip → no-trip reason ----
+const savedTrip = window.AppState.getTrip;
+window.AppState.getTrip = () => null;
+const noTripResult = await addPlaceToTrip(rawPlace, { day: 1 });
+assert('no trip → reason no-trip', noTripResult.reason === 'no-trip', noTripResult.reason);
+window.AppState.getTrip = savedTrip;
+
+// ---- End-to-end: Community → Place → Map → Navigate (same identity) ----
+const e2ePost = { id: 999, location: 'شفشاون، المغرب', description: 'المدينة الزرقاء', image: './images/chefchaouen.jpg', lat: 35.1715, lon: -5.2696 };
+const e2ePlace = postToPlace(e2ePost);
+const e2eIdentity = placeIdentity(e2ePlace);
+const e2eActivityId = placeActivityId(e2ePlace);
+
+// Stage 1: Community → canonical
+const e2eCp = toCanonical(e2ePlace);
+assert('e2e: community → canonical identity', placeIdentity(e2eCp) === e2eIdentity, placeIdentity(e2eCp));
+assert('e2e: canonical coords', e2eCp.coordinates.lat === 35.1715 && e2eCp.coordinates.lng === -5.2696, JSON.stringify(e2eCp.coordinates));
+
+// Stage 2: Community → Place URL
+const e2ePlaceUrl = placeUrl(e2ePlace);
+const e2ePlaceParams = new URLSearchParams(e2ePlaceUrl.split('?')[1]);
+const e2ePlaceIdentity = e2ePlaceParams.get('source') + ':' + e2ePlaceParams.get('sid');
+assert('e2e: place URL identity matches', e2ePlaceIdentity === e2eIdentity, e2ePlaceIdentity + ' vs ' + e2eIdentity);
+assert('e2e: place URL coords', e2ePlaceParams.get('lat') === '35.171500' && e2ePlaceParams.get('lon') === '-5.269600', e2ePlaceParams.get('lat') + ',' + e2ePlaceParams.get('lon'));
+
+// Stage 3: Community → Map URL
+const e2eMapUrl = mapUrl(e2ePlace);
+const e2eMapParams = new URLSearchParams(e2eMapUrl.split('?')[1]);
+const e2eMapIdentity = e2eMapParams.get('source') + ':' + e2eMapParams.get('sid');
+assert('e2e: map URL identity matches', e2eMapIdentity === e2eIdentity, e2eMapIdentity + ' vs ' + e2eIdentity);
+assert('e2e: map URL coords', e2eMapParams.get('lat') === '35.171500' && e2eMapParams.get('lng') === '-5.269600', e2eMapParams.get('lat') + ',' + e2eMapParams.get('lng'));
+
+// Stage 4: Community → Navigate URL
+const e2eNavUrl = navigateUrl(e2ePlace, 'walking');
+const e2eNavParams = new URLSearchParams(e2eNavUrl.split('?')[1]);
+const e2eNavDest = e2eNavParams.get('dest');
+assert('e2e: navigate URL coords', e2eNavDest === '35.1715,-5.2696', e2eNavDest);
+assert('e2e: navigate URL name', e2eNavParams.get('name') === 'شفشاون، المغرب', e2eNavParams.get('name'));
+
+// Stage 5: Community → Add to Trip (same activity id)
+activitiesStore = [];
+const e2eAdd = await addPlaceToTrip(e2ePlace, { day: 1 });
+assert('e2e: add to trip ok', e2eAdd.ok === true, JSON.stringify(e2eAdd));
+assert('e2e: activity id = canonical identity', e2eAdd.activity && e2eAdd.activity.id === e2eActivityId, e2eAdd.activity?.id + ' vs ' + e2eActivityId);
+assert('e2e: activity id = source:sourceId', e2eAdd.activity && e2eAdd.activity.id === 'community:999', e2eAdd.activity?.id);
+
+// ---- Identity stable across all stages ----
+const allIdentities = [e2eIdentity, e2ePlaceIdentity, e2eMapIdentity, e2eActivityId];
+assert('e2e: all stages same identity', allIdentities.every(id => id === 'community:999'), JSON.stringify(allIdentities));
+
+// ---- render ----
+function render() {
+  document.getElementById('summary').innerHTML = '<span class="' + (failed ? 'fail' : 'ok') + '">' + passed + ' passed · ' + failed + ' failed</span> · ' + results.length + ' total';
+  let html = '';
+  results.forEach(r => {
+    html += '<div class="row"><span class="name">' + r.name + '</span><span class="res ' + (r.ok ? 'ok' : 'fail') + '">' + (r.ok ? 'PASS' : 'FAIL') + '</span></div>';
+  });
+  document.getElementById('results').innerHTML = html;
+  document.getElementById('log').textContent = failed ? results.filter(r => !r.ok).map(r => 'FAIL: ' + r.name + (r.detail ? ' — ' + r.detail : '')).join('\n') : 'All tests passed.';
+}
+render();
+</script>
+</body>
+</html>

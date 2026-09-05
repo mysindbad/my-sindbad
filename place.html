@@ -84,6 +84,13 @@
 
   if(!Number.isFinite(lat)||!Number.isFinite(lon)){showNotFound();return;}
 
+  // Community-sourced place: render from URL params (no API fetch, no invented data).
+  if(sourceStr==='community'){
+    var cpPlace={name:nameStr||T('community_place','مكان من المجتمع'),lat:lat,lon:lon,source:'community',sourceId:sidStr||'',category:catStr||'place',description:'',dataQuality:{coordinates:'real',address:'absent',description:'absent',openingHours:'absent',website:'absent',phone:'absent',estimatedCost:'absent'}};
+    renderPlace(cpPlace);
+    return;
+  }
+
   function fieldRow(label,value,quality){
     var absent = !value || quality==='absent';
     var valHtml = absent
@@ -142,7 +149,7 @@
     html+=fieldRow(T('place_phone','الهاتف'),p.phone,dq.phone);
     html+=fieldRow(T('place_cost','التكلفة التقريبية'),(dq.estimatedCost==='real'&&p.estimatedCost!=null)?(p.estimatedCost+' MAD'):'',dq.estimatedCost);
     $('p-fields').innerHTML=html;
-    var srcMap={osm:'OpenStreetMap','local:verified':T('place_source_verified','بيانات محلية موثّقة')};
+    var srcMap={osm:'OpenStreetMap','local:verified':T('place_source_verified','بيانات محلية موثّقة'),community:T('place_source_community','مجتمع المسافرين')};
     $('p-source').textContent=T('place_source','المصدر')+': '+(srcMap[p.source]||p.source||'—');
     $('loading').hidden=true;$('place-card').hidden=false;
 
@@ -172,7 +179,7 @@
 
   $('retry-btn').onclick=loadPlace;
   loadPlace();
- })();
+})();
 </script>
 <script defer src="./utils/header.js"></script>
   <script src="./utils/icons.js" defer></script>
