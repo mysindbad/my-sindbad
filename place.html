@@ -123,9 +123,18 @@
           if(Math.abs(all[k].lat-lat)<1e-6 && Math.abs(all[k].lon-lon)<1e-6){match=all[k];break;}
         }
       }
-      if(!match){showNotFound();return;}
+      if(!match){
+        // Fallback: render from URL params (no invented data — only show what we know).
+        var urlPlace={name:nameStr||T('place_unknown','مكان'),lat:lat,lon:lon,source:sourceStr||'unknown',sourceId:sidStr||'',category:catStr||'place',description:'',dataQuality:{coordinates:'real',address:'absent',description:'absent',openingHours:'absent',website:'absent',phone:'absent',estimatedCost:'absent'}};
+        renderPlace(urlPlace);
+        return;
+      }
       renderPlace(match);
-    }catch(e){showError();}
+    }catch(e){
+      // On API error, still try to render from URL params (graceful degradation).
+      var errPlace={name:nameStr||T('place_unknown','مكان'),lat:lat,lon:lon,source:sourceStr||'unknown',sourceId:sidStr||'',category:catStr||'place',description:'',dataQuality:{coordinates:'real',address:'absent',description:'absent',openingHours:'absent',website:'absent',phone:'absent',estimatedCost:'absent'}};
+      renderPlace(errPlace);
+    }
   }
 
   function renderPlace(p){

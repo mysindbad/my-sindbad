@@ -889,8 +889,11 @@
     loading.classList.add('hidden');
     aiLoadingScreen.classList.remove('hidden');
     window.setTimeout(async () => {
+      try {
       tripData = await loadCurrentTrip();
       if (!tripData || !tripData.destination || !tripData.dates || !tripData.dates.start) {
+        aiLoadingScreen.classList.add('hidden');
+        loading.classList.add('hidden');
         window.location.href = './create-trip.html';
         return;
       }
@@ -912,6 +915,12 @@
         }
       } catch (e) {}
       document.getElementById('aiLoadingScreen').classList.add('hidden');
+      } catch (err) {
+        console.error('Itinerary init error:', err);
+        aiLoadingScreen.classList.add('hidden');
+        loading.classList.add('hidden');
+        window.location.href = './create-trip.html';
+      }
     }, 2500);
   </script>
 <script src="./utils/navigation.js"></script>
