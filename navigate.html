@@ -25,42 +25,28 @@
 .results .res small{display:block;color:#94a3b8;font-weight:600;font-size:.66rem;margin-top:2px}
 .map-box{display:none;position:relative;border:2px solid var(--gold);border-radius:var(--r-lg);overflow:hidden;box-shadow:var(--sh-lg)}
 #navmap{height:52vh;min-height:340px;max-height:520px}
-.nav-panel{margin-top:14px;padding:14px;border:1px solid #d4af3780;border-radius:var(--r-md);background:var(--card-bg);box-shadow:var(--sh-md)}
-.nav-panel .modes{display:flex;gap:8px;margin-bottom:12px}
-.nav-panel .modes button{flex:1;min-height:44px;border:1px solid var(--line);border-radius:var(--r-sm);background:#fff;color:#516174;cursor:pointer;font-size:.82rem;font-weight:700}
-.nav-panel .modes button.active{border-color:var(--gold);background:#fffaf0;color:var(--navy)}
-.nav-panel .stats{display:flex;gap:10px;margin-bottom:12px}
-.nav-panel .stat{flex:1;padding:10px;border-radius:var(--r-sm);background:#0a192f;color:#fff;text-align:center}
-.nav-panel .stat small{display:block;color:#fffb;font-size:.6rem;margin-bottom:3px}
-.nav-panel .stat b{font-size:1.05rem;font-weight:800;color:var(--gold)}
-.nav-panel .status{min-height:20px;color:#475569;font-size:.76rem;font-weight:700;margin-bottom:10px;text-align:center}
-.nav-panel .warn{display:none;background:#fff7ed;border:1px solid #fdba74;color:#b45309;padding:8px 10px;border-radius:10px;font-size:.72rem;font-weight:700;margin-bottom:10px;text-align:center}
-.gps-panel{margin-top:10px;padding:12px;border:1px solid var(--line);border-radius:12px;background:#fffaf0}
-.gps-panel p{font-size:.78rem;color:#475569;margin:0 0 .6rem;line-height:1.6}
+.nav-panel{margin-top:14px;padding:16px;border:1px solid #d4af3780;border-radius:var(--r-lg);background:var(--card-bg);box-shadow:var(--sh-lg)}
+.nav-panel .modes{display:flex;gap:8px;margin-bottom:14px}
+.nav-panel .modes button{flex:1;min-height:48px;border:1px solid var(--line);border-radius:var(--r-sm);background:var(--card-bg);color:var(--text-secondary,#516174);cursor:pointer;font-size:.86rem;font-weight:700}
+.nav-panel .modes button.active{border-color:var(--gold);background:var(--gold-light,#fffaf0);color:var(--navy-brand,#0A192F)}
+/* Large, glanceable stats — readable while moving (like real nav apps) */
+.nav-panel .stats{display:flex;gap:10px;margin-bottom:14px}
+.nav-panel .stat{flex:1;padding:14px 10px;border-radius:var(--r-md);background:var(--navy-brand,#0A192F);color:#fff;text-align:center}
+.nav-panel .stat small{display:block;color:rgba(255,255,255,.65);font-size:.72rem;margin-bottom:6px;font-weight:600}
+.nav-panel .stat b{font-size:2rem;font-weight:800;color:var(--accent-gold,#D4AF37);line-height:1.1;font-variant-numeric:tabular-nums}
+/* Prominent status banner */
+.nav-panel .status{min-height:48px;display:flex;align-items:center;justify-content:center;color:var(--text-primary,#0A192F);font-size:.92rem;font-weight:800;margin-bottom:12px;text-align:center;padding:10px 14px;border-radius:var(--r-sm);background:var(--surface-2,#f4f7fb)}
+.nav-panel .warn{display:none;background:#fff7ed;border:1px solid #fdba74;color:#b45309;padding:10px 12px;border-radius:var(--r-sm);font-size:.8rem;font-weight:700;margin-bottom:12px;text-align:center}
+.gps-panel{margin-top:12px;padding:14px;border:1px solid var(--line);border-radius:var(--r-md);background:var(--gold-light,#fffaf0)}
+.gps-panel p{font-size:.82rem;color:var(--text-secondary,#475569);margin:0 0 .7rem;line-height:1.7}
 .gps-panel .gps-actions{display:flex;gap:8px}
-.gps-panel button,.gps-panel a{flex:1;display:inline-flex;align-items:center;justify-content:center;min-height:44px;border:0;border-radius:var(--r-xs);font-weight:700;font-size:.8rem;cursor:pointer;text-decoration:none;font-family:inherit}
-.gps-panel .gps-retry{background:var(--gold);color:var(--navy)}
-.gps-panel .gps-alt{background:#fff;border:1px solid var(--line);color:var(--navy)}
+.gps-panel button,.gps-panel a{flex:1;display:inline-flex;align-items:center;justify-content:center;min-height:48px;border:0;border-radius:var(--r-sm);font-weight:700;font-size:.84rem;cursor:pointer;text-decoration:none;font-family:inherit}
+.gps-panel .gps-retry{background:var(--accent-gold,#D4AF37);color:var(--navy-brand,#0A192F)}
+.gps-panel .gps-alt{background:var(--card-bg,#fff);border:1px solid var(--line);color:var(--navy-brand,#0A192F)}
 .nav-panel .actions{display:flex;gap:8px}
-.nav-panel .actions button{flex:1;min-height:50px;border:0;border-radius:var(--r-md);font-weight:800;font-size:.92rem;cursor:pointer}
-#start-btn{background:var(--gold);color:var(--navy)}
+.nav-panel .actions button{flex:1;min-height:56px;border:0;border-radius:var(--r-md);font-weight:800;font-size:1rem;cursor:pointer}
+#start-btn{background:var(--accent-gold,#D4AF37);color:var(--navy-brand,#0A192F)}
 #stop-btn{display:none;background:#ef4444;color:#fff}
-.maneuver-banner{display:none;position:absolute;top:0;right:0;left:0;z-index:500;padding:10px 12px calc(10px + env(safe-area-inset-top));background:linear-gradient(180deg,rgba(10,25,47,.97),rgba(10,25,47,.9));color:#fff;backdrop-filter:blur(10px);border-bottom:1px solid rgba(212,175,55,.45)}
-.maneuver-banner.show{display:block}
-.maneuver-main{display:flex;align-items:center;gap:11px}
-.maneuver-icon{flex:none;width:48px;height:48px;display:grid;place-items:center;border-radius:13px;background:var(--gold);color:var(--navy);box-shadow:0 3px 10px rgba(212,175,55,.3)}
-.maneuver-icon svg{width:30px;height:30px}
-.maneuver-info{flex:1;min-width:0}
-.maneuver-dist{font-size:1.35rem;font-weight:800;color:var(--gold);line-height:1.15;direction:ltr}
-.maneuver-text{font-size:.76rem;font-weight:700;color:#fff;line-height:1.45;margin-top:1px;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
-.maneuver-next{display:none;margin-top:7px;padding-top:7px;border-top:1px solid rgba(255,255,255,.12);font-size:.68rem;color:rgba(255,255,255,.7);font-weight:600;line-height:1.4}
-.maneuver-next.show{display:flex;align-items:center;gap:7px}
-.maneuver-next svg{width:18px;height:18px;flex:none;color:rgba(255,255,255,.55)}
-.maneuver-next span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.maneuver-arrived{display:none;text-align:center;font-size:1.1rem;font-weight:800;color:var(--gold);padding:4px 0}
-.maneuver-banner.arrived .maneuver-main,.maneuver-banner.arrived .maneuver-next{display:none}
-.maneuver-banner.arrived .maneuver-arrived{display:block}
-.maneuver-banner.arrived.show{display:block}
 </style>
 <script>(function(){try{var p=localStorage.getItem('themePreference')||'auto',h=new Date().getHours(),d=window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches,night=h>=19||h<6;document.documentElement.dataset.themePreference=p;document.documentElement.dataset.theme=(p==='dark'||(p==='auto'&&(night||d)))?'dark':'light';}catch(e){document.documentElement.dataset.theme='light';}})();</script>
 <link href="./theme.css" rel="stylesheet"/>
@@ -76,7 +62,6 @@
 <div class="results" id="results"></div>
 </div>
 <div class="map-box" id="map-box">
-<div class="maneuver-banner" id="maneuver-banner"><div class="maneuver-main"><div class="maneuver-icon" id="maneuver-icon"></div><div class="maneuver-info"><div class="maneuver-dist" id="maneuver-dist">—</div><div class="maneuver-text" id="maneuver-text"></div></div></div><div class="maneuver-next" id="maneuver-next"><span id="maneuver-next-icon"></span><span id="maneuver-next-text"></span></div><div class="maneuver-arrived" id="maneuver-arrived"></div></div>
 <div id="navmap"></div>
 <div class="nav-panel">
 <div class="modes">
@@ -110,8 +95,6 @@
 <script src="https://api.mapbox.com/mapbox-gl-js/v3.5.1/mapbox-gl.js"></script>
 <script src="./utils/msLocation.js"></script>
 <script src="./utils/msRouting.js"></script>
-<script src="./utils/msNavIcons.js"></script>
-<script src="./utils/msFormat.js"></script>
 <script src="./utils/msNavigation.js"></script>
 <script>
 (function(){
@@ -171,25 +154,7 @@
       showGPSDetail('<p>'+t('nav_error_explain','تعذّر حساب المسار الآن. تحقق من اتصالك بالإنترنت ثم أعد المحاولة.')+'</p><div class="gps-actions"><button class="gps-retry" id="gps-retry">'+t('retry','إعادة المحاولة')+'</button></div>');
       bindRetry();
     }
-    updateManeuverBanner(snap);
     $('status').textContent=msg;$('warn').hidden=!warn;
-  }
-  var lastNavKey='';
-  function updateManeuverBanner(snap){
-    var banner=$('maneuver-banner');if(!banner)return;
-    if(snap.state==='arrived'){banner.classList.add('show','arrived');$('maneuver-arrived').textContent=t('nav_arrived','وصلت إلى وجهتك ✓');return;}
-    if(snap.state!=='navigating'||!snap.maneuver||snap.rerouting){banner.classList.remove('show','arrived');return;}
-    var key=[snap.currentStepIndex,snap.distanceToManeuver,snap.maneuver.type,snap.maneuver.modifier,snap.maneuver.instruction,snap.nextManeuver?snap.nextManeuver.type:''].join('|');
-    if(key===lastNavKey)return;lastNavKey=key;
-    banner.classList.add('show');banner.classList.remove('arrived');
-    $('maneuver-icon').innerHTML=window.MSNavIcons?window.MSNavIcons.maneuverSVG(snap.maneuver.type,snap.maneuver.modifier):'';
-    $('maneuver-dist').textContent=window.MSFormat?window.MSFormat.formatDistance(snap.distanceToManeuver):fmtDist(snap.distanceToManeuver);
-    var txt=snap.maneuver.instruction||'';
-    if(snap.maneuver.streetName&&txt.indexOf(snap.maneuver.streetName)<0)txt=txt+' — '+snap.maneuver.streetName;
-    $('maneuver-text').textContent=txt;
-    var nextEl=$('maneuver-next');
-    if(snap.nextManeuver&&snap.distanceToNextManeuver!=null){nextEl.classList.add('show');$('maneuver-next-icon').innerHTML=window.MSNavIcons?window.MSNavIcons.maneuverSVG(snap.nextManeuver.type,snap.nextManeuver.modifier):'';$('maneuver-next-text').textContent=t('nav_then','بعد ذلك:')+' '+(snap.nextManeuver.instruction||'');}
-    else{nextEl.classList.remove('show');}
   }
   async function startNav(){
     if(!dest){return;}
@@ -197,10 +162,10 @@
     if(!map){return;}
     navigating=true;$('start-btn').hidden=true;$('stop-btn').hidden=false;
     $('mode-walking').disabled=true;$('mode-driving').disabled=true;
-    window.MSNavigation.on(setUI);lastNavKey='';
-    await window.MSNavigation.start({map:map,destination:dest,profile:profile,mapboxgl:mapboxgl,language:(window.MySindbadI18n&&window.MySindbadI18n.getLang&&window.MySindbadI18n.getLang())||'ar'});
+    window.MSNavigation.on(setUI);
+    await window.MSNavigation.start({map:map,destination:dest,profile:profile,mapboxgl:mapboxgl});
   }
-  function stopNav(){window.MSNavigation.stop();navigating=false;clearWaiting();hideGPSDetail();$('start-btn').hidden=false;$('stop-btn').hidden=true;$('mode-walking').disabled=false;$('mode-driving').disabled=false;lastNavKey='';$('maneuver-banner').classList.remove('show','arrived');$('status').textContent=t('nav_ready','جاهز — اضغط ابدأ الملاحة');$('warn').hidden=true;}
+  function stopNav(){window.MSNavigation.stop();navigating=false;clearWaiting();hideGPSDetail();$('start-btn').hidden=false;$('stop-btn').hidden=true;$('mode-walking').disabled=false;$('mode-driving').disabled=false;$('status').textContent=t('nav_ready','جاهز — اضغط ابدأ الملاحة');$('warn').hidden=true;}
   $('mode-walking').addEventListener('click',function(){if(navigating)return;profile='walking';$('mode-walking').classList.add('active');$('mode-driving').classList.remove('active');});
   $('mode-driving').addEventListener('click',function(){if(navigating)return;profile='driving';$('mode-driving').classList.add('active');$('mode-walking').classList.remove('active');});
   $('start-btn').addEventListener('click',startNav);
