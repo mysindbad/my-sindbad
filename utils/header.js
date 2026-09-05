@@ -1,23 +1,131 @@
+/* My Sindbad — Shared Header (Mobile-first redesign)
+   - Clean header: [logo + page context]  [settings/profile action]
+   - NO random Home button (Home is in bottom navigation)
+   - NO random Language switcher (Language is in Profile/Settings)
+   - AI Assistant FAB with mobile touch fix (48px target, touch-action)
+   - Preserves all Phase 15-19 AI assistant logic */
 (function initSharedHeader() {
   const tr = (key) => window.MySindbadI18n?.getTranslation?.(window.MySindbadI18n?.getLang?.() || 'ar', key) || key;
-  const logo = `<span class="site-header__mark" aria-hidden="true"><svg width="32" height="32" viewBox="0 0 32 32" fill="none"><path d="M4 20L8 16L12 20L16 16L20 20L24 16L28 20" stroke="#D4AF37" stroke-width="2" stroke-linecap="round"/><path d="M8 20V26H24V20" fill="#D4AF37"/><path d="M16 8V16" stroke="#D4AF37" stroke-width="2"/><path d="M16 8L22 12L16 16Z" fill="#D4AF37"/></svg></span><span class="site-header__wordmark"><strong>My Sindbad</strong><small data-i18n="header_tagline">${tr('header_tagline')}</small></span>`;
-  function headerMarkup() { return `<header class="site-header" id="mainHeader"><div class="site-header__inner"><a class="site-header__brand" href="./index.html" aria-label="My Sindbad - ${tr('nav_home')}" data-i18n-aria-label="nav_home">${logo}</a><a class="site-header__home" href="./index.html" data-i18n="nav_home">${tr('nav_home')}</a><select data-language-select aria-label="${tr('language')}" data-i18n-aria-label="language" class="site-header__lang"><option value="ar" data-i18n="language_ar">${tr('language_ar')}</option><option value="en" data-i18n="language_en">${tr('language_en')}</option><option value="fr" data-i18n="language_fr">${tr('language_fr')}</option></select></div></header>`; }
-  const style = `<style id="m7-shared-assistant-style">.m6-assistant-fab{position:fixed;left:max(16px,calc(50% - 224px));bottom:calc(var(--nav-h,64px) + var(--fab-gap,12px) + env(safe-area-inset-bottom));z-index:900;width:var(--fab-size,40px);height:var(--fab-size,40px);padding:0;border:2px solid var(--card-bg,#fff);border-radius:50%;background:var(--accent-gold,#D4AF37);color:var(--navy-brand,#0A192F);font-size:1rem;box-shadow:0 4px 14px rgba(6,14,26,.20);cursor:pointer;transition:transform .18s ease,box-shadow .18s ease}.m6-assistant-fab:hover{transform:translateY(-2px);box-shadow:0 6px 18px rgba(6,14,26,.26)}.m6-assistant-fab:active{transform:scale(.94)}.m6-assistant-fab:focus-visible{outline:3px solid var(--accent-gold,#D4AF37);outline-offset:2px}.m6-assistant-backdrop{position:fixed;inset:0;z-index:1210;background:#06101f99;backdrop-filter:blur(3px)}.m6-assistant-sheet{position:fixed;inset-inline-end:50%;bottom:0;z-index:1220;display:flex;width:min(100%,480px);height:min(85vh,720px);max-height:85vh;transform:translateX(50%);flex-direction:column;overflow:hidden;border-radius:24px 24px 0 0;background:var(--card-bg,#fff);color:var(--color,#0c1624);box-shadow:0 -18px 60px #0005}.m6-assistant-sheet[hidden],.m6-assistant-backdrop[hidden]{display:none}.m6-assistant-head{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-bottom:1px solid var(--border,#e5e7eb)}.m6-assistant-head h2{margin:0;color:var(--color,#0c1624);font-size:1rem}.m6-assistant-head button{width:44px;height:44px;border:0;border-radius:10px;background:var(--surface-2,#eef2f7);color:var(--text-primary,#0A192F);font-size:1.1rem}.m6-assistant-messages{flex:1;min-height:0;overflow-y:auto;padding:14px}.m6-assistant-message{max-width:88%;margin:0 0 9px;padding:9px 11px;border-radius:14px;font-size:.875rem;line-height:1.75;white-space:pre-wrap}.m6-assistant-message.user{margin-inline-start:auto;background:#0A192F;color:#fff}.m6-assistant-message.ai{margin-inline-end:auto;background:var(--surface-2,#fffaf0);color:var(--color,#0c1624);border:1px solid var(--border,#e5e7eb)}.m6-assistant-quick{display:flex;gap:6px;overflow-x:auto;padding:8px 12px;border-top:1px solid var(--border,#e5e7eb)}.m6-assistant-quick button{flex:none;min-height:44px;padding:7px 9px;border:1px solid var(--accent-gold,#D4AF37);border-radius:999px;background:var(--surface-2,#fffaf0);color:var(--text-primary,#0A192F);font-size:.875rem;font-weight:700}.m6-assistant-form{position:sticky;bottom:0;z-index:4;display:flex;gap:8px;padding:9px 12px calc(12px + env(safe-area-inset-bottom));border-top:1px solid var(--border,#e5e7eb);background:var(--card-bg,#fff)}.m6-assistant-form input{min-width:0;flex:1;padding:10px;border:1px solid var(--border,#dbe2ea);border-radius:12px;background:inherit;color:var(--color,#0c1624);font-size:.875rem}.m6-assistant-form button{width:44px;min-height:44px;border:0;border-radius:12px;background:#0A192F;color:#fff;font-size:1rem}.m6-assistant-error{padding:4px 12px;color:#b91c1c;font-size:.75rem}.m6-assistant-action{margin:0 0 10px;padding:10px;border:1px solid var(--accent-gold,#D4AF37);border-radius:12px;background:var(--surface-2,#fffaf0);color:var(--text-primary,#0c1624);font-size:.875rem;line-height:1.6}.m6-assistant-action button{min-height:44px;margin-top:7px;padding:0 10px;border:0;border-radius:9px;background:#D4AF37;color:#0A192F;font-weight:800;cursor:pointer}.m6-assistant-options{display:flex;flex-wrap:wrap;gap:6px}.m6-assistant-options button{margin-top:0}</style>`;
-  const assistantMarkup = `${style}<button class="m6-assistant-fab" id="m6-assistant-fab" type="button" aria-label="${tr('assistant_title')}" data-i18n-aria-label="assistant_title" title="${tr('assistant_title')}" data-i18n-title="assistant_title">🤖</button><div class="m6-assistant-backdrop" id="m6-assistant-backdrop" hidden></div><section class="m6-assistant-sheet" id="m6-assistant-sheet" role="dialog" aria-modal="true" aria-labelledby="m6-assistant-title" hidden><header class="m6-assistant-head"><h2 id="m6-assistant-title" data-i18n="assistant_title">${tr('assistant_title')}</h2><button id="m6-assistant-close" type="button" data-i18n="close" aria-label="${tr('close')}">×</button></header><div class="m6-assistant-messages" id="m6-assistant-messages" aria-live="polite"></div><div class="m6-assistant-quick"><button type="button" data-i18n="assistant_salutation" data-assistant-prompt="${tr('assistant_salutation')}">${tr('assistant_salutation')}</button><button type="button" data-i18n="assistant_wellbeing" data-assistant-prompt="${tr('assistant_wellbeing')}">${tr('assistant_wellbeing')}</button><button type="button" data-i18n="assistant_today_prompt" data-assistant-prompt="${tr('assistant_today_prompt')}">${tr('assistant_today_prompt')}</button></div><form class="m6-assistant-form" id="m6-assistant-form" novalidate><input id="m6-assistant-input" type="text" autocomplete="off" data-i18n-placeholder="assistant_input" placeholder="${tr('assistant_input')}" aria-label="${tr('assistant_message')}"><button type="submit" data-i18n="send" data-i18n-aria-label="assistant_send" aria-label="${tr('assistant_send')}">➤</button></form><div class="m6-assistant-error" id="m6-assistant-error" role="status"></div></section>`;
-  function setScrolledState() { const header = document.getElementById('mainHeader'); if (header) header.classList.toggle('is-scrolled', window.scrollY > 50); }
+
+  const LOGO_SVG = '<svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">'
+    + '<path d="M16 2L2 9v14l14 7 14-7V9L16 2z" stroke="#D4AF37" stroke-width="2" fill="rgba(212,175,55,0.1)"/>'
+    + '<path d="M10 16l4 4 8-8" stroke="#D4AF37" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>'
+    + '</svg>';
+
+  const SETTINGS_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" '
+    + 'stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">'
+    + '<circle cx="12" cy="8" r="4"/><path d="M4 20a8 8 0 0 1 16 0"/></svg>';
+
+  const PAGE_TITLES = {
+    home: 'nav_home',
+    trip: 'nav_itinerary',
+    create: 'nav_create',
+    explore: 'nav_explore',
+    map: 'map_heading',
+    community: 'nav_community',
+    profile: 'nav_profile'
+  };
+
+  function getPageTitle() {
+    const nav = document.querySelector('[data-site-nav]');
+    const active = nav?.dataset?.active;
+    const key = PAGE_TITLES[active] || 'header_tagline';
+    return tr(key);
+  }
+
+  function headerMarkup() {
+    const pageTitle = getPageTitle();
+    return ''
+      + '<div class="site-header__inner">'
+      +   '<a class="site-header__brand" href="./index.html" aria-label="My Sindbad">'
+      +     '<span class="site-header__mark">' + LOGO_SVG + '</span>'
+      +     '<span class="site-header__wordmark">'
+      +       '<strong>My Sindbad</strong>'
+      +       '<small>' + pageTitle + '</small>'
+      +     '</span>'
+      +   '</a>'
+      +   '<a class="site-header__action" href="./profile.html" aria-label="' + tr('nav_profile') + '">'
+      +     '<span class="ms-icon" aria-hidden="true">' + SETTINGS_SVG + '</span>'
+      +   '</a>'
+      + '</div>';
+  }
+
+  /* ===== AI Assistant (preserved from original, FAB touch fix via CSS) ===== */
+  const assistantMarkup = ''
+    + '<button id="m6-assistant-fab" class="m6-assistant-fab ms-ai-fab" type="button"'
+    +   ' aria-label="' + tr('assistant_title') + '" title="' + tr('assistant_title') + '">'
+    +   '<span>🤖</span>'
+    + '</button>'
+    + '<div id="m6-assistant-backdrop" class="m6-assistant-backdrop" hidden></div>'
+    + '<section id="m6-assistant-sheet" class="m6-assistant-sheet" role="dialog" aria-modal="true" hidden>'
+    +   '<div class="m6-assistant-grabber" aria-hidden="true"></div>'
+    +   '<header class="m6-assistant-head">'
+    +     '<div>'
+    +       '<h2>' + tr('assistant_title') + '</h2>'
+    +       '<p>' + tr('assistant_subtitle') + '</p>'
+    +     '</div>'
+    +     '<button id="m6-assistant-close" type="button" aria-label="' + tr('close') + '">×</button>'
+    +   '</header>'
+    +   '<div id="m6-assistant-messages" class="m6-assistant-messages" aria-live="polite"></div>'
+    +   '<div id="m6-assistant-error" class="m6-assistant-error"></div>'
+    +   '<div class="m6-assistant-quick">'
+    +     '<button type="button" data-assistant-prompt="' + tr('assistant_salutation') + '">' + tr('assistant_salutation') + '</button>'
+    +     '<button type="button" data-assistant-prompt="' + tr('assistant_wellbeing') + '">' + tr('assistant_wellbeing') + '</button>'
+    +     '<button type="button" data-assistant-prompt="' + tr('assistant_today_prompt') + '">' + tr('assistant_today_prompt') + '</button>'
+    +   '</div>'
+    +   '<form id="m6-assistant-form" class="m6-assistant-form">'
+    +     '<input id="m6-assistant-input" type="text" autocomplete="off" placeholder="' + tr('assistant_input') + '" required>'
+    +     '<button type="submit" aria-label="' + tr('assistant_send') + '">➤</button>'
+    +   '</form>'
+    + '</section>';
+
+  function setScrolledState() {
+    const header = document.querySelector('.site-header');
+    if (header) header.classList.toggle('is-scrolled', window.scrollY > 50);
+  }
+
   function readTrip() { return window.AppState?.getTrip?.() || {}; }
-  async function fetchWithTimeout(input, init = {}, timeoutMs = 5000) { const controller = new AbortController(); const timer = setTimeout(() => controller.abort(), timeoutMs); try { return await fetch(input, { ...init, signal: controller.signal }); } finally { clearTimeout(timer); } }
+
+  async function fetchWithTimeout(input, init = {}, timeoutMs = 5000) {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), timeoutMs);
+    try { return await fetch(input, { ...init, signal: controller.signal }); }
+    finally { clearTimeout(timer); }
+  }
+
   function mountAssistant() {
     if (document.getElementById('m6-assistant-fab') || /itinerary(?:\.html)?$/.test(location.pathname)) return;
     document.body.insertAdjacentHTML('beforeend', assistantMarkup);
-    const fab = document.getElementById('m6-assistant-fab'), sheet = document.getElementById('m6-assistant-sheet'), backdrop = document.getElementById('m6-assistant-backdrop'), close = document.getElementById('m6-assistant-close'), form = document.getElementById('m6-assistant-form'), input = document.getElementById('m6-assistant-input'), messages = document.getElementById('m6-assistant-messages'), error = document.getElementById('m6-assistant-error');
+    const fab = document.getElementById('m6-assistant-fab');
+    const sheet = document.getElementById('m6-assistant-sheet');
+    const backdrop = document.getElementById('m6-assistant-backdrop');
+    const close = document.getElementById('m6-assistant-close');
+    const form = document.getElementById('m6-assistant-form');
+    const input = document.getElementById('m6-assistant-input');
+    const messages = document.getElementById('m6-assistant-messages');
+    const error = document.getElementById('m6-assistant-error');
+
     const history = [];
     const lang = () => localStorage.getItem('userLang') || 'ar';
     const text = (key, fallback) => window.MySindbadI18n?.getTranslation?.(lang(), key) || fallback;
-    const add = (role, value) => { const node = document.createElement('div'); node.className = `m6-assistant-message ${role}`; node.textContent = value; messages.appendChild(node); messages.scrollTop = messages.scrollHeight; return node; };
-    const open = () => { sheet.hidden = false; backdrop.hidden = false; input.focus(); };
+
+    const add = (role, value) => {
+      const node = document.createElement('div');
+      node.className = 'm6-assistant-message ' + role;
+      node.textContent = value;
+      messages.appendChild(node);
+      messages.scrollTop = messages.scrollHeight;
+      return node;
+    };
+
+    const open = () => { sheet.hidden = false; backdrop.hidden = false; setTimeout(() => input.focus(), 50); };
     const shut = () => { sheet.hidden = true; backdrop.hidden = true; };
-    function persistTrip(next) { window.AppState?.saveTrip?.(next); window.dispatchEvent(new CustomEvent('appstate:trip-updated', { detail: next })); }
+
+    function persistTrip(next) {
+      window.AppState?.saveTrip?.(next);
+      window.dispatchEvent(new CustomEvent('appstate:trip-updated', { detail: next }));
+    }
+
     async function execute(result) {
       const current = readTrip();
       let next = current;
@@ -27,26 +135,112 @@
       const dayIndex = days.findIndex((item) => Number(item.day) === day);
       if (dayIndex < 0) throw new Error('day_not_found');
       if (result.type === 'REMOVE' || result.type === 'REMOVE_ACTIVITY') days[dayIndex].activities.splice(index, 1);
-      else if (result.type === 'MOVE' || result.type === 'MOVE_ACTIVITY') { const targetDay = Number(result.toDay || result.targetDay) || day + 1; const target = days.find((item) => Number(item.day) === targetDay); const [activity] = days[dayIndex].activities.splice(index, 1); if (!target || !activity) throw new Error('move_target_not_found'); target.activities.push(activity); }
+      else if (result.type === 'MOVE' || result.type === 'MOVE_ACTIVITY') {
+        const targetDay = Number(result.toDay || result.targetDay) || day + 1;
+        const target = days.find((item) => Number(item.day) === targetDay);
+        const [activity] = days[dayIndex].activities.splice(index, 1);
+        if (!target || !activity) throw new Error('move_target_not_found');
+        target.activities.push(activity);
+      }
       else if (result.type === 'REPLAN') days.forEach((item) => item.activities.sort((a, b) => String(a.time || '').localeCompare(String(b.time || ''))));
-      else if (result.type === 'REPLACE_ACTIVITY') { const replacement = result.option; if (!replacement) throw new Error('replacement_missing'); days[dayIndex].activities[index] = { ...days[dayIndex].activities[index], ...replacement, title: replacement.title || replacement.name }; }
+      else if (result.type === 'REPLACE_ACTIVITY') {
+        const replacement = result.option;
+        if (!replacement) throw new Error('replacement_missing');
+        days[dayIndex].activities[index] = { ...days[dayIndex].activities[index], ...replacement, title: replacement.title || replacement.name };
+      }
       else throw new Error('unsupported_action');
       next = { ...current, days };
       persistTrip(next);
       return next;
     }
+
     function addAction(result) {
-      const box = document.createElement('div'); box.className = 'm6-assistant-action';
-      const preview = result.preview || result.message || text('preview', 'Preview'); const copy = document.createElement('div'); copy.textContent = preview; box.appendChild(copy);
+      const box = document.createElement('div');
+      box.className = 'm6-assistant-action';
+      const preview = result.preview || result.message || text('preview', 'Preview');
+      const copy = document.createElement('div');
+      copy.textContent = preview;
+      box.appendChild(copy);
       if (result.type === 'REPLACE_ACTIVITY' && Array.isArray(result.options) && result.options.length) {
-        const options = document.createElement('div'); options.className = 'm6-assistant-options'; result.options.forEach((option) => { const button = document.createElement('button'); button.type = 'button'; button.textContent = `${option.title} · ${option.cost || 0} MAD`; button.addEventListener('click', async () => { button.disabled = true; try { await execute({ ...result, option }); add('ai', text('added_success', 'Change applied successfully.')); } catch { add('ai', text('assistant_error', 'I could not apply that change.')); } }); options.appendChild(button); }); box.appendChild(options);
-      } else if (['REMOVE', 'REMOVE_ACTIVITY', 'MOVE', 'MOVE_ACTIVITY', 'REPLAN'].includes(result.type)) { const button = document.createElement('button'); button.type = 'button'; button.textContent = text('confirm', 'Confirm'); button.addEventListener('click', async () => { button.disabled = true; try { await execute(result); button.textContent = text('added_success', 'Applied'); add('ai', text('added_success', 'Change applied successfully.')); } catch { button.disabled = false; add('ai', text('assistant_error', 'I could not apply that change.')); } }); box.appendChild(button); }
-      messages.appendChild(box); messages.scrollTop = messages.scrollHeight;
+        const options = document.createElement('div');
+        options.className = 'm6-assistant-options';
+        result.options.forEach((option) => {
+          const button = document.createElement('button');
+          button.type = 'button';
+          button.textContent = option.title + ' · ' + (option.cost || 0) + ' MAD';
+          button.addEventListener('click', async () => {
+            button.disabled = true;
+            try { await execute({ ...result, option }); add('ai', text('added_success', 'Change applied successfully.')); }
+            catch { add('ai', text('assistant_error', 'I could not apply that change.')); }
+          });
+          options.appendChild(button);
+        });
+        box.appendChild(options);
+      } else if (['REMOVE', 'REMOVE_ACTIVITY', 'MOVE', 'MOVE_ACTIVITY', 'REPLAN'].includes(result.type)) {
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.textContent = text('confirm', 'Confirm');
+        button.addEventListener('click', async () => {
+          button.disabled = true;
+          try { await execute(result); button.textContent = text('added_success', 'Applied'); add('ai', text('added_success', 'Change applied successfully.')); }
+          catch { button.disabled = false; add('ai', text('assistant_error', 'I could not apply that change.')); }
+        });
+        box.appendChild(button);
+      }
+      messages.appendChild(box);
+      messages.scrollTop = messages.scrollHeight;
     }
-    async function send(raw) { const message = String(raw || '').trim(); if (!message) { error.textContent = text('assistant_required', 'Write your message first.'); input.focus(); return; } error.textContent = ''; add('user', message); input.value = ''; const loading = add('ai', text('assistant_loading', 'Sindbad is planning...')); try { const response = await fetchWithTimeout('/api/assistant', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ message, trip: readTrip(), history: history.slice(-5), language: lang() }) }); if (!response.ok) throw new Error('assistant'); const result = await response.json(); loading.remove(); const reply = result.message || (result.type === 'REPLACE_ACTIVITY' ? text('assistant_preview', 'The change preview is ready for review.') : result.preview) || text('assistant_error', 'I could not understand that request.'); add('ai', reply); if (['REMOVE', 'REMOVE_ACTIVITY', 'MOVE', 'MOVE_ACTIVITY', 'REPLAN', 'REPLACE_ACTIVITY'].includes(result.type)) addAction(result); history.push({ role: 'user', content: message }, { role: 'assistant', content: reply }); if (history.length > 10) history.splice(0, history.length - 10); } catch { loading.remove(); add('ai', text('assistant_error', 'I could not understand that request.')); } }
-    fab.addEventListener('click', open); close.addEventListener('click', shut); backdrop.addEventListener('click', shut); form.addEventListener('submit', (event) => { event.preventDefault(); send(input.value); }); document.querySelectorAll('[data-assistant-prompt]').forEach((button) => button.addEventListener('click', () => { open(); input.value = text(button.dataset.i18n, button.dataset.assistantPrompt || ''); input.focus(); }));
+
+    async function send(raw) {
+      const message = String(raw || '').trim();
+      if (!message) { error.textContent = text('assistant_required', 'Write your message first.'); input.focus(); return; }
+      error.textContent = '';
+      add('user', message);
+      input.value = '';
+      const loading = add('ai', text('assistant_loading', 'Sindbad is planning...'));
+      try {
+        const response = await fetchWithTimeout('/api/assistant', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ message, trip: readTrip(), history: history.slice(-5), language: lang() })
+        });
+        if (!response.ok) throw new Error('assistant');
+        const result = await response.json();
+        loading.remove();
+        const reply = result.message || (result.type === 'REPLACE_ACTIVITY' ? text('assistant_preview', 'The change preview is ready for review.') : result.preview) || text('assistant_error', 'I could not understand that request.');
+        add('ai', reply);
+        if (['REMOVE', 'REMOVE_ACTIVITY', 'MOVE', 'MOVE_ACTIVITY', 'REPLAN', 'REPLACE_ACTIVITY'].includes(result.type)) addAction(result);
+        history.push({ role: 'user', content: message }, { role: 'assistant', content: reply });
+        if (history.length > 10) history.splice(0, history.length - 10);
+      } catch {
+        loading.remove();
+        add('ai', text('assistant_error', 'I could not understand that request.'));
+      }
+    }
+
+    fab.addEventListener('click', open);
+    close.addEventListener('click', shut);
+    backdrop.addEventListener('click', shut);
+    form.addEventListener('submit', (event) => { event.preventDefault(); send(input.value); });
+    document.querySelectorAll('[data-assistant-prompt]').forEach((button) => button.addEventListener('click', () => {
+      open();
+      input.value = button.dataset.assistantPrompt || '';
+      input.focus();
+    }));
   }
-  function mount() { document.querySelectorAll('[data-site-header]').forEach((host) => { if (host.dataset.mounted === 'true') return; host.className = 'site-header-host'; host.innerHTML = headerMarkup(); host.dataset.mounted = 'true'; setTimeout(() => window.MySindbadI18n?.refresh?.(), 0); }); mountAssistant(); setScrolledState(); }
+
+  function mount() {
+    document.querySelectorAll('[data-site-header]').forEach((host) => {
+      if (host.dataset.mounted === 'true') return;
+      host.className = 'site-header-host';
+      host.innerHTML = headerMarkup();
+      host.dataset.mounted = 'true';
+      setTimeout(() => window.MySindbadI18n?.refresh?.(), 0);
+    });
+    mountAssistant();
+    setScrolledState();
+  }
+
   function observeDynamicHosts() {
     if (!document.body || !window.MutationObserver) return;
     const observer = new MutationObserver(() => {
@@ -54,6 +248,13 @@
     });
     observer.observe(document.body, { childList: true, subtree: true });
   }
-  function start() { mount(); observeDynamicHosts(); window.addEventListener('scroll', setScrolledState, { passive: true }); }
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start, { once: true }); else start();
+
+  function start() {
+    mount();
+    observeDynamicHosts();
+    window.addEventListener('scroll', setScrolledState, { passive: true });
+  }
+
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start, { once: true });
+  else start();
 })();

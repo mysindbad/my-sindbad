@@ -1,4 +1,5 @@
-/* Shared navigation for every My Sindbad page. */
+/* Shared bottom navigation for every My Sindbad page — Mobile-first.
+   48px touch targets, clear active state, no FAB overlap. */
 .site-nav {
   position: fixed;
   inset-inline-end: 0;
@@ -28,10 +29,12 @@
   border-radius: 10px;
   color: var(--nav-text, rgba(255, 255, 255, 0.72));
   text-decoration: none;
-  font-size: 0.55rem;
+  font-size: 0.6rem;
   font-weight: 600;
   line-height: 1.2;
   transition: color 0.18s ease, background-color 0.18s ease, transform 0.18s ease;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
 }
 
 .site-nav a:hover,
@@ -52,8 +55,8 @@
 
 .site-nav .nav-icon {
   display: block;
-  width: 22px;
-  height: 22px;
+  width: 24px;
+  height: 24px;
   line-height: 1;
 }
 
@@ -66,6 +69,12 @@
   stroke-linecap: round;
   stroke-linejoin: round;
   stroke-width: 1.8;
+}
+
+.site-nav .nav-label {
+  display: block;
+  font-size: inherit;
+  font-weight: inherit;
 }
 
 @media (min-width: 700px) {
