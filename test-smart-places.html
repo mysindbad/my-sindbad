@@ -48,10 +48,9 @@ function assert(name, ok, detail) {
   if (ok) pass++; else fail++;
 }
 let currentGroup = '';
-
+const groupDefs = [];
 function group(title, fn) {
-  currentGroup = title;
-  fn();
+  groupDefs.push({ title, fn });
 }
 
 // ---- Canonical flow ----
@@ -74,7 +73,8 @@ group('Canonical flow', function () {
   assert('placeUrl has cat', url.includes('cat=hotel'), url);
 
   const mUrl = mapUrl(raw);
-  assert('mapUrl has lng', mUrl.includes('lng=31.621700') === false || mUrl.includes('lng='), mUrl);
+  assert('mapUrl has correct lng param', mUrl.includes('lng=-8.008100'), mUrl);
+  assert('mapUrl lng not confused with lat', !mUrl.includes('lng=31.621700'), mUrl);
   assert('mapUrl has identity', mUrl.includes('id=osm%3Anode%2F456'), mUrl);
 
   const nUrl = navigateUrl(raw, 'walking');
@@ -200,25 +200,91 @@ group('Cross-page identity', function () {
   assert('diff source → diff activity id', placeActivityId(a) !== placeActivityId(b), placeActivityId(a) + ' vs ' + placeActivityId(b));
 });
 
-// ---- Render ----
-const groups = {};
-results.forEach(function (r) {
-  (groups[r.group] = groups[r.group] || []).push(r);
+// ---- Cross-page identity (different raw shapes, same canonical identity) ----
+group('Cross-page raw shapes', function () {
+  const exploreRaw = { name: 'Café Clock', lat: 31.6258, lon: -7.9893, price: 50, distance: '1km', icon: '☕', category: 'cafe', source: 'osm', sourceId: 'node/77' };
+  const mapRaw = { name: 'Café Clock', coordinates: { lat: 31.6258, lng: -7.9893 }, source: 'osm', sourceId: 'node/77', category: 'cafe' };
+  const placeRaw = { name: 'Café Clock', lat: 31.6258, lng: -7.9893, source: 'osm', sourceId: 'node/77', category: 'cafe' };
+  const idE = placeActivityId(exploreRaw);
+  const idM = placeActivityId(mapRaw);
+  const idP = placeActivityId(placeRaw);
+  assert('explore/map/place raw → same activity id', idE === idM && idM === idP, idE + '|' + idM + '|' + idP);
+  assert('raw shapes activity id = osm:node/77', idE === 'osm:node/77', idE);
+  assert('placeUrl identity stable across shapes', placeUrl(exploreRaw).includes('id=osm%3Anode%2F77') && placeUrl(mapRaw).includes('id=osm%3Anode%2F77') && placeUrl(placeRaw).includes('id=osm%3Anode%2F77'), '');
+  assert('mapUrl identity stable across shapes', mapUrl(exploreRaw).includes('id=osm%3Anode%2F77') && mapUrl(mapRaw).includes('id=osm%3Anode%2F77') && mapUrl(placeRaw).includes('id=osm%3Anode%2F77'), '');
+  assert('navigateUrl coords stable across shapes', navigateUrl(exploreRaw, 'walking').includes('dest=31.6258') && navigateUrl(mapRaw, 'walking').includes('dest=31.6258') && navigateUrl(placeRaw, 'walking').includes('dest=31.6258'), '');
 });
-const out = document.getElementById('results');
-let html = '';
-Object.keys(groups).forEach(function (g) {
-  html += '<div class="group"><h2>' + g + '</h2>';
-  groups[g].forEach(function (r) {
-    html += '<div class="case"><span class="mark ' + (r.ok ? 'ok' : 'bad') + '">' + (r.ok ? '✓' : '✕') + '</span><span><span class="n">' + r.name + '</span>' + (r.detail ? '<span class="d">' + r.detail + '</span>' : '') + '</span></div>';
+
+// ---- Legacy place without source (deterministic coord identity) ----
+group('Legacy coord identity', function () {
+  const a = placeActivityId({ name: 'Spot A', lat: 31, lon: -7 });
+  const b = placeActivityId({ name: 'Spot B', lat: 31, lon: -7 });
+  assert('same coords + diff names → same id', a === b, a + ' vs ' + b);
+  const c = placeActivityId({ name: 'Spot A', lat: 32, lon: -7 });
+  assert('diff coords → diff id', a !== c, a + ' vs ' + c);
+  assert('no name-only identity', placeActivityId({ name: 'X', lat: 1, lon: 2 }) !== placeActivityId({ name: 'X', lat: 3, lon: 4 }), '');
+  assert('source/sourceId stable id', placeActivityId({ name: 'N1', lat: 1, lon: 2, source: 'osm', sourceId: 'node/5' }) === placeActivityId({ name: 'N2', lat: 9, lon: 9, source: 'osm', sourceId: 'node/5' }), '');
+});
+
+// ---- AppState duplicate integration (real addPlaceToTrip flow) ----
+group('AppState duplicate integration', async function () {
+  const savedAppState = window.AppState;
+  const store = { activities: [], trip: { id: 't1', destination: 'Marrakech' } };
+  window.AppState = {
+    getTrip: function () { return store.trip; },
+    getActivities: function () { return store.activities.slice(); },
+    addActivity: function (act) {
+      if (store.activities.some(function (a) { return a.id === act.id; })) return Promise.resolve(false);
+      store.activities.push(act);
+      return Promise.resolve(true);
+    }
+  };
+  try {
+    const MSP = window.MSPlaces;
+    const place = { name: 'Café Clock', lat: 31.6258, lon: -7.9893, source: 'osm', sourceId: 'node/77', category: 'cafe' };
+    const r1 = await MSP.addPlaceToTrip(place, { day: 1 });
+    assert('first add → ok true', r1 && r1.ok === true, JSON.stringify(r1));
+    assert('first add → activity id', r1 && r1.activity && r1.activity.id === 'osm:node/77', JSON.stringify(r1 && r1.activity));
+    const r2 = await MSP.addPlaceToTrip(place, { day: 1 });
+    assert('second add → duplicate', r2 && r2.ok === false && r2.reason === 'duplicate', JSON.stringify(r2));
+    assert('final activities count = 1', store.activities.length === 1, 'len=' + store.activities.length);
+    const place2 = { name: 'Jardin Majorelle', lat: 31.6421, lon: -8.0033, source: 'osm', sourceId: 'node/78', category: 'garden' };
+    const r3 = await MSP.addPlaceToTrip(place2, { day: 1 });
+    assert('third add (diff place) → ok true', r3 && r3.ok === true, JSON.stringify(r3));
+    assert('final activities count = 2', store.activities.length === 2, 'len=' + store.activities.length);
+    window.AppState.getTrip = function () { return null; };
+    const r4 = await MSP.addPlaceToTrip(place, { day: 1 });
+    assert('no trip → reason no-trip', r4 && r4.ok === false && r4.reason === 'no-trip', JSON.stringify(r4));
+  } finally {
+    window.AppState = savedAppState;
+  }
+});
+
+// ---- Run all groups sequentially (supports async tests) then render ----
+(async function () {
+  for (const g of groupDefs) {
+    currentGroup = g.title;
+    try { await g.fn(); } catch (e) { assert('group threw', false, String(e)); }
+  }
+  const groups = {};
+  results.forEach(function (r) {
+    (groups[r.group] = groups[r.group] || []).push(r);
   });
-  html += '</div>';
-});
-out.innerHTML = html;
-document.getElementById('summary').innerHTML =
-  '<span class="pill ok">' + pass + ' passed</span>' +
-  '<span class="pill bad">' + fail + ' failed</span>' +
-  '<span class="pill total">' + results.length + ' total</span>';
+  const out = document.getElementById('results');
+  let html = '';
+  Object.keys(groups).forEach(function (g) {
+    html += '<div class="group"><h2>' + g + '</h2>';
+    groups[g].forEach(function (r) {
+      html += '<div class="case"><span class="mark ' + (r.ok ? 'ok' : 'bad') + '">' + (r.ok ? '✓' : '✕') + '</span><span><span class="n">' + r.name + '</span>' + (r.detail ? '<span class="d">' + r.detail + '</span>' : '') + '</span></div>';
+    });
+    html += '</div>';
+  });
+  out.innerHTML = html;
+  document.getElementById('summary').innerHTML =
+    '<span class="pill ok">' + pass + ' passed</span>' +
+    '<span class="pill bad">' + fail + ' failed</span>' +
+    '<span class="pill total">' + results.length + ' total</span>';
+})();
 </script>
 <script src="./utils/navigation.js"></script>
 <script src="./utils/header.js"></script>
