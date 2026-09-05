@@ -1,5 +1,5 @@
 // المصدر المركزي لإدارة بيانات التطبيق.
-// يقرأ المفاتيح القديمة مرة واحدة عند الحاجة، ثم يعتمد على هذا المفتاح فقط.
+// تقرأ المفاتيح القديمة مرة واحدة عند الحاجة، ثم تعتمد على هذا المفتاح فقط.
 const APP_STATE_KEY = 'mysindbad_app_data_v1';
 const LEGACY_TRIP_KEYS = ['currentTrip', 'sb_trip'];
 const LEGACY_ACTIVITY_KEYS = ['myTripActivities', 'currentItinerary'];
@@ -147,6 +147,25 @@ const AppState = {
     })));
     AppState.saveAll(state);
     return days;
+  },
+
+  // Reorder activities within a single day by ordered ids.
+  // Preserves every activity object (id, source, sourceId, coordinates, category).
+  // Any activity not listed in orderedIds is appended in its original order (backward compat).
+  // Returns the persisted days, or false if the day cannot be found.
+  reorderActivities: (dayNumber, orderedIds) => {
+    const state = AppState.getAll();
+    const days = Array.isArray(state.currentTrip?.itinerary) ? state.currentTrip.itinerary : [];
+    const day = days.find((item) => Number(item.day) === Number(dayNumber));
+    if (!day || !Array.isArray(day.activities)) return false;
+    const ids = Array.isArray(orderedIds) ? orderedIds : [];
+    const map = new Map();
+    day.activities.forEach((activity) => { if (activity && activity.id) map.set(activity.id, activity); });
+    const reordered = ids.map((id) => map.get(id)).filter(Boolean);
+    // keep any activities not included in orderedIds (defensive — never drop data)
+    day.activities.forEach((activity) => { if (!reordered.includes(activity)) reordered.push(activity); });
+    day.activities = reordered;
+    return AppState.saveItinerary(days);
   },
 
   saveFavorites: (favorites) => {

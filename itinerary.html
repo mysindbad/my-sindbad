@@ -455,6 +455,7 @@
            : (index % dayCount) + 1;
         if (!grouped.has(day)) grouped.set(day, []);
         grouped.get(day).push({
+          ...item,
           time: item.time || '',
            place: item.place || item.name || item.place_name || assistantText('activity_label'),
            activity: item.activity || item.description || item.activity_description || '',
@@ -481,6 +482,9 @@
     function renderActivity(activity, dayIndex, activityIndex) {
       const imageCategory = activity.category || activity.type || activity.place;
       const imageFallback = window.MySindbadCity?.placeholderForCategory(imageCategory) || '';
+      const dayActivities = itinerary[dayIndex]?.activities || [];
+      const isFirst = activityIndex === 0;
+      const isLast = activityIndex === Math.max(0, dayActivities.length - 1);
       return `
         <article class="activity-card rounded-2xl border border-slate-200 bg-white p-4 shadow-sm" style="animation-delay:${activityIndex * 70}ms">
           <img data-place-image="${escapeHtml(activity.place)}" data-place-category="${escapeHtml(imageCategory)}" src="${imageFallback}" alt="${escapeHtml(activity.place)}" class="mb-3 h-32 w-full rounded-xl object-cover" onerror="this.src='${imageFallback}'">
@@ -505,6 +509,8 @@
             <a href="./map.html?day=${dayIndex + 1}&activity=${activityIndex}" class="rounded-xl bg-navy-900 px-3 py-2 text-center text-xs font-bold text-white transition hover:bg-navy-800" title="${assistantText('open_map')}">${assistantText('map')}</a>
             <a href="${hasValidCoords(activity) ? ('./navigate.html?dest=' + activity.coords.lat + ',' + activity.coords.lng + '&name=' + encodeURIComponent(activity.place) + '&profile=walking') : '#'}" class="rounded-xl bg-gold-500 px-3 py-2 text-center text-xs font-bold text-white transition hover:bg-gold-600 ${hasValidCoords(activity) ? '' : 'opacity-40 pointer-events-none'}" title="ابدأ الملاحة" data-nav>🧭</a>
             <button type="button" data-edit="${dayIndex}:${activityIndex}" class="rounded-xl bg-slate-100 px-4 py-2 text-xs font-bold text-slate-700 transition hover:bg-slate-200">${assistantText('edit')} ✏️</button>
+            <button type="button" data-up="${dayIndex}:${activityIndex}" class="rounded-xl bg-slate-100 px-3 py-2 text-xs font-bold text-slate-700 transition hover:bg-slate-200 ${isFirst ? 'opacity-40 pointer-events-none' : ''}" title="${assistantText('reorder_up','تحريك لأعلى')}" aria-label="${assistantText('reorder_up','تحريك لأعلى')}">↑</button>
+            <button type="button" data-down="${dayIndex}:${activityIndex}" class="rounded-xl bg-slate-100 px-3 py-2 text-xs font-bold text-slate-700 transition hover:bg-slate-200 ${isLast ? 'opacity-40 pointer-events-none' : ''}" title="${assistantText('reorder_down','تحريك لأسفل')}" aria-label="${assistantText('reorder_down','تحريك لأسفل')}">↓</button>
           </div>
         </article>`;
     }
@@ -619,25 +625,6 @@
     function assistantHistory() { return assistantMessages.filter((item) => !item.loading && item.text).slice(0, -1).slice(-5).map((item) => ({ role: item.role === 'ai' ? 'assistant' : 'user', content: item.text })); }
     async function fetchWithTimeout(input, init = {}, timeoutMs = 5000) { const controller = new AbortController(); const timer = setTimeout(() => controller.abort(), timeoutMs); try { return await fetch(input, { ...init, signal: controller.signal }); } finally { clearTimeout(timer); } }
 
-    // Phase 15 — Location awareness (ephemeral, in-memory, freshness 5min). No watcher, no storage.
-    let assistantLocation = null;
-    const ASSISTANT_LOCATION_TTL = 5 * 60 * 1000;
-    async function getAssistantLocation() {
-      const now = Date.now();
-      if (assistantLocation && (now - assistantLocation.fetchedAt) < ASSISTANT_LOCATION_TTL) {
-        return { lat: assistantLocation.lat, lng: assistantLocation.lng, accuracy: assistantLocation.accuracy };
-      }
-      if (!window.MSLocation || !window.MSLocation.has()) return null;
-      try {
-        const pos = await window.MSLocation.current({ enableHighAccuracy: false, maximumAge: 300000, timeout: 6000 });
-        if (pos && Number.isFinite(pos.lat) && Number.isFinite(pos.lng) && !(pos.lat === 0 && pos.lng === 0)) {
-          assistantLocation = { lat: pos.lat, lng: pos.lng, accuracy: Number.isFinite(pos.accuracy) ? pos.accuracy : null, fetchedAt: Date.now() };
-          return { lat: assistantLocation.lat, lng: assistantLocation.lng, accuracy: assistantLocation.accuracy };
-        }
-      } catch (error) { /* DENIED | UNAVAILABLE | TIMEOUT | UNSUPPORTED → continue without location */ }
-      return null;
-    }
-
     async function sendAssistantMessage(text) {
       const message = String(text || '').trim();
       if (!message || assistantSending) return;
@@ -646,10 +633,7 @@
       addAssistantMessage('ai', assistantText('assistant_loading'), { loading: true });
       const loadingMessageIndex = assistantMessages.length - 1;
       try {
-        const location = await getAssistantLocation();
-        const payload = { message, trip: assistantTripPayload(), history: assistantHistory(), language: window.MySindbadI18n?.getLang?.() || localStorage.getItem('userLang') || 'ar' };
-        if (location) payload.location = location;
-        const response = await fetchWithTimeout('/api/assistant', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+        const response = await fetchWithTimeout('/api/assistant', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ message, trip: assistantTripPayload(), history: assistantHistory(), language: window.MySindbadI18n?.getLang?.() || localStorage.getItem('userLang') || 'ar' }) });
         if (!response.ok) throw new Error('assistant');
         const result = await response.json();
         assistantMessages.splice(loadingMessageIndex, 1);
@@ -772,6 +756,9 @@
           costEstimated: activity.costEstimated,
           currency: activity.currency,
           coords: activity.coords || null,
+          coordinates: activity.coordinates || activity.coords || null,
+          source: activity.source || null,
+          sourceId: activity.sourceId || null,
           time: activity.time,
           day_number: itinerary[dayIndex].day
         });
@@ -783,6 +770,32 @@
         const [dayIndex, activityIndex] = button.dataset.edit.split(':').map(Number);
         openEditor(dayIndex, activityIndex);
       }));
+      container.querySelectorAll('[data-up]').forEach((button) => button.addEventListener('click', () => {
+        const [dayIndex, activityIndex] = button.dataset.up.split(':').map(Number);
+        moveActivity(dayIndex, activityIndex, -1);
+      }));
+      container.querySelectorAll('[data-down]').forEach((button) => button.addEventListener('click', () => {
+        const [dayIndex, activityIndex] = button.dataset.down.split(':').map(Number);
+        moveActivity(dayIndex, activityIndex, 1);
+      }));
+    }
+
+    // Reorder an activity within its day by swapping with a neighbour.
+    // Preserves every activity object (id, source, sourceId, coordinates, category);
+    // only the array order changes. Persists via saveItinerary (rebuilds state.activities)
+    // and dispatches a reorder event so the map and navigation pick up the new order.
+    function moveActivity(dayIndex, activityIndex, delta) {
+      const day = itinerary[dayIndex];
+      if (!day || !Array.isArray(day.activities)) return;
+      const newIndex = activityIndex + delta;
+      if (newIndex < 0 || newIndex >= day.activities.length) return;
+      const acts = day.activities;
+      const moved = acts[activityIndex];
+      acts[activityIndex] = acts[newIndex];
+      acts[newIndex] = moved;
+      saveItinerary();
+      window.dispatchEvent(new Event('appstate:reorder'));
+      renderDayPlan(readLiveActivities());
     }
 
      // <!-- QA15-SYNC: merge every saved activity source and keep the day assignment -->

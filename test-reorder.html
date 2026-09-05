@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<title>Reorder Tests — My Sindbad</title>
+<link href="./utils/navigation.css" rel="stylesheet"/>
+<link href="./utils/header.css" rel="stylesheet"/>
+<style>
+  :root{--navy:#0A192F;--gold:#D4AF37;--bg:#fbf9f5;--line:#cbd5e1;--ok:#16a34a;--bad:#dc2626}
+  *{box-sizing:border-box;font-family:Cairo,system-ui,sans-serif}body{margin:0;background:var(--bg);color:#0A192F}
+  .wrap{max-width:760px;margin:0 auto;padding:20px 16px 80px}
+  h1{font-size:1.25rem;margin:0 0 4px}
+  .sub{color:#475569;font-size:.8rem;margin-bottom:18px}
+  .summary{display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap}
+  .pill{padding:8px 14px;border-radius:999px;font-weight:800;font-size:.8rem}
+  .pill.ok{background:#dcfce7;color:var(--ok)}
+  .pill.bad{background:#fee2e2;color:var(--bad)}
+  .pill.total{background:#e0e7ff;color:#3730a3}
+  .group{border:1px solid var(--line);border-radius:14px;background:#fff;padding:14px;margin-bottom:14px}
+  .group h2{font-size:.9rem;margin:0 0 10px;color:var(--navy)}
+  .case{display:flex;align-items:flex-start;gap:8px;padding:7px 0;border-bottom:1px solid #f1f5f9;font-size:.78rem}
+  .case:last-child{border-bottom:0}
+  .mark{flex:none;width:20px;height:20px;border-radius:50%;display:grid;place-items:center;font-size:.7rem;color:#fff;font-weight:800}
+  .mark.ok{background:var(--ok)}
+  .mark.bad{background:var(--bad)}
+  .case .n{font-weight:700;color:#0A192F}
+  .case .d{color:#64748b;font-size:.72rem;margin-inline-start:6px}
+  a.back{display:inline-block;margin-top:10px;padding:8px 14px;border-radius:10px;background:var(--navy);color:#fff;text-decoration:none;font-size:.78rem;font-weight:700}
+</style>
+</head>
+<body>
+<main class="wrap">
+  <h1>Phase 17 — Reorder &amp; Trip Management Tests</h1>
+  <p class="sub">Deterministic tests for reorder (IDs, coordinates, canonical identity preserved), add→itinerary, itinerary→activities sync. Uses real AppState with backed-up localStorage. No network.</p>
+  <div class="summary" id="summary"></div>
+  <div id="results"></div>
+  <a class="back" href="./itinerary.html">← العودة لبرنامج الرحلة</a>
+</main>
+<script src="./utils/appState.js"></script>
+<script type="module">
+import { placeActivityId, placeIdentity } from './utils/msPlaces.js';
+
+const results = [];
+let pass = 0, fail = 0;
+let currentGroup = '';
+const groupDefs = [];
+function group(title, fn) { groupDefs.push({ title, fn }); }
+function assert(name, ok, detail) {
+  results.push({ group: currentGroup, name, ok: !!ok, detail: detail || '' });
+  if (ok) pass++; else fail++;
+}
+
+// ---- localStorage backup/restore helper (never clobber the user's real data) ----
+function backupKey() { return localStorage.getItem('mysindbad_app_data_v1'); }
+function restoreKey(value) {
+  if (value === null) { try { localStorage.removeItem('mysindbad_app_data_v1'); } catch (e) {} }
+  else { try { localStorage.setItem('mysindbad_app_data_v1', value); } catch (e) {} }
+}
+function seedState(state) {
+  try { localStorage.setItem('mysindbad_app_data_v1', JSON.stringify(state)); } catch (e) {}
+}
+
+function makeActivity(idSuffix, name, lat, lng, category) {
+  return {
+    id: 'osm:node/' + idSuffix,
+    name: name, place: name, title: name,
+    description: name + ' description',
+    coordinates: { lat: lat, lng: lng }, coords: { lat: lat, lng: lng },
+    lat: lat, lon: lng,
+    source: 'osm', sourceId: 'node/' + idSuffix,
+    category: category || 'museum',
+    day: 1, day_number: 1,
+    time: '10:00', distance: '1km', duration: '1h', cost: 50,
+    added: true, addedAt: '2026-09-05T10:00:00.000Z'
+  };
+}
+
+// ---- Reorder A,B,C → C,A,B; IDs preserved ----
+group('Reorder preserves identity', function () {
+  const backup = backupKey();
+  try {
+    const A = makeActivity('1', 'A', 31.1, -7.1, 'museum');
+    const B = makeActivity('2', 'B', 31.2, -7.2, 'cafe');
+    const C = makeActivity('3', 'C', 31.3, -7.3, 'restaurant');
+    seedState({ user: null, currentTrip: { id: 't1', destination: 'Marrakech', itinerary: [{ day: 1, activities: [A, B, C] }] }, activities: [A, B, C], favorites: [] });
+    const ok = window.AppState.reorderActivities(1, ['osm:node/3', 'osm:node/1', 'osm:node/2']);
+    assert('reorder returns truthy', !!ok, String(ok));
+    const days = window.AppState.getItinerary();
+    const acts = days[0].activities;
+    assert('order is C,A,B', acts.length === 3 && acts[0].name === 'C' && acts[1].name === 'A' && acts[2].name === 'B', acts.map(a => a.name).join(','));
+    assert('id[0] = osm:node/3', acts[0].id === 'osm:node/3', acts[0].id);
+    assert('id[1] = osm:node/1', acts[1].id === 'osm:node/1', acts[1].id);
+    assert('id[2] = osm:node/2', acts[2].id === 'osm:node/2', acts[2].id);
+    // coordinates preserved
+    assert('C coords preserved', acts[0].coordinates.lat === 31.3 && acts[0].coordinates.lng === -7.3, JSON.stringify(acts[0].coordinates));
+    assert('A coords preserved', acts[1].coordinates.lat === 31.1 && acts[1].coordinates.lng === -7.1, JSON.stringify(acts[1].coordinates));
+    assert('B coords preserved', acts[2].coordinates.lat === 31.2 && acts[2].coordinates.lng === -7.2, JSON.stringify(acts[2].coordinates));
+    // source/sourceId preserved
+    assert('C source preserved', acts[0].source === 'osm' && acts[0].sourceId === 'node/3', acts[0].source + ':' + acts[0].sourceId);
+    assert('A source preserved', acts[1].source === 'osm' && acts[1].sourceId === 'node/1', '');
+    assert('B source preserved', acts[2].source === 'osm' && acts[2].sourceId === 'node/2', '');
+    // category preserved
+    assert('C category preserved', acts[0].category === 'restaurant', acts[0].category);
+    assert('A category preserved', acts[1].category === 'museum', acts[1].category);
+    assert('B category preserved', acts[2].category === 'cafe', acts[2].category);
+    // canonical identity preserved (same as before reorder)
+    assert('C canonical identity', placeIdentity(acts[0]) === 'osm:node/3', placeIdentity(acts[0]));
+    assert('A canonical identity', placeIdentity(acts[1]) === 'osm:node/1', placeIdentity(acts[1]));
+    assert('B canonical identity', placeIdentity(acts[2]) === 'osm:node/2', placeIdentity(acts[2]));
+    assert('activity id = canonical identity', placeActivityId(acts[0]) === acts[0].id, placeActivityId(acts[0]));
+  } finally {
+    restoreKey(backup);
+  }
+});
+
+// ---- state.activities rebuilt in new order ----
+group('Activities sync after reorder', function () {
+  const backup = backupKey();
+  try {
+    const A = makeActivity('1', 'A', 31.1, -7.1);
+    const B = makeActivity('2', 'B', 31.2, -7.2);
+    const C = makeActivity('3', 'C', 31.3, -7.3);
+    seedState({ user: null, currentTrip: { id: 't1', destination: 'Marrakech', itinerary: [{ day: 1, activities: [A, B, C] }] }, activities: [A, B, C], favorites: [] });
+    window.AppState.reorderActivities(1, ['osm:node/2', 'osm:node/3', 'osm:node/1']);
+    const all = window.AppState.getActivities();
+    assert('state.activities order = B,C,A', all.length === 3 && all[0].id === 'osm:node/2' && all[1].id === 'osm:node/3' && all[2].id === 'osm:node/1', all.map(a => a.id).join(','));
+    assert('state.activities ids preserved', all[0].id === 'osm:node/2' && all[1].id === 'osm:node/3' && all[2].id === 'osm:node/1', '');
+    assert('itinerary matches activities order', window.AppState.getItinerary()[0].activities.map(a => a.id).join(',') === all.map(a => a.id).join(','), '');
+  } finally {
+    restoreKey(backup);
+  }
+});
+
+// ---- Reorder is isolated per day ----
+group('Per-day isolation', function () {
+  const backup = backupKey();
+  try {
+    const A = makeActivity('1', 'A', 31.1, -7.1);
+    const B = makeActivity('2', 'B', 31.2, -7.2);
+    const X = makeActivity('9', 'X', 32.1, -6.1);
+    const Y = makeActivity('8', 'Y', 32.2, -6.2);
+    seedState({ user: null, currentTrip: { id: 't1', destination: 'Marrakech', itinerary: [{ day: 1, activities: [A, B] }, { day: 2, activities: [X, Y] }] }, activities: [A, B, X, Y], favorites: [] });
+    window.AppState.reorderActivities(1, ['osm:node/2', 'osm:node/1']);
+    const days = window.AppState.getItinerary();
+    assert('day1 reordered B,A', days[0].activities.map(a => a.id).join(',') === 'osm:node/2,osm:node/1', days[0].activities.map(a => a.id).join(','));
+    assert('day2 untouched X,Y', days[1].activities.map(a => a.id).join(',') === 'osm:node/9,osm:node/8', days[1].activities.map(a => a.id).join(','));
+    assert('day2 coords untouched', days[1].activities[0].coordinates.lat === 32.1 && days[1].activities[1].coordinates.lat === 32.2, '');
+  } finally {
+    restoreKey(backup);
+  }
+});
+
+// ---- Backward compat: legacy activities without source still reorder ----
+group('Legacy backward compat', function () {
+  const backup = backupKey();
+  try {
+    const legacyA = { id: 'place:31.0,-7.0', name: 'Old A', place: 'Old A', lat: 31, lon: -7, coords: { lat: 31, lng: -7 }, coordinates: { lat: 31, lng: -7 }, category: 'place', day: 1, day_number: 1, added: true };
+    const legacyB = { id: 'place:31.5,-7.5', name: 'Old B', place: 'Old B', lat: 31.5, lon: -7.5, coords: { lat: 31.5, lng: -7.5 }, coordinates: { lat: 31.5, lng: -7.5 }, category: 'place', day: 1, day_number: 1, added: true };
+    seedState({ user: null, currentTrip: { id: 't1', destination: 'Marrakech', itinerary: [{ day: 1, activities: [legacyA, legacyB] }] }, activities: [legacyA, legacyB], favorites: [] });
+    window.AppState.reorderActivities(1, ['place:31.5,-7.5', 'place:31.0,-7.0']);
+    const acts = window.AppState.getItinerary()[0].activities;
+    assert('legacy reorder B,A', acts[0].id === 'place:31.5,-7.5' && acts[1].id === 'place:31.0,-7.0', acts.map(a => a.id).join(','));
+    assert('legacy coords preserved', acts[0].coordinates.lat === 31.5 && acts[1].coordinates.lat === 31, '');
+    assert('legacy identity stable', placeIdentity(acts[0]) === 'place:31.5,-7.5', placeIdentity(acts[0]));
+    assert('legacy no source → coord identity', !acts[0].source, String(acts[0].source));
+  } finally {
+    restoreKey(backup);
+  }
+});
+
+// ---- Defensive: orderedIds missing some activity → appended, never dropped ----
+group('Defensive append', function () {
+  const backup = backupKey();
+  try {
+    const A = makeActivity('1', 'A', 31.1, -7.1);
+    const B = makeActivity('2', 'B', 31.2, -7.2);
+    const C = makeActivity('3', 'C', 31.3, -7.3);
+    seedState({ user: null, currentTrip: { id: 't1', destination: 'Marrakech', itinerary: [{ day: 1, activities: [A, B, C] }] }, activities: [A, B, C], favorites: [] });
+    // only list C and A — B should be appended at the end
+    window.AppState.reorderActivities(1, ['osm:node/3', 'osm:node/1']);
+    const acts = window.AppState.getItinerary()[0].activities;
+    assert('partial order C,A,B', acts.map(a => a.id).join(',') === 'osm:node/3,osm:node/1,osm:node/2', acts.map(a => a.id).join(','));
+    assert('no activity dropped', acts.length === 3, 'len=' + acts.length);
+  } finally {
+    restoreKey(backup);
+  }
+});
+
+// ---- reorderActivities on missing day → false, no crash ----
+group('Missing day safety', function () {
+  const backup = backupKey();
+  try {
+    seedState({ user: null, currentTrip: { id: 't1', destination: 'Marrakech', itinerary: [{ day: 1, activities: [] }] }, activities: [], favorites: [] });
+    const r = window.AppState.reorderActivities(99, ['x']);
+    assert('missing day → false', r === false, String(r));
+    const r2 = window.AppState.reorderActivities(1, []);
+    assert('empty day + empty ids → truthy', !!r2, String(r2));
+  } finally {
+    restoreKey(backup);
+  }
+});
+
+// ---- Full flow: addPlaceToTrip → reorder → itinerary reflects new order ----
+group('Add → reorder flow', async function () {
+  const backup = backupKey();
+  try {
+    seedState({ user: null, currentTrip: { id: 't1', destination: 'Marrakech', itinerary: [{ day: 1, activities: [] }] }, activities: [], favorites: [] });
+    const MSP = window.MSPlaces;
+    const pA = { name: 'Café A', lat: 31.1, lon: -7.1, source: 'osm', sourceId: 'node/1', category: 'cafe' };
+    const pB = { name: 'Café B', lat: 31.2, lon: -7.2, source: 'osm', sourceId: 'node/2', category: 'cafe' };
+    const pC = { name: 'Café C', lat: 31.3, lon: -7.3, source: 'osm', sourceId: 'node/3', category: 'restaurant' };
+    const r1 = await MSP.addPlaceToTrip(pA, { day: 1 });
+    const r2 = await MSP.addPlaceToTrip(pB, { day: 1 });
+    const r3 = await MSP.addPlaceToTrip(pC, { day: 1 });
+    assert('add A ok', r1 && r1.ok === true, JSON.stringify(r1));
+    assert('add B ok', r2 && r2.ok === true, JSON.stringify(r2));
+    assert('add C ok', r3 && r3.ok === true, JSON.stringify(r3));
+    const before = window.AppState.getItinerary()[0].activities;
+    assert('before order A,B,C', before.map(a => a.id).join(',') === 'osm:node/1,osm:node/2,osm:node/3', before.map(a => a.id).join(','));
+    // reorder to C,A,B
+    window.AppState.reorderActivities(1, ['osm:node/3', 'osm:node/1', 'osm:node/2']);
+    const after = window.AppState.getItinerary()[0].activities;
+    assert('after order C,A,B', after.map(a => a.id).join(',') === 'osm:node/3,osm:node/1,osm:node/2', after.map(a => a.id).join(','));
+    assert('after names C,A,B', after.map(a => a.name).join(',') === 'Café C,Café A,Café B', after.map(a => a.name).join(','));
+    assert('after coords preserved', after[0].coordinates.lat === 31.3 && after[1].coordinates.lat === 31.1 && after[2].coordinates.lat === 31.2, '');
+    assert('after source preserved', after[0].source === 'osm' && after[0].sourceId === 'node/3', after[0].source + ':' + after[0].sourceId);
+    assert('after category preserved', after[0].category === 'restaurant' && after[1].category === 'cafe', after[0].category + '/' + after[1].category);
+    // duplicate add after reorder still blocked
+    const r4 = await MSP.addPlaceToTrip(pA, { day: 1 });
+    assert('duplicate add blocked after reorder', r4 && r4.ok === false && r4.reason === 'duplicate', JSON.stringify(r4));
+  } finally {
+    restoreKey(backup);
+  }
+});
+
+// ---- Run all groups sequentially then render ----
+(async function () {
+  for (const g of groupDefs) {
+    currentGroup = g.title;
+    try { await g.fn(); } catch (e) { assert('group threw', false, String(e)); }
+  }
+  const groups = {};
+  results.forEach(function (r) { (groups[r.group] = groups[r.group] || []).push(r); });
+  const out = document.getElementById('results');
+  let html = '';
+  Object.keys(groups).forEach(function (g) {
+    html += '<div class="group"><h2>' + g + '</h2>';
+    groups[g].forEach(function (r) {
+      html += '<div class="case"><span class="mark ' + (r.ok ? 'ok' : 'bad') + '">' + (r.ok ? '✓' : '✕') + '</span><span><span class="n">' + r.name + '</span>' + (r.detail ? '<span class="d">' + r.detail + '</span>' : '') + '</span></div>';
+    });
+    html += '</div>';
+  });
+  out.innerHTML = html;
+  document.getElementById('summary').innerHTML =
+    '<span class="pill ok">' + pass + ' passed</span>' +
+    '<span class="pill bad">' + fail + ' failed</span>' +
+    '<span class="pill total">' + results.length + ' total</span>';
+})();
+</script>
+<script src="./utils/navigation.js"></script>
+<script src="./utils/header.js"></script>
+<script src="./utils/icons.js" defer></script>
+</body>
+</html>
