@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<title>Navigation Engine Tests — My Sindbad</title>
+<style>
+body{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;background:#0a192f;color:#e2e8f0;padding:20px;margin:0;min-height:100vh}
+h1{color:#d4af37;font-size:1.1rem;margin:0 0 4px}
+.sub{color:#94a3b8;font-size:.75rem;margin:0 0 14px}
+.summary{font-size:1.15rem;font-weight:800;margin:10px 0;padding:10px;border-radius:10px;background:#1e293b}
+.pass{color:#22c55e}.fail{color:#ef4444}
+.test{padding:7px 10px;border-bottom:1px solid #1e293b;font-size:.85rem}
+.test-name{font-weight:700;color:#f1f5f9}.test-detail{color:#94a3b8;font-size:.85em;margin-inline-start:8px}
+</style>
+</head>
+<body>
+<h1>PHASE 14 — Navigation Engine Tests</h1>
+<p class="sub">Deterministic fixtures for buildSteps, computeCurrentStep, normalizeManeuver, reroute reset, maneuver icons. No live GPS required.</p>
+<div class="summary" id="summary"></div>
+<div id="results"></div>
+<script src="./utils/msNavigation.js"></script>
+<script src="./utils/msNavIcons.js"></script>
+<script>
+(function(){
+  var passed=0, failed=0;
+  var resultsEl=document.getElementById('results');
+  function assert(name, cond, detail){
+    var div=document.createElement('div');
+    div.className='test';
+    div.innerHTML='<span class="'+(cond?'pass':'fail')+'">'+(cond?'✓':'✗')+'</span> <span class="test-name">'+name+'</span>'+(detail?'<span class="test-detail">'+detail+'</span>':'');
+    resultsEl.appendChild(div);
+    if(cond)passed++;else failed++;
+  }
+
+  // --- Mock route data (real Mapbox Directions structure) ---
+  function makeStep(type, modifier, name, distance, duration, loc) {
+    return {
+      maneuver: { type: type, modifier: modifier, instruction: 'Test '+type+' '+modifier, location: loc || [0,0] },
+      name: name, distance: distance, duration: duration,
+      bannerInstructions: [{ primary: 'Primary '+type, secondary: name, type: type, modifier: modifier }],
+      geometry: { coordinates: [[0,0],[0.001,0]] }
+    };
+  }
+  function makeRoute(steps) {
+    var totalDist = steps.reduce(function(s,st){return s+st.distance;},0);
+    var totalDur = steps.reduce(function(s,st){return s+st.duration;},0);
+    var coords = [];
+    steps.forEach(function(s){coords=coords.concat(s.geometry.coordinates);});
+    return { geometry:{coordinates:coords,type:'LineString'}, distance:totalDist, duration:totalDur, legs:[{steps:steps}] };
+  }
+
+  // ===== buildSteps =====
+  var route = makeRoute([
+    makeStep('depart','straight','Start St',100,60),
+    makeStep('turn','left','Rue Mohammed V',80,40),
+    makeStep('continue','straight','Ave Hassan II',200,120),
+    makeStep('roundabout','left','Roundabout',50,30),
+    makeStep('arrive','straight','Destination',10,5)
+  ]);
+  var steps = window.MSNavigation._buildSteps(route);
+  assert('buildSteps: 5 steps flattened', steps.length===5, 'got '+steps.length);
+  assert('buildSteps: cumulative start[0]=0', steps[0].cumStart===0);
+  assert('buildSteps: cumulative end[0]=100', steps[0].cumEnd===100);
+  assert('buildSteps: cumulative start[1]=100', steps[1].cumStart===100);
+  assert('buildSteps: cumulative end[4]=440', steps[4].cumEnd===440, 'got '+steps[4].cumEnd);
+
+  // ===== normalizeManeuver =====
+  var man = window.MSNavigation._normalizeManeuver(route.legs[0].steps[1]);
+  assert('normalizeManeuver: type=turn', man.type==='turn');
+  assert('normalizeManeuver: modifier=left', man.modifier==='left');
+  assert('normalizeManeuver: streetName=Rue Mohammed V', man.streetName==='Rue Mohammed V');
+  assert('normalizeManeuver: location parsed to {lng,lat}', man.location && man.location.lng===0 && man.location.lat===0);
+  assert('normalizeManeuver: banner captured', man.banner && man.banner.primary==='Primary turn');
+
+  // missing street name
+  var noName = window.MSNavigation._normalizeManeuver({maneuver:{type:'turn',modifier:'right',instruction:'Turn right',location:[1,2]}});
+  assert('normalizeManeuver: missing streetName=empty', noName.streetName==='');
+  assert('normalizeManeuver: missing name still has instruction', noName.instruction==='Turn right');
+
+  // missing modifier
+  var noMod = window.MSNavigation._normalizeManeuver({maneuver:{type:'continue',instruction:'Continue',location:[1,2]}});
+  assert('normalizeManeuver: missing modifier=empty', noMod.modifier==='');
+
+  // ===== computeCurrentStep =====
+  var sess = { steps: steps, currentStepIndex: -1, profile: 'walking' };
+
+  // straight (within step 0)
+  var idx = window.MSNavigation._computeCurrentStep(sess, 50);
+  assert('computeCurrentStep: at=50 → step 0 (depart)', idx===0, 'got '+idx);
+
+  // advance to left turn (3m past cumEnd=100)
+  sess.currentStepIndex = 0;
+  idx = window.MSNavigation._computeCurrentStep(sess, 103);
+  assert('computeCurrentStep: at=103 → step 1 (left turn)', idx===1, 'got '+idx);
+
+  // hysteresis: don't advance at 1m past (within 3m)
+  sess.currentStepIndex = 0;
+  idx = window.MSNavigation._computeCurrentStep(sess, 101);
+  assert('computeCurrentStep: hysteresis at=101 stays step 0', idx===0, 'got '+idx);
+
+  // continue straight (step 2)
+  sess.currentStepIndex = 1;
+  idx = window.MSNavigation._computeCurrentStep(sess, 183);
+  assert('computeCurrentStep: at=183 → step 2 (continue)', idx===2, 'got '+idx);
+
+  // roundabout (step 3)
+  sess.currentStepIndex = 2;
+  idx = window.MSNavigation._computeCurrentStep(sess, 383);
+  assert('computeCurrentStep: at=383 → step 3 (roundabout)', idx===3, 'got '+idx);
+
+  // arrive (step 4)
+  sess.currentStepIndex = 3;
+  idx = window.MSNavigation._computeCurrentStep(sess, 433);
+  assert('computeCurrentStep: at=433 → step 4 (arrive)', idx===4, 'got '+idx);
+
+  // GPS noise: don't go backward
+  sess.currentStepIndex = 3;
+  idx = window.MSNavigation._computeCurrentStep(sess, 50);
+  assert('GPS noise: at=50 with idx=3 stays step 3', idx===3, 'got '+idx);
+
+  // past end stays at last step
+  sess.currentStepIndex = 4;
+  idx = window.MSNavigation._computeCurrentStep(sess, 999);
+  assert('past end: stays last step 4', idx===4, 'got '+idx);
+
+  // ===== short consecutive steps =====
+  var shortRoute = makeRoute([
+    makeStep('turn','left','Short1',5,3),
+    makeStep('turn','right','Short2',5,3),
+    makeStep('continue','straight','Long',100,60)
+  ]);
+  var shortSteps = window.MSNavigation._buildSteps(shortRoute);
+  var shortSess = { steps: shortSteps, currentStepIndex: -1, profile: 'walking' };
+  idx = window.MSNavigation._computeCurrentStep(shortSess, 2);
+  assert('short steps: at=2 → step 0', idx===0);
+  shortSess.currentStepIndex = 0;
+  idx = window.MSNavigation._computeCurrentStep(shortSess, 8);
+  assert('short steps: at=8 → step 1 (3m past end=5)', idx===1, 'got '+idx);
+  shortSess.currentStepIndex = 1;
+  idx = window.MSNavigation._computeCurrentStep(shortSess, 14);
+  assert('short steps: at=14 → step 2 (3m past end=10)', idx===2, 'got '+idx);
+
+  // ===== reroute resets current step =====
+  sess.currentStepIndex = 3;
+  sess.currentStepIndex = -1; // simulate reroute reset
+  sess.steps = window.MSNavigation._buildSteps(makeRoute([makeStep('depart','straight','New Start',50,30),makeStep('arrive','straight','New Dest',10,5)]));
+  idx = window.MSNavigation._computeCurrentStep(sess, 10);
+  assert('reroute reset: new route starts at step 0', idx===0, 'got '+idx);
+
+  // ===== maneuver icons =====
+  assert('icon key: straight', window.MSNavIcons.maneuverKey('continue','straight')==='straight');
+  assert('icon key: left', window.MSNavIcons.maneuverKey('turn','left')==='left');
+  assert('icon key: right', window.MSNavIcons.maneuverKey('turn','right')==='right');
+  assert('icon key: uturn', window.MSNavIcons.maneuverKey('continue','uturn')==='uturn');
+  assert('icon key: roundabout', window.MSNavIcons.maneuverKey('roundabout','')==='roundabout');
+  assert('icon key: arrive', window.MSNavIcons.maneuverKey('arrive','')==='arrive');
+  assert('icon key: slight left', window.MSNavIcons.maneuverKey('turn','slight left')==='slight_left');
+  assert('icon key: sharp right', window.MSNavIcons.maneuverKey('turn','sharp right')==='sharp_right');
+  assert('icon key: unknown defaults to straight', window.MSNavIcons.maneuverKey('notification','')==='straight');
+  assert('icon SVG: starts with <svg', window.MSNavIcons.maneuverSVG('turn','left').indexOf('<svg')===0);
+  assert('icon SVG: contains <path', window.MSNavIcons.maneuverSVG('turn','left').indexOf('<path')>=0);
+  assert('icon SVG: arrive contains pin path', window.MSNavIcons.maneuverSVG('arrive','').indexOf('a7 7 0 0 0-7 7')>=0);
+
+  // ===== Summary =====
+  var summary = document.getElementById('summary');
+  summary.innerHTML = '<span class="'+(failed===0?'pass':'fail')+'">'+passed+' passed · '+failed+' failed</span>';
+})();
+</script>
+</body>
+</html>

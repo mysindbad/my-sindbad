@@ -1,5 +1,6 @@
 // utils/msRouting.js
 // Mapbox Directions v5 wrapper. Real routes only; no fabrication. Reuses /api/map-token.
+// Requests steps + banner_instructions + localized instructions.
 // Exposes window.MSRouting: { getToken, getRoute }
 (function () {
   'use strict';
@@ -16,7 +17,7 @@
     return tokenPromise;
   }
 
-  async function getRoute({ origin, destination, profile = 'walking', alternatives = false }) {
+  async function getRoute({ origin, destination, profile = 'walking', alternatives = false, language }) {
     if (!origin || !destination) throw { __msroute: true, type: 'ARGS', message: 'origin and destination required' };
     for (const p of [origin, destination]) {
       if (!Number.isFinite(p.lat) || !Number.isFinite(p.lng)) throw { __msroute: true, type: 'ARGS', message: 'invalid coordinates' };
@@ -25,8 +26,9 @@
     if (!token) throw { __msroute: true, type: 'NO_TOKEN', message: 'Mapbox token not configured' };
     const prof = profile === 'walking' ? 'walking' : profile === 'cycling' ? 'cycling' : 'driving';
     const coords = origin.lng + ',' + origin.lat + ';' + destination.lng + ',' + destination.lat;
+    const lang = (language === 'en' || language === 'fr') ? language : 'ar';
     const url = 'https://api.mapbox.com/directions/v5/mapbox/' + prof + '/' + coords +
-      '?alternatives=' + (alternatives ? 'true' : 'false') + '&geometries=geojson&overview=full&steps=true&access_token=' + encodeURIComponent(token);
+      '?alternatives=' + (alternatives ? 'true' : 'false') + '&geometries=geojson&overview=full&steps=true&banner_instructions=true&language=' + lang + '&access_token=' + encodeURIComponent(token);
     let resp;
     try { resp = await fetch(url, { headers: { Accept: 'application/json' } }); }
     catch (e) { throw { __msroute: true, type: 'NETWORK', message: e.message, original: e }; }
