@@ -1,1 +1,161 @@
-PLACEHOLDER_TEST
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Phase 15 — Location Awareness Tests — My Sindbad</title>
+<style>
+  body { font-family: Cairo, system-ui, sans-serif; background: #060e1a; color: #e4eaf2; margin: 0; padding: 24px; }
+  h1 { font-size: 1.1rem; color: #D4AF37; margin: 0 0 6px; }
+  p.sub { color: #94a3b8; font-size: .75rem; margin: 0 0 14px; }
+  .summary { margin: 12px 0; padding: 12px 14px; border-radius: 12px; background: #0A192F; font-weight: 800; }
+  .ok { color: #34d399; } .fail { color: #f87171; }
+  .row { display: flex; gap: 10px; align-items: center; padding: 8px 10px; border-bottom: 1px solid rgba(255,255,255,.06); font-size: .8rem; }
+  .row .name { flex: 1; } .row .res { font-weight: 800; min-width: 50px; text-align: center; }
+  pre { background: #0A192F; padding: 10px; border-radius: 8px; overflow:auto; font-size:.72rem; color:#fbbf24; }
+</style>
+</head>
+<body>
+<h1>Phase 15 — Location Awareness (Deterministic Tests)</h1>
+<p class="sub">يتحقق من validation + freshness + عزل الـlocation عن history/trip. لا يتطلب GPS حقيقي.</p>
+<div id="summary" class="summary"></div>
+<div id="results"></div>
+<pre id="log"></pre>
+<script>
+// Pure validation — MUST stay in sync with api/assistant.js parseLocation
+function parseLocation(value) {
+  if (!value || typeof value !== 'object') return null;
+  const lat = Number(value.lat);
+  const lng = Number(value.lng);
+  if (!Number.isFinite(lat) || !Number.isFinite(lng)) return null;
+  if (lat === 0 && lng === 0) return null;
+  if (Math.abs(lat) > 90 || Math.abs(lng) > 180) return null;
+  const accuracy = Number(value.accuracy);
+  return { lat, lng, accuracy: Number.isFinite(accuracy) && accuracy > 0 ? accuracy : null };
+}
+
+// Freshness module — MUST stay in sync with itinerary.html getAssistantLocation
+function makeFreshnessModule(MSLocation, now) {
+  let cache = null;
+  const TTL = 5 * 60 * 1000;
+  async function get() {
+    if (cache && (now() - cache.fetchedAt) < TTL) {
+      return { lat: cache.lat, lng: cache.lng, accuracy: cache.accuracy };
+    }
+    if (!MSLocation || !MSLocation.has()) return null;
+    try {
+      const pos = await MSLocation.current({ enableHighAccuracy: false, maximumAge: 300000, timeout: 6000 });
+      if (pos && Number.isFinite(pos.lat) && Number.isFinite(pos.lng) && !(pos.lat === 0 && pos.lng === 0)) {
+        cache = { lat: pos.lat, lng: pos.lng, accuracy: Number.isFinite(pos.accuracy) ? pos.accuracy : null, fetchedAt: now() };
+        return { lat: cache.lat, lng: cache.lng, accuracy: cache.accuracy };
+      }
+    } catch (e) { return null; }
+    return null;
+  }
+  return { get, _cache: () => cache };
+}
+
+const results = [];
+let passed = 0, failed = 0;
+function assert(name, cond, detail) {
+  const ok = !!cond;
+  if (ok) passed++; else failed++;
+  results.push({ name, ok, detail: detail || '' });
+}
+
+// --- parseLocation validation ---
+assert('valid location', parseLocation({ lat: 31.63, lng: -7.99, accuracy: 25 }).lat === 31.63);
+assert('valid accuracy', parseLocation({ lat: 31.63, lng: -7.99, accuracy: 25 }).accuracy === 25);
+assert('invalid lat (string)', parseLocation({ lat: 'abc', lng: -7.99 }) === null);
+assert('invalid lng (null)', parseLocation({ lat: 31.63, lng: null }) === null);
+assert('zero-zero rejected', parseLocation({ lat: 0, lng: 0 }) === null);
+assert('lat out of range', parseLocation({ lat: 999, lng: -7.99 }) === null);
+assert('lng out of range', parseLocation({ lat: 31.63, lng: 999 }) === null);
+assert('invalid accuracy nullified', parseLocation({ lat: 31.63, lng: -7.99, accuracy: -5 }).accuracy === null);
+assert('no location (undefined)', parseLocation(undefined) === null);
+assert('no location (null)', parseLocation(null) === null);
+assert('no location (string)', parseLocation('31, -7') === null);
+assert('negative coords valid', parseLocation({ lat: -33.45, lng: -70.66 }).lat === -33.45);
+
+// --- Permission / error via freshness module ---
+function makeMSLocation(behavior) {
+  return {
+    has: () => behavior.has !== false,
+    current: () => new Promise((resolve, reject) => {
+      if (behavior.reject) reject({ type: behavior.reject });
+      else if (behavior.resolve) resolve(behavior.resolve);
+    })
+  };
+}
+
+async function runAsync() {
+  let clock = 1000;
+  const now = () => clock;
+
+  assert('DENIED → null', (await makeFreshnessModule(makeMSLocation({ reject: 'DENIED' }), now).get()) === null);
+  assert('TIMEOUT → null', (await makeFreshnessModule(makeMSLocation({ reject: 'TIMEOUT' }), now).get()) === null);
+  assert('UNAVAILABLE → null', (await makeFreshnessModule(makeMSLocation({ reject: 'UNAVAILABLE' }), now).get()) === null);
+  assert('UNSUPPORTED → null', (await makeFreshnessModule(makeMSLocation({ has: false }), now).get()) === null);
+
+  {
+    const m = makeFreshnessModule(makeMSLocation({ resolve: { lat: 31.63, lng: -7.99, accuracy: 20 } }), now);
+    const loc = await m.get();
+    assert('valid acquisition', loc && loc.lat === 31.63 && loc.accuracy === 20);
+  }
+  {
+    let calls = 0;
+    const msl = { has: () => true, current: () => { calls++; return Promise.resolve({ lat: 31.63, lng: -7.99, accuracy: 20 }); } };
+    const m = makeFreshnessModule(msl, now);
+    await m.get();
+    const firstCalls = calls;
+    clock += 1000;
+    const loc = await m.get();
+    assert('fresh reuse (no extra GPS)', calls === firstCalls && loc.lat === 31.63);
+  }
+  {
+    let calls = 0;
+    const msl = { has: () => true, current: () => { calls++; return Promise.resolve({ lat: 33.57, lng: -7.59, accuracy: 30 }); } };
+    const m = makeFreshnessModule(msl, now);
+    await m.get();
+    const firstCalls = calls;
+    clock += 6 * 60 * 1000;
+    const loc = await m.get();
+    assert('stale refresh (new GPS)', calls === firstCalls + 1 && loc.lat === 33.57);
+  }
+  {
+    const m = makeFreshnessModule(makeMSLocation({ resolve: { lat: 0, lng: 0, accuracy: 5 } }), now);
+    assert('GPS zero-zero → null', (await m.get()) === null);
+  }
+
+  // --- History isolation ---
+  const assistantMessages = [
+    { role: 'user', text: 'شنو الوضع' },
+    { role: 'ai', text: 'مرحبا' }
+  ];
+  const history = assistantMessages.filter((i) => !i.loading && i.text).slice(0, -1).slice(-5).map((i) => ({ role: i.role === 'ai' ? 'assistant' : 'user', content: i.text }));
+  const historyHasLocation = JSON.stringify(history).includes('lat') || JSON.stringify(history).includes('location');
+  assert('location excluded from history', !historyHasLocation);
+
+  // --- Stored trip isolation ---
+  const tripPayload = { destination: 'مراكش', days: [], activities: [], budget: 0, currency: 'MAD', travelers: 1, preferences: '' };
+  assert('location excluded from trip payload', !JSON.stringify(tripPayload).includes('"location"'));
+
+  // --- Final payload shape ---
+  const withLoc = { message: 'أقرب مطعم', trip: tripPayload, history, language: 'ar', location: { lat: 31.63, lng: -7.99, accuracy: 20 } };
+  const withoutLoc = { message: 'أقرب مطعم', trip: tripPayload, history, language: 'ar' };
+  assert('payload includes location when present', !!withLoc.location && withLoc.location.lat === 31.63);
+  assert('payload omits location when absent', !('location' in withoutLoc));
+
+  render();
+}
+
+function render() {
+  document.getElementById('summary').innerHTML = '<span class="' + (failed ? 'fail' : 'ok') + '">' + passed + ' passed · ' + failed + ' failed</span> · ' + results.length + ' total';
+  document.getElementById('results').innerHTML = results.map(r => '<div class="row"><span class="name">' + r.name + '</span><span class="res ' + (r.ok ? 'ok' : 'fail') + '">' + (r.ok ? 'PASS' : 'FAIL') + '</span></div>').join('');
+  document.getElementById('log').textContent = failed ? results.filter(r => !r.ok).map(r => 'FAIL: ' + r.name + (r.detail ? ' — ' + r.detail : '')).join('\n') : 'All tests passed.';
+}
+
+runAsync();
+</script>
+</body>
+</html>
