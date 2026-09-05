@@ -124,7 +124,7 @@
     $('add-trip').onclick=function(){
       var trip=window.AppState&&window.AppState.getTrip&&window.AppState.getTrip();
       if(!trip){showToast(T('place_create_trip_first','أنشئ رحلة أولاً'));return;}
-      var act={id:'place-'+Date.now(),name:p.name,place:p.name,title:p.name,description:p.description||'',coords:{lat:p.lat,lng:p.lon},lat:p.lat,lon:p.lon,category:p.category||'place',cost:p.estimatedCost||0,day:1,day_number:1};
+      var act={id:'place-'+Date.now(),name:p.name,place:p.name,title:p.name,description:p.description||'',coords:{lat:p.lat,lng:p.lon},coordinates:{lat:p.lat,lng:p.lon},lat:p.lat,lon:p.lon,category:p.category||'place',cost:p.estimatedCost||0,day:1,day_number:1};
       if(window.AppState.addActivity){window.AppState.addActivity(act).then(function(ok){showToast(ok?T('place_added_to_trip','تمت الإضافة إلى رحلتك'):T('place_already_added','مضاف بالفعل'));});}
     };
     $('go-nav').href='./navigate.html?dest='+encodeURIComponent(p.lat+','+p.lon)+'&name='+encodeURIComponent(p.name||'')+'&profile=walking';

@@ -461,6 +461,7 @@
           distance: item.distance || '',
           duration: item.duration || '',
           coords: item.coords || (Number.isFinite(Number(item.lat)) && Number.isFinite(Number(item.lon)) ? { lat: Number(item.lat), lng: Number(item.lon) } : null),
+          coordinates: item.coordinates || item.coords || (Number.isFinite(Number(item.lat)) && Number.isFinite(Number(item.lon)) ? { lat: Number(item.lat), lng: Number(item.lon) } : null),
           cost: Number.isFinite(Number(item.cost ?? item.estimated_cost)) ? Number(item.cost ?? item.estimated_cost) : null,
           category: item.category || (item.type === 'فندق' ? 'accommodation' : item.type === 'مطعم' ? 'food' : 'activities'),
           costEstimated: item.costEstimated !== false,
