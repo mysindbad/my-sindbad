@@ -774,7 +774,7 @@ body{background:#060e1a}.shell{max-width:480px;background:#fbf9f5;padding-bottom
 /* ===== MySindbad Home (ms-*) ===== */
 body.ms-home [data-site-header]{display:none !important;}
 body.ms-home .content{padding-top:max(.7rem,env(safe-area-inset-top));}
-.ms-hero{position:relative;display:flex;flex-direction:column;align-items:center;text-align:center;padding:.6rem 0 1.4rem;background:linear-gradient(180deg,var(--navy-900,#0A192F),var(--navy-800,#16223a));border-radius:0 0 24px 24px;}
+.ms-hero{position:relative;display:flex;flex-direction:column;align-items:center;text-align:center;padding:.3rem 0 1rem;}
 .ms-bell{position:absolute;top:.2rem;right:.1rem;width:42px;height:42px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);color:#fff;backdrop-filter:blur(8px);}
 .ms-bell svg{width:20px;height:20px;}
 .ms-bell-dot{position:absolute;top:7px;right:8px;width:8px;height:8px;border-radius:50%;background:#ef4444;border:1.5px solid #0A192F;}
@@ -796,8 +796,8 @@ body.ms-home .content{padding-top:max(.7rem,env(safe-area-inset-top));}
 .ms-fg-ic svg{width:26px;height:26px;}
 .ms-fg-lb{font-size:.84rem;font-weight:700;}
 .ms-sec{display:flex;align-items:center;justify-content:space-between;margin:1.15rem .1rem .55rem;}
-.ms-sec>span{font-weight:800;color:var(--text-primary);font-size:1.02rem;}
-.ms-link{color:var(--accent-gold);font-size:.82rem;font-weight:600;text-decoration:none;}
+.ms-sec>span{font-weight:800;color:#fff;font-size:1.02rem;}
+.ms-link{color:#D4AF37;font-size:.82rem;font-weight:600;text-decoration:none;}
 .ms-trip{display:flex;gap:.8rem;align-items:stretch;background:#142030;border:1px solid rgba(255,255,255,.08);border-radius:18px;overflow:hidden;text-decoration:none;color:#fff;}
 .ms-trip-img{width:38%;min-height:100px;background-size:cover;background-position:center;flex-shrink:0;}
 .ms-trip-body{flex:1;padding:.7rem .8rem;display:flex;flex-direction:column;justify-content:center;}
@@ -901,7 +901,12 @@ function applyDynamicTheme() {
 /* ===== بيانات Home والمصادقة ===== */
 const $=id=>document.getElementById(id);
 const ls=(k,v)=>localStorage.setItem(k,JSON.stringify(v));
-const t=(key,fallback='')=>window.MySindbadI18n?.getTranslation?.(window.MySindbadI18n?.getLang?.()||'ar',key)||fallback;
+const HOME_I18N={
+ar:{home_plan_subtitle:'خطّط رحلتك المثالية بالذكاء الاصطناعي',home_ai_planner:'مخطط الرحلة بالذكاء الاصطناعي',home_explore_places:'استكشف الأماكن',home_food:'مطاعم',home_your_trips:'رحلاتك',home_view_all:'عرض الكل',home_today_plan:'خطة اليوم',home_see_itinerary:'عرض البرنامج الكامل',home_plan_first:'خطّط أول رحلة لك',home_plan_first_desc:'دع Sindbad يخطّط رحلتك بالذكاء الاصطناعي',home_start_now:'ابدأ الآن',home_demo_title:'رحلة برشلونة',home_demo_dates:'٢٠ - ٢٤ يونيو ٢٠٢٥',home_search_dest:'ابحث عن وجهة...'},
+en:{home_plan_subtitle:'Plan your perfect trip with AI',home_ai_planner:'AI Trip Planner',home_explore_places:'Explore Places',home_food:'Food',home_your_trips:'Your Trips',home_view_all:'View all',home_today_plan:"Today's Plan",home_see_itinerary:'See full itinerary',home_plan_first:'Plan your first trip',home_plan_first_desc:'Let Sindbad plan your trip with AI',home_start_now:'Start now',home_demo_title:'Barcelona Getaway',home_demo_dates:'20 - 24 June 2025',home_search_dest:'Search destination...'},
+fr:{home_plan_subtitle:'Planifiez votre voyage parfait avec l\'IA',home_ai_planner:'Planificateur de voyage IA',home_explore_places:'Explorer les lieux',home_food:'Restaurants',home_your_trips:'Vos voyages',home_view_all:'Voir tout',home_today_plan:'Plan du jour',home_see_itinerary:'Voir l\'itinéraire complet',home_plan_first:'Planifiez votre premier voyage',home_plan_first_desc:'Laissez Sindbad planifier votre voyage avec l\'IA',home_start_now:'Commencer',home_demo_title:'Escapade à Barcelone',home_demo_dates:'20 - 24 juin 2025',home_search_dest:'Rechercher une destination...'}
+};
+const t=(key,fallback='')=>{const lang=window.MySindbadI18n?.getLang?.()||'ar';return window.MySindbadI18n?.getTranslation?.(lang,key)||HOME_I18N[lang]?.[key]||fallback;};
 const lg=(k,d)=>{try{const v=JSON.parse(localStorage.getItem(k));return v??d;}catch(e){return d;}};
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 let session=lg('sb_session',null), city='istanbul', page='home', tab='hotels', authTab='login';
@@ -967,16 +972,16 @@ function startHeroCarousel(){const hero=document.querySelector('.home-hero'),dot
 function pgHome(P){
   const trip=stateTrip();
   const hasTrip=!!trip;
-  const tTitle=hasTrip?esc(tripDestinationText(trip)):'Barcelona Getaway';
+  const tTitle=hasTrip?esc(tripDestinationText(trip)):t('home_demo_title','Barcelona Getaway');
   const tStart=hasTrip?esc(getStartDate(trip)):'20';
   const tEnd=hasTrip?esc(getEndDate(trip)):'24 June 2025';
-  const tDates=hasTrip?(tStart+' - '+tEnd):'20 - 24 June 2025';
+  const tDates=hasTrip?(tStart+' - '+tEnd):t('home_demo_dates','20 - 24 June 2025');
   const BARCELONA='https://media.base44.com/images/public/6a96c8b673985abfb03c538b/ebe14f77d_generated_image.png';
   const tImg=hasTrip?imageForCity(tripDestinationText(trip)):BARCELONA;
   const firstAct=hasTrip?((trip.itinerary&&trip.itinerary[0]&&trip.itinerary[0].activities&&trip.itinerary[0].activities[0])||null):null;
   const msHomeTripsSection=hasTrip
-    ? `<div class="ms-sec"><span>Your Trips</span><a class="ms-link" href="./itinerary.html">View all</a></div><a class="ms-trip" href="./itinerary.html"><div class="ms-trip-img" style="background-image:url('${tImg}')"></div><div class="ms-trip-body"><h3>${tTitle}</h3><p>${tDates}</p><span class="ms-trip-people">${ic('users',14)} 2</span></div></a>${firstAct?`<div class="ms-sec"><span>Today's Plan</span><a class="ms-link" href="./today.html">See full itinerary</a></div><a class="ms-today" href="./today.html"><span class="ms-today-time">${firstAct.time||'•'}</span><span class="ms-today-rail"><span class="ms-today-dot"></span></span><span class="ms-today-tx"><b>${esc(firstAct.title||firstAct.place||'')}</b><small>${esc(firstAct.place||tTitle)}</small></span><span class="ms-today-thumb" style="background-image:url('${tImg}')"></span></a>`:''}`
-    : `<a class="ms-trip" href="./create-trip.html" style="align-items:center;justify-content:center;text-align:center"><div class="ms-trip-body" style="align-items:center;text-align:center"><h3>خطّط أول رحلة لك</h3><p>دع Sindbad يخطّط رحلتك بالذكاء الاصطناعي</p><span class="ms-trip-people">ابدأ الآن</span></div></a>`;
+    ? `<div class="ms-sec"><span>${t('home_your_trips','Your Trips')}</span><a class="ms-link" href="./itinerary.html">${t('home_view_all','View all')}</a></div><a class="ms-trip" href="./itinerary.html"><div class="ms-trip-img" style="background-image:url('${tImg}')"></div><div class="ms-trip-body"><h3>${tTitle}</h3><p>${tDates}</p><span class="ms-trip-people">${ic('users',14)} 2</span></div></a>${firstAct?`<div class="ms-sec"><span>${t('home_today_plan',"Today's Plan")}</span><a class="ms-link" href="./today.html">${t('home_see_itinerary','See full itinerary')}</a></div><a class="ms-today" href="./today.html"><span class="ms-today-time">${firstAct.time||'•'}</span><span class="ms-today-rail"><span class="ms-today-dot"></span></span><span class="ms-today-tx"><b>${esc(firstAct.title||firstAct.place||'')}</b><small>${esc(firstAct.place||tTitle)}</small></span><span class="ms-today-thumb" style="background-image:url('${tImg}')"></span></a>`:''}`
+    : `<a class="ms-trip" href="./create-trip.html" style="align-items:center;justify-content:center;text-align:center"><div class="ms-trip-body" style="align-items:center;text-align:center"><h3>${t('home_plan_first','خطّط أول رحلة لك')}</h3><p>${t('home_plan_first_desc','دع Sindbad يخطّط رحلتك بالذكاء الاصطناعي')}</p><span class="ms-trip-people">${t('home_start_now','ابدأ الآن')}</span></div></a>`;
 
   const ROBOT='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="8" width="16" height="12" rx="3"/><path d="M12 8V4M9 4h6"/><circle cx="9" cy="13" r="1.1" fill="currentColor" stroke="none"/><circle cx="15" cy="13" r="1.1" fill="currentColor" stroke="none"/><path d="M9 17h6"/></svg>';
   P.innerHTML=`
@@ -984,21 +989,21 @@ function pgHome(P){
     <button class="ms-bell" type="button" aria-label="Notifications" onclick="window.location.href='./today.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10 21a2 2 0 0 0 4 0"/></svg><span class="ms-bell-dot"></span></button>
     <div class="ms-moon" style="background-image:url('./icons/app-icon.jpg')"></div>
     <h1 class="ms-brand en">MY SINDBAD</h1>
-    <p class="ms-tag">Your AI Travel Companion</p>
-    <h2 class="ms-q">Where to next?</h2>
-    <p class="ms-sub">Plan your perfect trip with AI</p>
+    <p class="ms-tag">${t('welcome_tagline','Your AI Travel Companion')}</p>
+    <h2 class="ms-q">${t('home_heading','Where to next?')}</h2>
+    <p class="ms-sub">${t('home_plan_subtitle','Plan your perfect trip with AI')}</p>
     <div class="ms-search">
-      <input class="inp ms-search-inp" id="q" placeholder="Search destination..." autocomplete="off" onkeydown="if(event.key==='Enter')doSearch()">
+      <input class="inp ms-search-inp" id="q" placeholder="${t('home_search_dest','Search destination...')}" autocomplete="off" onkeydown="if(event.key==='Enter')doSearch()">
       <button class="ms-search-btn" type="button" aria-label="Search" onclick="doSearch()">${ic('nav',18)}</button>
     </div>
     <div id="hero-carousel-dots" class="hero-carousel-dots" aria-label="${t('image_alt_destinations')||''}"></div>
   </section>
   <div id="searchResults"></div>
   <section class="ms-grid">
-    <a class="ms-fg" href="./create-trip.html"><span class="ms-fg-ic">${ROBOT}</span><span class="ms-fg-lb">AI Trip Planner</span></a>
-    <a class="ms-fg" href="./explore.html?tab=spots"><span class="ms-fg-ic">${ic('pin',22)}</span><span class="ms-fg-lb">Explore Places</span></a>
-    <a class="ms-fg" href="./explore.html?tab=hotels"><span class="ms-fg-ic">${ic('hotel',22)}</span><span class="ms-fg-lb">Hotels</span></a>
-    <a class="ms-fg" href="./explore.html?tab=rest"><span class="ms-fg-ic">${ic('food',22)}</span><span class="ms-fg-lb">Food</span></a>
+    <a class="ms-fg" href="./create-trip.html"><span class="ms-fg-ic">${ROBOT}</span><span class="ms-fg-lb">${t('home_ai_planner','AI Trip Planner')}</span></a>
+    <a class="ms-fg" href="./explore.html?tab=spots"><span class="ms-fg-ic">${ic('pin',22)}</span><span class="ms-fg-lb">${t('home_explore_places','Explore Places')}</span></a>
+    <a class="ms-fg" href="./explore.html?tab=hotels"><span class="ms-fg-ic">${ic('hotel',22)}</span><span class="ms-fg-lb">${t('service_hotels','Hotels')}</span></a>
+    <a class="ms-fg" href="./explore.html?tab=rest"><span class="ms-fg-ic">${ic('food',22)}</span><span class="ms-fg-lb">${t('home_food','Food')}</span></a>
   </section>
   ${msHomeTripsSection}
   <div id="smart-recs" class="ms-recs-section"></div>
