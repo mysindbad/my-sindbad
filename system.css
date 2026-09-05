@@ -261,5 +261,5 @@ html[data-theme='dark'] .card {
   right: max(18px, calc(50% - 222px));
 }
 @media (max-width: 430px) {
-  .compose-btn, .fab-compose { inset-inline-end: var(--sp-3); }
+  .compose-btn, .fab-compose { right: var(--sp-3); }
 }
