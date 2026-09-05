@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html dir="ltr" lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<title>Place Model Tests — My Sindbad</title>
+<style>
+  body{font-family:ui-monospace,monospace;max-width:780px;margin:2rem auto;padding:0 1rem;line-height:1.6}
+  h1{font-size:1.2rem}
+  .summary{font-size:1.1rem;font-weight:700;margin:1rem 0;padding:.6rem .9rem;border-radius:8px}
+  .summary.pass{background:#dcfce7;color:#166534}
+  .summary.fail{background:#fee2e2;color:#991b1b}
+  ul{list-style:none;padding:0}
+  li{padding:.35rem .6rem;border-radius:6px;margin:.2rem 0;font-size:.82rem}
+  li.ok{background:#f0fdf4;color:#166534}
+  li.bad{background:#fef2f2;color:#991b1b}
+  code{background:#f1f5f9;padding:.1rem .3rem;border-radius:3px;font-size:.78rem}
+</style>
+</head>
+<body>
+<h1>PHASE 11 — Canonical Place Model Self-Tests</h1>
+<div id="summary" class="summary">Running…</div>
+<ul id="results"></ul>
+<script type="module">
+  import { runSelfTests } from './lib/placeModel.js';
+  const t = runSelfTests();
+  const summary = document.getElementById('summary');
+  summary.textContent = `${t.passed}/${t.total} passed · ${t.failed} failed`;
+  summary.className = 'summary ' + (t.failed === 0 ? 'pass' : 'fail');
+  const ul = document.getElementById('results');
+  ul.innerHTML = t.results.map(r =>
+    `<li class="${r.ok ? 'ok' : 'bad'}">${r.ok ? '✓' : '✗'} ${r.name}${r.detail ? ' — <code>' + r.detail + '</code>' : ''}</li>`
+  ).join('');
+</script>
+</body>
+</html>
