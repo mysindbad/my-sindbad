@@ -23,7 +23,8 @@
 <div id="results"></div>
 <pre id="log"></pre>
 <script type="module">
-import { placeUrl, mapUrl, navigateUrl, addPlaceToTrip, placeActivityId, placeIdentity, toCanonical, validCoordinates, extractCoords, normalizeCategory } from './utils/msPlaces.js';
+import { toCanonicalPlace, extractCoords, validCoordinates, normalizeCategory } from './lib/placeModel.js';
+import { placeUrl, mapUrl, navigateUrl, placeActivityId, placeIdentity } from './utils/msPlaces.js';
 
 const results = [];
 let passed = 0, failed = 0;
@@ -42,6 +43,10 @@ function render() {
   document.getElementById('results').innerHTML = html;
   document.getElementById('log').textContent = failed ? results.filter(r => !r.ok).map(r => 'FAIL: ' + r.name + (r.detail ? ' — ' + r.detail : '')).join('\n') : 'All tests passed.';
 }
+
+// addPlaceToTrip is on window.MSPlaces (not exported from msPlaces.js module)
+const addPlaceToTrip = (place, opts) => window.MSPlaces.addPlaceToTrip(place, opts);
+const toCanonical = toCanonicalPlace;
 
 async function runTests() {
   // ---- Mock AppState for addPlaceToTrip tests ----
