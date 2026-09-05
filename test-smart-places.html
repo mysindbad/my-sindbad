@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<title>Smart Places Tests — My Sindbad</title>
+<link href="./utils/navigation.css" rel="stylesheet"/>
+<link href="./utils/header.css" rel="stylesheet"/>
+<style>
+  :root{--navy:#0A192F;--gold:#D4AF37;--bg:#fbf9f5;--line:#cbd5e1;--ok:#16a34a;--bad:#dc2626}
+  *{box-sizing:border-box;font-family:Cairo,system-ui,sans-serif}body{margin:0;background:var(--bg);color:#0A192F}
+  .wrap{max-width:760px;margin:0 auto;padding:20px 16px 80px}
+  h1{font-size:1.25rem;margin:0 0 4px}
+  .sub{color:#475569;font-size:.8rem;margin-bottom:18px}
+  .summary{display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap}
+  .pill{padding:8px 14px;border-radius:999px;font-weight:800;font-size:.8rem}
+  .pill.ok{background:#dcfce7;color:var(--ok)}
+  .pill.bad{background:#fee2e2;color:var(--bad)}
+  .pill.total{background:#e0e7ff;color:#3730a3}
+  .group{border:1px solid var(--line);border-radius:14px;background:#fff;padding:14px;margin-bottom:14px}
+  .group h2{font-size:.9rem;margin:0 0 10px;color:var(--navy)}
+  .case{display:flex;align-items:flex-start;gap:8px;padding:7px 0;border-bottom:1px solid #f1f5f9;font-size:.78rem}
+  .case:last-child{border-bottom:0}
+  .mark{flex:none;width:20px;height:20px;border-radius:50%;display:grid;place-items:center;font-size:.7rem;color:#fff;font-weight:800}
+  .mark.ok{background:var(--ok)}
+  .mark.bad{background:var(--bad)}
+  .case .n{font-weight:700;color:#0A192F}
+  .case .d{color:#64748b;font-size:.72rem;margin-inline-start:6px}
+  a.back{display:inline-block;margin-top:10px;padding:8px 14px;border-radius:10px;background:var(--navy);color:#fff;text-decoration:none;font-size:.78rem;font-weight:700}
+</style>
+</head>
+<body>
+<main class="wrap">
+  <h1>Phase 16 — Smart Places Tests</h1>
+  <p class="sub">Deterministic tests for canonical Place flow, dedup, coordinates, actions, and categories. No network.</p>
+  <div class="summary" id="summary"></div>
+  <div id="results"></div>
+  <a class="back" href="./map.html">← العودة للخريطة</a>
+</main>
+<script type="module">
+import { toCanonicalPlace, extractCoords, normalizeCategory, validCoordinates } from './lib/placeModel.js';
+import { placeIdentity, placeActivityId, dedupePlaces, placeUrl, mapUrl, navigateUrl, categoryIcon, categoryColor } from './utils/msPlaces.js';
+
+const results = [];
+let pass = 0, fail = 0;
+function assert(name, ok, detail) {
+  results.push({ group: currentGroup, name, ok: !!ok, detail: detail || '' });
+  if (ok) pass++; else fail++;
+}
+let currentGroup = '';
+
+function group(title, fn) {
+  currentGroup = title;
+  fn();
+}
+
+// ---- Canonical flow ----
+group('Canonical flow', function () {
+  const raw = { name: 'Royal Mansour', lat: 31.6217, lon: -8.0081, category: 'hotel', source: 'osm', sourceId: 'node/456', address: 'Marrakech', description: 'Palace hotel' };
+  const cp = toCanonicalPlace(raw);
+  assert('raw → canonical has id', cp.id === 'osm:node/456', cp.id);
+  assert('canonical coordinates {lat,lng}', cp.coordinates.lat === 31.6217 && cp.coordinates.lng === -8.0081, JSON.stringify(cp.coordinates));
+  assert('canonical category normalized', cp.category === 'hotel', cp.category);
+  assert('canonical source preserved', cp.source === 'osm', cp.source);
+  assert('canonical sourceId preserved', cp.sourceId === 'node/456', cp.sourceId);
+  assert('canonical has dataQuality', !!cp.dataQuality && typeof cp.dataQuality === 'object', '');
+  assert('canonical photos is array', Array.isArray(cp.photos), '');
+
+  const url = placeUrl(raw);
+  assert('placeUrl has id param', url.includes('id=osm%3Anode%2F456'), url);
+  assert('placeUrl has source param', url.includes('source=osm'), url);
+  assert('placeUrl has lat/lon', url.includes('lat=31.621700') && url.includes('lon=-8.008100'), url);
+  assert('placeUrl has name', url.includes('name=Royal+Mansour'), url);
+  assert('placeUrl has cat', url.includes('cat=hotel'), url);
+
+  const mUrl = mapUrl(raw);
+  assert('mapUrl has lng', mUrl.includes('lng=31.621700') === false || mUrl.includes('lng='), mUrl);
+  assert('mapUrl has identity', mUrl.includes('id=osm%3Anode%2F456'), mUrl);
+
+  const nUrl = navigateUrl(raw, 'walking');
+  assert('navigateUrl has dest', nUrl.includes('dest=31.6217%2C-8.0081') || nUrl.includes('dest=31.6217,-8.0081'), nUrl);
+  assert('navigateUrl has profile walking', nUrl.includes('profile=walking'), nUrl);
+  assert('navigateUrl has name', nUrl.includes('name=Royal+Mansour'), nUrl);
+
+  // trip payload (activity) preserves canonical identity
+  const id = placeActivityId(raw);
+  assert('activity id = source:sourceId', id === 'osm:node/456', id);
+});
+
+// ---- Duplicate prevention ----
+group('Duplicate prevention', function () {
+  const a = { name: 'Place A', lat: 31.6, lon: -7.9, source: 'osm', sourceId: 'node/1', category: 'museum' };
+  const b = { name: 'Place A (dup)', lat: 31.6, lon: -7.9, source: 'osm', sourceId: 'node/1', category: 'museum' };
+  const c = { name: 'Place C', lat: 31.7, lon: -7.8, source: 'osm', sourceId: 'node/2', category: 'cafe' };
+  const deduped = dedupePlaces([a, b, c]);
+  assert('dedup removes same source+sourceId', deduped.length === 2, 'len=' + deduped.length);
+  assert('dedup identity stable', placeIdentity(a) === placeIdentity(b), placeIdentity(a) + ' vs ' + placeIdentity(b));
+  assert('dedup keeps first occurrence', deduped[0].name === 'Place A', deduped[0].name);
+
+  // same coords but different source → different identity (not name-based dedup)
+  const x = { name: 'X', lat: 30, lon: -9, source: 'osm', sourceId: 'node/9' };
+  const y = { name: 'X', lat: 30, lon: -9, source: 'local:verified', sourceId: 'local/casablanca/0' };
+  assert('different source → different identity', placeIdentity(x) !== placeIdentity(y), placeIdentity(x) + ' vs ' + placeIdentity(y));
+
+  // no source → coord fallback
+  const z = { name: 'Z', lat: 30, lon: -9 };
+  const zId = placeIdentity(z);
+  assert('no source → coord identity', zId.startsWith('coord:'), zId);
+  assert('coord identity deterministic', placeIdentity({ name: 'Z2', lat: 30, lon: -9 }) === zId, '');
+});
+
+// ---- Coordinates ----
+group('Coordinates', function () {
+  assert('{lat,lon} extracted', extractCoords({ lat: 31.6, lon: -7.9 }).lat === 31.6, '');
+  assert('{lat,lng} extracted', extractCoords({ lat: 31.6, lng: -7.9 }).lng === -7.9, '');
+  assert('{coordinates:{lat,lng}} extracted', extractCoords({ coordinates: { lat: 31.6, lng: -7.9 } }).lat === 31.6, '');
+  assert('{coords:{lat,lng}} extracted', extractCoords({ coords: { lat: 31.6, lng: -7.9 } }).lng === -7.9, '');
+  assert('zero-zero rejected', extractCoords({ lat: 0, lon: 0 }) === null, '');
+  assert('non-finite rejected', extractCoords({ lat: 'abc', lon: -7.9 }) === null, '');
+  assert('null rejected', extractCoords(null) === null, '');
+  assert('validCoordinates true', validCoordinates({ lat: 1, lng: 1 }) === true, '');
+  assert('validCoordinates false (zero)', validCoordinates({ lat: 0, lng: 0 }) === false, '');
+});
+
+// ---- Place actions (URL building) ----
+group('Place actions', function () {
+  const p = { name: 'Café Clock', lat: 31.6258, lon: -7.9893, source: 'osm', sourceId: 'node/77', category: 'cafe' };
+  const vu = placeUrl(p);
+  assert('view → place.html', vu.startsWith('./place.html?'), vu);
+  assert('view → carries identity', vu.includes('id=osm%3Anode%2F77'), vu);
+  const mu = mapUrl(p);
+  assert('map → map.html', mu.startsWith('./map.html?'), mu);
+  assert('map → carries identity', mu.includes('id=osm%3Anode%2F77'), mu);
+  const nu = navigateUrl(p, 'driving');
+  assert('navigate → navigate.html', nu.startsWith('./navigate.html?'), nu);
+  assert('navigate → dest coords', nu.includes('dest=31.6258%2C-7.9893') || nu.includes('dest=31.6258,-7.9893'), nu);
+  assert('navigate → profile driving', nu.includes('profile=driving'), nu);
+
+  // backward compat: legacy place without source still produces usable URL
+  const legacy = { name: 'Old', lat: 31, lon: -7 };
+  const lu = placeUrl(legacy);
+  assert('legacy view → has lat/lon', lu.includes('lat=31.000000') && lu.includes('lon=-7.000000'), lu);
+  assert('legacy view → no id param', !lu.includes('id='), lu);
+});
+
+// ---- Category normalization ----
+group('Category', function () {
+  assert('food → restaurant', normalizeCategory('food') === 'restaurant', normalizeCategory('food'));
+  assert('tourism → attraction', normalizeCategory('tourism') === 'attraction', '');
+  assert('shopping stays', normalizeCategory('shopping') === 'shopping', '');
+  assert('empty → place', normalizeCategory('') === 'place', '');
+  assert('null → place', normalizeCategory(null) === 'place', '');
+  assert('hotel stays', normalizeCategory('hotel') === 'hotel', '');
+  assert('cafe stays', normalizeCategory('cafe') === 'cafe', '');
+  assert('campsite → camping', normalizeCategory('campsite') === 'camping', '');
+  const unknown = normalizeCategory('random_xyz');
+  assert('unknown valid-looking preserved', unknown === 'random_xyz', unknown);
+  assert('icon for museum', categoryIcon('museum') === '🏛️', categoryIcon('museum'));
+  assert('icon for hotel', categoryIcon('hotel') === '🏨', categoryIcon('hotel'));
+  assert('icon fallback for unknown', categoryIcon('zzz') === '📍', categoryIcon('zzz'));
+  assert('color for restaurant', categoryColor('restaurant') === '#ef4444', categoryColor('restaurant'));
+  assert('color fallback', categoryColor('zzz') === '#0A192F', categoryColor('zzz'));
+});
+
+// ---- AI compatibility (canonical shape usable by AI) ----
+group('AI compatibility', function () {
+  const p = toCanonicalPlace({ name: 'Test', lat: 1, lng: 2, source: 'osm', sourceId: 'node/1', category: 'museum' });
+  assert('canonical has source for AI', p.source === 'osm', '');
+  assert('canonical has category for AI', p.category === 'museum', '');
+  assert('canonical has coordinates for AI', p.coordinates.lat === 1 && p.coordinates.lng === 2, '');
+  assert('canonical has no fake rating', p.rating === null, '');
+  assert('canonical has no fake reviews', p.reviews === null, '');
+});
+
+// ---- Cross-page identity (Map / Explore / Place produce same activity id) ----
+group('Cross-page identity', function () {
+  const raw = { name: 'Café Clock', lat: 31.6258, lon: -7.9893, source: 'osm', sourceId: 'node/77', category: 'cafe' };
+  const idE = placeActivityId(raw);
+  const idM = placeActivityId({ ...raw });
+  const idP = placeActivityId({ ...raw });
+  assert('explore/map/place same activity id', idE === idM && idM === idP, idE + '|' + idM + '|' + idP);
+  assert('activity id = source:sourceId', idE === 'osm:node/77', idE);
+  // legacy activity (no source) → deterministic coord id
+  const legacy = { name: 'Old', lat: 31, lon: -7 };
+  const lid = placeActivityId(legacy);
+  assert('legacy → coord id', lid.startsWith('place:'), lid);
+  assert('legacy coord id deterministic', placeActivityId({ name: 'Old2', lat: 31, lon: -7 }) === lid, lid);
+  // map URL carries identity
+  const mu = mapUrl(raw);
+  assert('map URL carries identity', mu.includes('id=osm%3Anode%2F77'), mu);
+  // navigate URL identity (dest coords stable)
+  const nu = navigateUrl(raw, 'walking');
+  assert('navigate URL dest coords', nu.includes('dest=31.6258'), nu);
+  // place URL identity
+  const pu = placeUrl(raw);
+  assert('place URL carries identity', pu.includes('id=osm%3Anode%2F77'), pu);
+  // same coords, different source → different activity id (no false dedup)
+  const a = { name: 'X', lat: 30, lon: -9, source: 'osm', sourceId: 'node/9' };
+  const b = { name: 'X', lat: 30, lon: -9, source: 'local:verified', sourceId: 'local/casablanca/0' };
+  assert('diff source → diff activity id', placeActivityId(a) !== placeActivityId(b), placeActivityId(a) + ' vs ' + placeActivityId(b));
+});
+
+// ---- Render ----
+const groups = {};
+results.forEach(function (r) {
+  (groups[r.group] = groups[r.group] || []).push(r);
+});
+const out = document.getElementById('results');
+let html = '';
+Object.keys(groups).forEach(function (g) {
+  html += '<div class="group"><h2>' + g + '</h2>';
+  groups[g].forEach(function (r) {
+    html += '<div class="case"><span class="mark ' + (r.ok ? 'ok' : 'bad') + '">' + (r.ok ? '✓' : '✕') + '</span><span><span class="n">' + r.name + '</span>' + (r.detail ? '<span class="d">' + r.detail + '</span>' : '') + '</span></div>';
+  });
+  html += '</div>';
+});
+out.innerHTML = html;
+document.getElementById('summary').innerHTML =
+  '<span class="pill ok">' + pass + ' passed</span>' +
+  '<span class="pill bad">' + fail + ' failed</span>' +
+  '<span class="pill total">' + results.length + ' total</span>';
+</script>
+<script src="./utils/navigation.js"></script>
+<script src="./utils/header.js"></script>
+<script src="./utils/icons.js" defer></script>
+</body>
+</html>
